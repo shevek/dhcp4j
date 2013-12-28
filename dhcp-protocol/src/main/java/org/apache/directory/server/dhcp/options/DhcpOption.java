@@ -84,7 +84,6 @@ public abstract class DhcpOption {
             out.put(tag);
             out.put((byte) length);
             out.put(data, offset, length);
-            tag = (byte) 0xFA; // Continuation code
         }
     }
 

@@ -19,6 +19,7 @@ import org.apache.directory.server.dhcp.options.dhcp.Message;
 import org.apache.directory.server.dhcp.options.dhcp.OptionOverload;
 import org.apache.directory.server.dhcp.options.dhcp.ParameterRequestList;
 import org.apache.directory.server.dhcp.options.dhcp.RebindingTimeValue;
+import org.apache.directory.server.dhcp.options.dhcp.RelayAgentInformation;
 import org.apache.directory.server.dhcp.options.dhcp.RenewalTimeValue;
 import org.apache.directory.server.dhcp.options.dhcp.RequestedIpAddress;
 import org.apache.directory.server.dhcp.options.dhcp.ServerIdentifier;
@@ -69,10 +70,12 @@ import org.apache.directory.server.dhcp.options.tcp.TcpDefaultTimeToLive;
 import org.apache.directory.server.dhcp.options.tcp.TcpKeepaliveGarbage;
 import org.apache.directory.server.dhcp.options.tcp.TcpKeepaliveInterval;
 import org.apache.directory.server.dhcp.options.vendor.BootFileSize;
+import org.apache.directory.server.dhcp.options.vendor.ClientFQDN;
 import org.apache.directory.server.dhcp.options.vendor.CookieServers;
 import org.apache.directory.server.dhcp.options.vendor.DirectoryAgent;
 import org.apache.directory.server.dhcp.options.vendor.DomainName;
 import org.apache.directory.server.dhcp.options.vendor.DomainNameServers;
+import org.apache.directory.server.dhcp.options.vendor.DomainSearch;
 import org.apache.directory.server.dhcp.options.vendor.ExtensionsPath;
 import org.apache.directory.server.dhcp.options.vendor.HostName;
 import org.apache.directory.server.dhcp.options.vendor.ImpressServers;
@@ -112,6 +115,7 @@ public class DhcpOptionsRegistry {
             BootFileSize.class,
             BroadcastAddress.class,
             ClientIdentifier.class,
+            ClientFQDN.class,
             CookieServers.class,
             DefaultFingerServers.class,
             DefaultIpTimeToLive.class,
@@ -121,6 +125,7 @@ public class DhcpOptionsRegistry {
             DirectoryAgent.class,
             DomainName.class,
             DomainNameServers.class,
+            DomainSearch.class,
             EthernetEncapsulation.class,
             ExtensionsPath.class,
             HostName.class,
@@ -159,6 +164,7 @@ public class DhcpOptionsRegistry {
             PolicyFilter.class,
             Pop3Servers.class,
             RebindingTimeValue.class,
+            RelayAgentInformation.class,
             RenewalTimeValue.class,
             RequestedIpAddress.class,
             ResourceLocationServers.class,

@@ -140,17 +140,29 @@ public class DhcpMessageDecoder {
         OptionsField options = new OptionsField();
 
         for (;;) {
-            byte code = message.get();
+            byte tag = message.get();
 
-            if (code == 0) // pad option
+            if (tag == 0) // pad option
                 continue;
-            if (code == -1) // end option
+            if (tag == -1) // end option
                 break;
 
             int length = message.get() & 0xFF;
             byte[] value = decodeBytes(message, length);
-            options.add(newOptionInstance(code, value));
+            DhcpOption option = options.get(tag);
+            if (option != null) {
+                byte[] dataPrev = option.getData();
+                byte[] dataCurr = Arrays.copyOf(dataPrev, dataPrev.length + length);
+                System.arraycopy(value, 0, dataCurr, dataPrev.length, length);
+                option.setData(dataCurr);
+            } else {
+                options.add(newOptionInstance(tag, value));
+            }
         }
+
+        // After concatenation has been resolved, we can do this.
+        for (DhcpOption option : options)
+            option.validate();
 
         return options;
     }
@@ -160,7 +172,6 @@ public class DhcpMessageDecoder {
         Class<? extends DhcpOption> type = registry.getOptionType(tag);
         DhcpOption option = (type != null) ? DhcpOptionsRegistry.newInstance(type) : new UnrecognizedOption(tag);
         option.setData(value);
-        option.validate();
         return option;
     }
 }
