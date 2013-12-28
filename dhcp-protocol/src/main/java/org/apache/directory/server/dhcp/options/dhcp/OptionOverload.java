@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.dhcp;
 
-
 import org.apache.directory.server.dhcp.options.ByteOption;
-
 
 /**
  * This option is used to indicate that the DHCP 'sname' or 'file'
@@ -45,13 +42,12 @@ import org.apache.directory.server.dhcp.options.ByteOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class OptionOverload extends ByteOption
-{
+public class OptionOverload extends ByteOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 52;
     }
 }

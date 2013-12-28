@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.perinterface;
 
-
 import org.apache.directory.server.dhcp.options.ShortOption;
-
 
 /**
  * This option specifies the MTU to use on this interface.  The MTU is
@@ -33,13 +30,12 @@ import org.apache.directory.server.dhcp.options.ShortOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class InterfaceMtu extends ShortOption
-{
+public class InterfaceMtu extends ShortOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 26;
     }
 }

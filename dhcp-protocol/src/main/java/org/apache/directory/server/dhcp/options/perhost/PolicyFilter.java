@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.perhost;
 
-
 import org.apache.directory.server.dhcp.options.AddressListOption;
-
 
 /**
  * This option specifies policy filters for non-local source routing.
@@ -37,13 +34,12 @@ import org.apache.directory.server.dhcp.options.AddressListOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class PolicyFilter extends AddressListOption
-{
+public class PolicyFilter extends AddressListOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 21;
     }
 }

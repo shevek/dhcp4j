@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.vendor;
 
-
 import org.apache.directory.server.dhcp.options.StringOption;
-
 
 /**
  * This option specifies the path-name that contains the client's root
@@ -33,27 +30,23 @@ import org.apache.directory.server.dhcp.options.StringOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class RootPath extends StringOption
-{
-    public RootPath()
-    {
-    }
+public class RootPath extends StringOption {
 
+    public RootPath() {
+    }
 
     /**
      * @param path
      */
-    public RootPath( String path )
-    {
-        setString( path );
+    public RootPath(String path) {
+        setString(path);
     }
 
 
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+    public byte getTag() {
         return 17;
     }
 }

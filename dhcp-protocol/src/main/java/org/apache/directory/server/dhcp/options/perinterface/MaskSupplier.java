@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.perinterface;
 
-
 import org.apache.directory.server.dhcp.options.ByteOption;
-
 
 /**
  * This option specifies whether or not the client should respond to
@@ -34,13 +31,12 @@ import org.apache.directory.server.dhcp.options.ByteOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class MaskSupplier extends ByteOption
-{
+public class MaskSupplier extends ByteOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 30;
     }
 }

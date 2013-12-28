@@ -17,13 +17,10 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.dhcp;
-
 
 import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.options.DhcpOption;
-
 
 /**
  * This option is used to convey the type of the DHCP message.  The code
@@ -43,18 +40,14 @@ import org.apache.directory.server.dhcp.options.DhcpOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DhcpMessageType extends DhcpOption
-{
+public class DhcpMessageType extends DhcpOption {
+
     private MessageType type;
 
-
-    public DhcpMessageType()
-    {
+    public DhcpMessageType() {
     }
 
-
-    public DhcpMessageType( MessageType type )
-    {
+    public DhcpMessageType(MessageType type) {
         this.type = type;
     }
 
@@ -62,27 +55,19 @@ public class DhcpMessageType extends DhcpOption
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+    public byte getTag() {
         return 53;
     }
 
-
-    public void setData( byte[] messageType )
-    {
-        type = MessageType.getTypeByCode( messageType[0] );
+    public void setData(byte[] messageType) {
+        type = MessageType.getTypeByCode(messageType[0]);
     }
 
-
-    public byte[] getData()
-    {
-        return new byte[]
-            { type.getCode() };
+    public byte[] getData() {
+        return new byte[]{type.getCode()};
     }
 
-
-    public MessageType getType()
-    {
+    public MessageType getType() {
         return type;
     }
 }

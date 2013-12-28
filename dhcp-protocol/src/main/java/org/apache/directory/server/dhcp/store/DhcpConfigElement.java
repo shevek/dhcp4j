@@ -19,19 +19,17 @@
  */
 package org.apache.directory.server.dhcp.store;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.directory.server.dhcp.options.OptionsField;
 
-
 /**
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public abstract class DhcpConfigElement
-{
+public abstract class DhcpConfigElement {
+
     public static final String PROPERTY_MAX_LEASE_TIME = "max-lease-time";
 
     /** List of DhcpOptions for ths subnet */
@@ -40,15 +38,11 @@ public abstract class DhcpConfigElement
     /** Map of properties for this element */
     private Map properties = new HashMap();
 
-
-    public OptionsField getOptions()
-    {
+    public OptionsField getOptions() {
         return options;
     }
 
-
-    public Map getProperties()
-    {
+    public Map getProperties() {
         return properties;
     }
 }

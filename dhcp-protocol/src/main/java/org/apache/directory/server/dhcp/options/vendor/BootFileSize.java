@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.vendor;
 
-
 import org.apache.directory.server.dhcp.options.ShortOption;
-
 
 /**
  * This option specifies the length in 512-octet blocks of the default
@@ -33,13 +30,12 @@ import org.apache.directory.server.dhcp.options.ShortOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class BootFileSize extends ShortOption
-{
+public class BootFileSize extends ShortOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 21;
     }
 }

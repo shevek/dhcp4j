@@ -17,13 +17,9 @@
  *  under the License. 
  *  
  */
-
 /**
  * Provides the implementation of the {@link org.apache.directory.server.dhcp.service.DhcpService}.
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-
 package org.apache.directory.server.dhcp.service;
-
-

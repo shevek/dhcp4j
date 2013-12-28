@@ -17,9 +17,7 @@
  *  under the License. 
  * 
  */
-
 package org.apache.directory.server.dhcp.io;
-
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -33,53 +31,49 @@ import org.apache.directory.server.dhcp.options.DhcpOption;
 import org.apache.directory.server.dhcp.options.OptionsField;
 import org.apache.directory.server.dhcp.options.dhcp.DhcpMessageType;
 
-
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DhcpMessageEncoder
-{
+public class DhcpMessageEncoder {
+
     /**
      * Converts a DhcpMessage object into a byte buffer.
      * 
      * @param byteBuffer ByteBuffer to put DhcpMessage into
      * @param message DhcpMessage to encode into ByteBuffer
      */
-    public void encode( ByteBuffer byteBuffer, DhcpMessage message )
-    throws IOException {
-        byteBuffer.put( message.getOp() );
+    public void encode(ByteBuffer byteBuffer, DhcpMessage message)
+            throws IOException {
+        byteBuffer.put(message.getOp());
 
         HardwareAddress hardwareAddress = message.getHardwareAddress();
 
-        byteBuffer.put( ( byte ) ( null != hardwareAddress ? hardwareAddress.getType() : 0 ) );
-        byteBuffer.put( ( byte ) ( null != hardwareAddress ? hardwareAddress.getLength() : 0 ) );
-        byteBuffer.put( ( byte ) message.getHopCount() );
-        byteBuffer.putInt( message.getTransactionId() );
-        byteBuffer.putShort( ( short ) message.getSeconds() );
-        byteBuffer.putShort( message.getFlags() );
+        byteBuffer.put((byte) (null != hardwareAddress ? hardwareAddress.getType() : 0));
+        byteBuffer.put((byte) (null != hardwareAddress ? hardwareAddress.getLength() : 0));
+        byteBuffer.put((byte) message.getHopCount());
+        byteBuffer.putInt(message.getTransactionId());
+        byteBuffer.putShort((short) message.getSeconds());
+        byteBuffer.putShort(message.getFlags());
 
-        writeAddress( byteBuffer, message.getCurrentClientAddress() );
-        writeAddress( byteBuffer, message.getAssignedClientAddress() );
-        writeAddress( byteBuffer, message.getNextServerAddress() );
-        writeAddress( byteBuffer, message.getRelayAgentAddress() );
+        writeAddress(byteBuffer, message.getCurrentClientAddress());
+        writeAddress(byteBuffer, message.getAssignedClientAddress());
+        writeAddress(byteBuffer, message.getNextServerAddress());
+        writeAddress(byteBuffer, message.getRelayAgentAddress());
 
-        writeBytes( byteBuffer, ( null != hardwareAddress ? hardwareAddress.getAddress() : new byte[]
-            {} ), 16 );
+        writeBytes(byteBuffer, (null != hardwareAddress ? hardwareAddress.getAddress() : new byte[]{}), 16);
 
-        writeString( byteBuffer, message.getServerHostname(), 64 );
-        writeString( byteBuffer, message.getBootFileName(), 128 );
+        writeString(byteBuffer, message.getServerHostname(), 64);
+        writeString(byteBuffer, message.getBootFileName(), 128);
 
         OptionsField options = message.getOptions();
 
         // update message type option (if set)
-        if ( null != message.getMessageType() )
-        {
-            options.add( new DhcpMessageType( message.getMessageType() ) );
+        if (null != message.getMessageType()) {
+            options.add(new DhcpMessageType(message.getMessageType()));
         }
 
-        encodeOptions( options, byteBuffer );
+        encodeOptions(options, byteBuffer);
     }
-
 
     /**
      * Write a zero-terminated string to a field of len bytes.
@@ -88,20 +82,18 @@ public class DhcpMessageEncoder
      * @param serverHostname
      * @param i
      */
-    private void writeString( ByteBuffer byteBuffer, String string, int len )
-    throws IOException {
-        if ( null == string )
-        {
+    private void writeString(ByteBuffer byteBuffer, String string, int len)
+            throws IOException {
+        if (null == string) {
             string = "";
         }
 
-        byte sbytes[] = string.getBytes( "ASCII" );
+        byte sbytes[] = string.getBytes("ASCII");
 
         // writeBytes will automatically zero-pad and thus terminate the
         // string.
-        writeBytes( byteBuffer, sbytes, len );
+        writeBytes(byteBuffer, sbytes, len);
     }
-
 
     /**
      * Write an InetAddress to the byte buffer.
@@ -109,21 +101,16 @@ public class DhcpMessageEncoder
      * @param byteBuffer
      * @param currentClientAddress
      */
-    private void writeAddress( ByteBuffer byteBuffer, InetAddress currentClientAddress )
-    {
-        if ( null == currentClientAddress )
-        {
-            byte emptyAddress[] =
-                { 0, 0, 0, 0 };
-            byteBuffer.put( emptyAddress );
-        }
-        else
-        {
+    private void writeAddress(ByteBuffer byteBuffer, InetAddress currentClientAddress) {
+        if (null == currentClientAddress) {
+            byte emptyAddress[]
+                    = {0, 0, 0, 0};
+            byteBuffer.put(emptyAddress);
+        } else {
             byte[] addressBytes = currentClientAddress.getAddress();
-            byteBuffer.put( addressBytes );
+            byteBuffer.put(addressBytes);
         }
     }
-
 
     /**
      * Write an array of bytes to the buffer. Write exactly len bytes,
@@ -133,40 +120,33 @@ public class DhcpMessageEncoder
      * @param byteBuffer
      * @param currentClientAddress
      */
-    private void writeBytes( ByteBuffer byteBuffer, byte bytes[], int len )
-    {
-        if ( null == bytes )
-        {
-            bytes = new byte[]
-                {};
+    private void writeBytes(ByteBuffer byteBuffer, byte bytes[], int len) {
+        if (null == bytes) {
+            bytes = new byte[]{};
         }
 
-        byteBuffer.put( bytes, 0, Math.min( len, bytes.length ) );
+        byteBuffer.put(bytes, 0, Math.min(len, bytes.length));
 
         // pad as necessary
         int remain = len - bytes.length;
 
-        while ( remain-- > 0 )
-        {
-            byteBuffer.put( ( byte ) 0 );
+        while (remain-- > 0) {
+            byteBuffer.put((byte) 0);
         }
     }
 
-    private static final byte[] VENDOR_MAGIC_COOKIE =
-        { ( byte ) 99, ( byte ) 130, ( byte ) 83, ( byte ) 99 };
+    private static final byte[] VENDOR_MAGIC_COOKIE
+            = {(byte) 99, (byte) 130, (byte) 83, (byte) 99};
 
+    public void encodeOptions(OptionsField options, ByteBuffer message) {
+        message.put(VENDOR_MAGIC_COOKIE);
 
-    public void encodeOptions( OptionsField options, ByteBuffer message )
-    {
-        message.put( VENDOR_MAGIC_COOKIE );
-
-        for ( Iterator i = options.iterator(); i.hasNext(); )
-        {
-            DhcpOption option = ( DhcpOption ) i.next();
-            option.writeTo( message );
+        for (Iterator i = options.iterator(); i.hasNext();) {
+            DhcpOption option = (DhcpOption) i.next();
+            option.writeTo(message);
         }
 
         // add end option
-        message.put( ( byte ) 0xff );
+        message.put((byte) 0xff);
     }
 }

@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.tcp;
 
-
 import org.apache.directory.server.dhcp.options.IntOption;
-
 
 /**
  * This option specifies the interval (in seconds) that the client TCP
@@ -35,13 +32,12 @@ import org.apache.directory.server.dhcp.options.IntOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class TcpKeepaliveGarbage extends IntOption
-{
+public class TcpKeepaliveGarbage extends IntOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 38;
     }
 }

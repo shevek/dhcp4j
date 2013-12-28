@@ -17,15 +17,12 @@
  *  under the License. 
  *
  */
-
 package org.apache.directory.server.dhcp.options;
-
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import java.util.Arrays;
-
 
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework
@@ -38,16 +35,15 @@ import java.util.Arrays;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public abstract class AddressOption extends DhcpOption
-{
+public abstract class AddressOption extends DhcpOption {
+
     private InetAddress address;
 
 
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getData()
      */
-    public byte[] getData()
-    {
+    public byte[] getData() {
         return address.getAddress();
     }
 
@@ -55,27 +51,19 @@ public abstract class AddressOption extends DhcpOption
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#setData(byte[])
      */
-    public void setData( byte[] data )
-    {
-        try
-        {
-            address = InetAddress.getByAddress( data );
-        }
-        catch ( UnknownHostException e )
-        {
-            throw new IllegalArgumentException( "Illegal address data " + Arrays.toString(data), e);
+    public void setData(byte[] data) {
+        try {
+            address = InetAddress.getByAddress(data);
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException("Illegal address data " + Arrays.toString(data), e);
         }
     }
 
-
-    public InetAddress getAddress()
-    {
+    public InetAddress getAddress() {
         return address;
     }
 
-
-    public void setAddress( InetAddress address )
-    {
+    public void setAddress(InetAddress address) {
         this.address = address;
     }
 }

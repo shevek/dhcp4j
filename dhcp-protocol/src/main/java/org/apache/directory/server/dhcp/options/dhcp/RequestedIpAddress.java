@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.dhcp;
 
-
 import org.apache.directory.server.dhcp.options.AddressOption;
-
 
 /**
  * This option is used in a client request (DHCPDISCOVER) to allow the
@@ -32,13 +29,12 @@ import org.apache.directory.server.dhcp.options.AddressOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class RequestedIpAddress extends AddressOption
-{
+public class RequestedIpAddress extends AddressOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 50;
     }
 }

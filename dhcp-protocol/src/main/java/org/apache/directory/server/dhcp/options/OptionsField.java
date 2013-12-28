@@ -17,14 +17,11 @@
  *  under the License. 
  *
  */
-
 package org.apache.directory.server.dhcp.options;
-
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework
@@ -35,32 +32,25 @@ import java.util.Map;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class OptionsField
-{
+public class OptionsField {
+
     /**
      * A map of option code (Integer)->DhcpOption. FIXME: use IntHashtable from
      * commons collections
      */
     private Map options = new HashMap();
 
-
-    public void add( DhcpOption option )
-    {
-        options.put( Integer.valueOf( option.getTag() ), option );
+    public void add(DhcpOption option) {
+        options.put(Integer.valueOf(option.getTag()), option);
     }
 
-
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return options.isEmpty();
     }
 
-
-    public Iterator iterator()
-    {
+    public Iterator iterator() {
         return options.values().iterator();
     }
-
 
     /**
      * Return the (first) DHCP option matching a given option class or
@@ -68,12 +58,10 @@ public class OptionsField
      * 
      * @param optionClass
      */
-    public DhcpOption get( Class optionClass )
-    {
-        Integer key = Integer.valueOf( DhcpOption.getTagByClass( optionClass ) );
-        return ( DhcpOption ) options.get( key );
+    public DhcpOption get(Class optionClass) {
+        Integer key = Integer.valueOf(DhcpOption.getTagByClass(optionClass));
+        return (DhcpOption) options.get(key);
     }
-
 
     /**
      * Return the (first) DHCP option matching a given tag or <code>null</code>
@@ -81,12 +69,10 @@ public class OptionsField
      * 
      * @param tag
      */
-    public DhcpOption get( int tag )
-    {
-        Integer key = Integer.valueOf( tag );
-        return ( DhcpOption ) options.get( key );
+    public DhcpOption get(int tag) {
+        Integer key = Integer.valueOf(tag);
+        return (DhcpOption) options.get(key);
     }
-
 
     /**
      * Merge the options from the given options field into my options. Existing
@@ -94,50 +80,41 @@ public class OptionsField
      * 
      * @param options
      */
-    public void merge( OptionsField options )
-    {
-        if ( null == options )
-        {
+    public void merge(OptionsField options) {
+        if (null == options) {
             return;
         }
 
-        for ( Iterator i = options.iterator(); i.hasNext(); )
-        {
-            DhcpOption option = ( DhcpOption ) i.next();
-            this.options.put( Integer.valueOf( option.getTag() ), option );
+        for (Iterator i = options.iterator(); i.hasNext();) {
+            DhcpOption option = (DhcpOption) i.next();
+            this.options.put(Integer.valueOf(option.getTag()), option);
         }
     }
-
 
     /**
      * Remove instances of the given option class.
      * 
      * @param c
      */
-    public void remove( Class c )
-    {
-        Integer key = Integer.valueOf( DhcpOption.getTagByClass( c ) );
-        options.remove( key );
+    public void remove(Class c) {
+        Integer key = Integer.valueOf(DhcpOption.getTagByClass(c));
+        options.remove(key);
     }
-
 
     /**
      * Remove options matching the given tag
      * 
      * @param tag
      */
-    public void remove( int tag )
-    {
-        Integer key = Integer.valueOf( tag );
-        options.remove( key );
+    public void remove(int tag) {
+        Integer key = Integer.valueOf(tag);
+        options.remove(key);
     }
-
 
     /**
      * @see Map#clear()
      */
-    public void clear()
-    {
+    public void clear() {
         options.clear();
     }
 }

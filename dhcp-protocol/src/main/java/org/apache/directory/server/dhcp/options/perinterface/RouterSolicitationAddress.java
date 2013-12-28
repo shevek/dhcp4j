@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.perinterface;
 
-
 import org.apache.directory.server.dhcp.options.AddressOption;
-
 
 /**
  * This option specifies the address to which the client should transmit
@@ -32,13 +29,12 @@ import org.apache.directory.server.dhcp.options.AddressOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class RouterSolicitationAddress extends AddressOption
-{
+public class RouterSolicitationAddress extends AddressOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 32;
     }
 }

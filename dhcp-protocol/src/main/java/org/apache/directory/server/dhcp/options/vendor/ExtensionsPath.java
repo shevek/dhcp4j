@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.vendor;
 
-
 import org.apache.directory.server.dhcp.options.StringOption;
-
 
 /**
  * A string to specify a file, retrievable via TFTP, which contains
@@ -39,13 +36,12 @@ import org.apache.directory.server.dhcp.options.StringOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class ExtensionsPath extends StringOption
-{
+public class ExtensionsPath extends StringOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 18;
     }
 }

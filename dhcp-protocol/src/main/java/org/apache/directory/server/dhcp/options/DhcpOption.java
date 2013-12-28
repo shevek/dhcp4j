@@ -14,9 +14,7 @@
  *   limitations under the License.
  *
  */
-
 package org.apache.directory.server.dhcp.options;
-
 
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -95,7 +93,6 @@ import org.apache.directory.server.dhcp.options.vendor.SwapServer;
 import org.apache.directory.server.dhcp.options.vendor.TimeOffset;
 import org.apache.directory.server.dhcp.options.vendor.TimeServers;
 
-
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework
  * for passing configuration information to hosts on a TCP/IP network.  
@@ -105,33 +102,33 @@ import org.apache.directory.server.dhcp.options.vendor.TimeServers;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public abstract class DhcpOption
-{
+public abstract class DhcpOption {
+
     /**
      * An array of concrete implementations of DhcpOption.
      */
-    private static Class OPTION_CLASSES[] =
-        { BootfileName.class, ClientIdentifier.class, DhcpMessageType.class, IpAddressLeaseTime.class,
-            MaximumDhcpMessageSize.class, org.apache.directory.server.dhcp.options.dhcp.Message.class,
-            OptionOverload.class, ParameterRequestList.class, RebindingTimeValue.class, RenewalTimeValue.class,
-            RequestedIpAddress.class, ServerIdentifier.class, TftpServerName.class, VendorClassIdentifier.class,
-            ClientIdentifier.class, DhcpMessageType.class, IpAddressLeaseTime.class, MaximumDhcpMessageSize.class,
-            OptionOverload.class, ParameterRequestList.class, RebindingTimeValue.class, RenewalTimeValue.class,
-            RequestedIpAddress.class, ServerIdentifier.class, TftpServerName.class, UnrecognizedOption.class,
-            VendorClassIdentifier.class, DefaultFingerServers.class, DefaultIrcServers.class, DefaultWwwServers.class,
-            MobileIpHomeAgents.class, NbddServers.class, NetbiosNameServers.class, NetbiosNodeType.class,
-            NetbiosScope.class, NisDomain.class, NisPlusDomain.class, NisPlusServers.class, NisServers.class,
-            NntpServers.class, NtpServers.class, Pop3Servers.class, SmtpServers.class, StdaServers.class,
-            StreetTalkServers.class, VendorSpecificInformation.class, XWindowDisplayManagers.class,
-            XWindowFontServers.class, DefaultIpTimeToLive.class, IpForwarding.class, MaximumDatagramSize.class,
-            NonLocalSourceRouting.class, PathMtuAgingTimeout.class, PathMtuPlateauTable.class, PolicyFilter.class,
-            AllSubnetsAreLocal.class, BroadcastAddress.class, InterfaceMtu.class, MaskSupplier.class,
-            PerformMaskDiscovery.class, PerformRouterDiscovery.class, RouterSolicitationAddress.class,
-            StaticRoute.class, TcpDefaultTimeToLive.class, TcpKeepaliveGarbage.class, TcpKeepaliveInterval.class,
-            BootFileSize.class, CookieServers.class, DomainName.class, DomainNameServers.class, ExtensionsPath.class,
-            HostName.class, ImpressServers.class, LogServers.class, LprServers.class, MeritDumpFile.class,
-            NameServers.class, ResourceLocationServers.class, RootPath.class, Routers.class, SubnetMask.class,
-            SwapServer.class, TimeOffset.class, TimeServers.class, };
+    private static Class OPTION_CLASSES[]
+            = {BootfileName.class, ClientIdentifier.class, DhcpMessageType.class, IpAddressLeaseTime.class,
+                MaximumDhcpMessageSize.class, org.apache.directory.server.dhcp.options.dhcp.Message.class,
+                OptionOverload.class, ParameterRequestList.class, RebindingTimeValue.class, RenewalTimeValue.class,
+                RequestedIpAddress.class, ServerIdentifier.class, TftpServerName.class, VendorClassIdentifier.class,
+                ClientIdentifier.class, DhcpMessageType.class, IpAddressLeaseTime.class, MaximumDhcpMessageSize.class,
+                OptionOverload.class, ParameterRequestList.class, RebindingTimeValue.class, RenewalTimeValue.class,
+                RequestedIpAddress.class, ServerIdentifier.class, TftpServerName.class, UnrecognizedOption.class,
+                VendorClassIdentifier.class, DefaultFingerServers.class, DefaultIrcServers.class, DefaultWwwServers.class,
+                MobileIpHomeAgents.class, NbddServers.class, NetbiosNameServers.class, NetbiosNodeType.class,
+                NetbiosScope.class, NisDomain.class, NisPlusDomain.class, NisPlusServers.class, NisServers.class,
+                NntpServers.class, NtpServers.class, Pop3Servers.class, SmtpServers.class, StdaServers.class,
+                StreetTalkServers.class, VendorSpecificInformation.class, XWindowDisplayManagers.class,
+                XWindowFontServers.class, DefaultIpTimeToLive.class, IpForwarding.class, MaximumDatagramSize.class,
+                NonLocalSourceRouting.class, PathMtuAgingTimeout.class, PathMtuPlateauTable.class, PolicyFilter.class,
+                AllSubnetsAreLocal.class, BroadcastAddress.class, InterfaceMtu.class, MaskSupplier.class,
+                PerformMaskDiscovery.class, PerformRouterDiscovery.class, RouterSolicitationAddress.class,
+                StaticRoute.class, TcpDefaultTimeToLive.class, TcpKeepaliveGarbage.class, TcpKeepaliveInterval.class,
+                BootFileSize.class, CookieServers.class, DomainName.class, DomainNameServers.class, ExtensionsPath.class,
+                HostName.class, ImpressServers.class, LogServers.class, LprServers.class, MeritDumpFile.class,
+                NameServers.class, ResourceLocationServers.class, RootPath.class, Routers.class, SubnetMask.class,
+                SwapServer.class, TimeOffset.class, TimeServers.class,};
 
     /**
      * A map of concrete implementations of DhcpOption indexed by tag code.
@@ -143,55 +140,44 @@ public abstract class DhcpOption
      */
     private static Map CODE_BY_CLASS;
 
-    static
-    {
-        try
-        {
+    static {
+        try {
             // initialize the tag-to-class and class-to-tag map
             Map classByCode = new HashMap();
             Map codeByClass = new HashMap();
-            for ( int i = 0; i < OPTION_CLASSES.length; i++ )
-            {
+            for (int i = 0; i < OPTION_CLASSES.length; i++) {
                 Class c = OPTION_CLASSES[i];
 
-                if ( !DhcpOption.class.isAssignableFrom( c ) )
-                {
-                    throw new RuntimeException( "Not a subclass of DhcpOption: " + c);
+                if (!DhcpOption.class.isAssignableFrom(c)) {
+                    throw new RuntimeException("Not a subclass of DhcpOption: " + c);
                 }
 
-                DhcpOption o = ( DhcpOption ) c.newInstance();
+                DhcpOption o = (DhcpOption) c.newInstance();
 
-                Integer tagInt = Integer.valueOf( o.getTag() );
-                classByCode.put( tagInt, c );
-                codeByClass.put( c, tagInt );
+                Integer tagInt = Integer.valueOf(o.getTag());
+                classByCode.put(tagInt, c);
+                codeByClass.put(c, tagInt);
             }
 
-            OPTION_CLASS_BY_CODE = Collections.unmodifiableMap( classByCode );
-            CODE_BY_CLASS = Collections.unmodifiableMap( codeByClass );
-        }
-        catch ( Exception e )
-        {
-            throw new RuntimeException( "Failed to initialize DhcpOption", e);
+            OPTION_CLASS_BY_CODE = Collections.unmodifiableMap(classByCode);
+            CODE_BY_CLASS = Collections.unmodifiableMap(codeByClass);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize DhcpOption", e);
         }
     }
 
-
-    public static Class getClassByTag( int tag )
-    {
-        return ( Class ) OPTION_CLASS_BY_CODE.get( Integer.valueOf( tag ) );
+    public static Class getClassByTag(int tag) {
+        return (Class) OPTION_CLASS_BY_CODE.get(Integer.valueOf(tag));
     }
 
-
-    public static int getTagByClass( Class c )
-    {
-        return ( ( Integer ) CODE_BY_CLASS.get( c ) ).intValue();
+    public static int getTagByClass(Class c) {
+        return ((Integer) CODE_BY_CLASS.get(c)).intValue();
     }
 
     /**
      * The default data array used for simple (unparsed) options.
      */
     private byte[] data;
-
 
     /**
      * Get the option's code tag.
@@ -200,7 +186,6 @@ public abstract class DhcpOption
      */
     public abstract byte getTag();
 
-
     /**
      * Set the data (wire format) from a byte array. The default implementation
      * just records the data as a byte array. Subclasses may parse the data into
@@ -208,11 +193,9 @@ public abstract class DhcpOption
      * 
      * @param data
      */
-    public void setData( byte data[] )
-    {
+    public void setData(byte data[]) {
         this.data = data;
     }
-
 
     /**
      * Get the data (wire format) into a byte array. Subclasses must provide an
@@ -221,25 +204,21 @@ public abstract class DhcpOption
      * 
      * @return byte[]
      */
-    public byte[] getData()
-    {
+    public byte[] getData() {
         return data;
     }
 
-
-    public final void writeTo( ByteBuffer out )
-    {
-        out.put( getTag() );
+    public final void writeTo(ByteBuffer out) {
+        out.put(getTag());
 
         // FIXME: handle continuation, i.e. options longer than 128 bytes?
         byte data[] = getData();
 
-        if ( data.length > 255 )
-        {
-            throw new IllegalArgumentException( "Maximum data length exceeded: 128 bytes.");
+        if (data.length > 255) {
+            throw new IllegalArgumentException("Maximum data length exceeded: 128 bytes.");
         }
 
-        out.put( ( byte ) data.length );
-        out.put( data );
+        out.put((byte) data.length);
+        out.put(data);
     }
 }

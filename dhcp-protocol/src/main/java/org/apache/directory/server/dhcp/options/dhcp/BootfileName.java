@@ -17,28 +17,24 @@
  *  under the License. 
  *
  */
-
 package org.apache.directory.server.dhcp.options.dhcp;
 
-
 import org.apache.directory.server.dhcp.options.StringOption;
-
 
 /**
  * This option is used to identify a bootfile when the 'file' field in
  * the DHCP header has been used for DHCP options.
-*
+ *
  * The code for this option is 67, and its minimum length is 1.
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class BootfileName extends StringOption
-{
+public class BootfileName extends StringOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 67;
     }
 }

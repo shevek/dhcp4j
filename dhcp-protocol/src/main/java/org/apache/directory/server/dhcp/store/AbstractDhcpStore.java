@@ -19,7 +19,6 @@
  */
 package org.apache.directory.server.dhcp.store;
 
-
 import java.net.InetAddress;
 import java.util.Map;
 
@@ -32,15 +31,14 @@ import org.apache.directory.server.dhcp.service.Lease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Abstract base implementation of a {@link DhcpStore}.
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public abstract class AbstractDhcpStore implements DhcpStore
-{
-    private static final Logger logger = LoggerFactory.getLogger( AbstractDhcpStore.class );
+public abstract class AbstractDhcpStore implements DhcpStore {
+
+    private static final Logger logger = LoggerFactory.getLogger(AbstractDhcpStore.class);
 
 
     /*
@@ -48,82 +46,73 @@ public abstract class AbstractDhcpStore implements DhcpStore
      *      java.net.InetAddress, java.net.InetAddress, long,
      *      org.apache.directory.server.dhcp.options.OptionsField)
      */
-    public Lease getLeaseOffer( HardwareAddress hardwareAddress, InetAddress requestedAddress,
-        InetAddress selectionBase, long requestedLeaseTime, OptionsField options ) throws DhcpException
-    {
-        Subnet subnet = findSubnet( selectionBase );
+    public Lease getLeaseOffer(HardwareAddress hardwareAddress, InetAddress requestedAddress,
+            InetAddress selectionBase, long requestedLeaseTime, OptionsField options) throws DhcpException {
+        Subnet subnet = findSubnet(selectionBase);
 
-        if ( null == subnet )
-        {
-            logger.warn( "Don't know anything about the sbnet containing " + selectionBase );
+        if (null == subnet) {
+            logger.warn("Don't know anything about the sbnet containing " + selectionBase);
             return null;
         }
 
         // try to find existing lease
         Lease lease = null;
-        lease = findExistingLease( hardwareAddress, lease );
+        lease = findExistingLease(hardwareAddress, lease);
 
-        if ( null != lease )
-        {
+        if (null != lease) {
             return lease;
         }
 
         Host host = null;
-        host = findDesignatedHost( hardwareAddress );
+        host = findDesignatedHost(hardwareAddress);
 
-        if ( null != host )
-        {
+        if (null != host) {
             // make sure that the host is actually within the subnet. Depending
             // on the way the DhcpStore configuration is implemented, it is not
             // possible to violate this condition, but we can't be sure.
-            if ( !subnet.contains( host.getAddress() ) )
-            {
-                logger.warn( "Host " + host + " is not within the subnet for which an address is requested" );
-            }
-            else
-            {
+            if (!subnet.contains(host.getAddress())) {
+                logger.warn("Host " + host + " is not within the subnet for which an address is requested");
+            } else {
                 // build properties map
-                Map properties = getProperties( subnet );
-                properties.putAll( getProperties( host ) );
+                Map properties = getProperties(subnet);
+                properties.putAll(getProperties(host));
 
                 // build lease
                 lease = new Lease();
-                lease.setAcquired( System.currentTimeMillis() );
+                lease.setAcquired(System.currentTimeMillis());
 
-                long leaseTime = determineLeaseTime( requestedLeaseTime, properties );
+                long leaseTime = determineLeaseTime(requestedLeaseTime, properties);
 
-                lease.setExpires( System.currentTimeMillis() + leaseTime );
+                lease.setExpires(System.currentTimeMillis() + leaseTime);
 
-                lease.setHardwareAddress( hardwareAddress );
-                lease.setState( Lease.STATE_NEW );
-                lease.setClientAddress( host.getAddress() );
+                lease.setHardwareAddress(hardwareAddress);
+                lease.setState(Lease.STATE_NEW);
+                lease.setClientAddress(host.getAddress());
 
                 // set lease options
                 OptionsField o = lease.getOptions();
 
                 // set (client) host name
-                o.add( new HostName( host.getName() ) );
+                o.add(new HostName(host.getName()));
 
                 // add subnet settings
-                o.add( new SubnetMask( subnet.getNetmask() ) );
-                o.merge( subnet.getOptions() );
+                o.add(new SubnetMask(subnet.getNetmask()));
+                o.merge(subnet.getOptions());
 
                 // add the host's options. they override existing
                 // subnet options as they take the precedence.
-                o.merge( host.getOptions() );
+                o.merge(host.getOptions());
             }
         }
 
-        if ( null == lease )
-        {
+        if (null == lease) {
             // FIXME: use selection base to find a lease in a pool.
         }
 
         // update the lease state
-        if ( null != lease && lease.getState() != Lease.STATE_ACTIVE )
-        {
-            lease.setState( Lease.STATE_OFFERED );
-            updateLease( lease );
+        if (null != lease && lease.getState() != Lease.STATE_ACTIVE) {
+            lease.setState(Lease.STATE_OFFERED);
+            updateLease(lease);
         }
 
         return lease;
@@ -135,100 +124,90 @@ public abstract class AbstractDhcpStore implements DhcpStore
      *      java.net.InetAddress, java.net.InetAddress, long,
      *      org.apache.directory.server.dhcp.options.OptionsField)
      */
-    public Lease getExistingLease( HardwareAddress hardwareAddress, InetAddress requestedAddress,
-        InetAddress selectionBase, long requestedLeaseTime, OptionsField options ) throws DhcpException
-    {
+    public Lease getExistingLease(HardwareAddress hardwareAddress, InetAddress requestedAddress,
+            InetAddress selectionBase, long requestedLeaseTime, OptionsField options) throws DhcpException {
         // try to find existing lease. if we don't find a lease based on the
         // client's
         // hardware address, we send a NAK.
         Lease lease = null;
-        lease = findExistingLease( hardwareAddress, lease );
+        lease = findExistingLease(hardwareAddress, lease);
 
-        if ( null == lease )
-        {
+        if (null == lease) {
             return null;
         }
 
         // check whether the notions of the client address match
-        if ( !lease.getClientAddress().equals( requestedAddress ) )
-        {
-            logger.warn( "Requested address " + requestedAddress + " for " + hardwareAddress
-                + " doesn't match existing lease " + lease );
+        if (!lease.getClientAddress().equals(requestedAddress)) {
+            logger.warn("Requested address " + requestedAddress + " for " + hardwareAddress
+                    + " doesn't match existing lease " + lease);
             return null;
         }
 
         // check whether addresses and subnet match
-        Subnet subnet = findSubnet( selectionBase );
+        Subnet subnet = findSubnet(selectionBase);
 
-        if ( null == subnet )
-        {
-            logger.warn( "No subnet found for existing lease " + lease );
+        if (null == subnet) {
+            logger.warn("No subnet found for existing lease " + lease);
             return null;
         }
 
-        if ( !subnet.contains( lease.getClientAddress() ) )
-        {
-            logger.warn( "Client with existing lease " + lease + " is on wrong subnet " + subnet );
+        if (!subnet.contains(lease.getClientAddress())) {
+            logger.warn("Client with existing lease " + lease + " is on wrong subnet " + subnet);
             return null;
         }
 
-        if ( !subnet.isInRange( lease.getClientAddress() ) )
-        {
-            logger.warn( "Client with existing lease " + lease + " is out of valid range for subnet " + subnet );
+        if (!subnet.isInRange(lease.getClientAddress())) {
+            logger.warn("Client with existing lease " + lease + " is out of valid range for subnet " + subnet);
             return null;
         }
 
         // build properties map
-        Map properties = getProperties( subnet );
+        Map properties = getProperties(subnet);
 
         // update lease options
         OptionsField o = lease.getOptions();
         o.clear();
 
         // add subnet settings
-        o.add( new SubnetMask( subnet.getNetmask() ) );
-        o.merge( subnet.getOptions() );
+        o.add(new SubnetMask(subnet.getNetmask()));
+        o.merge(subnet.getOptions());
 
         // check whether there is a designated host.
-        Host host = findDesignatedHost( hardwareAddress );
-        if ( null != host )
-        {
+        Host host = findDesignatedHost(hardwareAddress);
+        if (null != host) {
             // check whether the host matches the address (using a fixed
             // host address is mandatory).
-            if ( host.getAddress() != null && !host.getAddress().equals( lease.getClientAddress() ) )
-            {
-                logger.warn( "Existing fixed address for " + hardwareAddress + " conflicts with existing lease "
-                    + lease );
+            if (host.getAddress() != null && !host.getAddress().equals(lease.getClientAddress())) {
+                logger.warn("Existing fixed address for " + hardwareAddress + " conflicts with existing lease "
+                        + lease);
                 return null;
             }
 
-            properties.putAll( getProperties( host ) );
+            properties.putAll(getProperties(host));
 
             // set (client) host name
-            o.add( new HostName( host.getName() ) );
+            o.add(new HostName(host.getName()));
 
             // add the host's options
-            o.merge( host.getOptions() );
+            o.merge(host.getOptions());
         }
 
         // update other lease fields
-        long leaseTime = determineLeaseTime( requestedLeaseTime, properties );
-        lease.setExpires( System.currentTimeMillis() + leaseTime );
-        lease.setHardwareAddress( hardwareAddress );
+        long leaseTime = determineLeaseTime(requestedLeaseTime, properties);
+        lease.setExpires(System.currentTimeMillis() + leaseTime);
+        lease.setHardwareAddress(hardwareAddress);
 
         // update the lease state
-        if ( lease.getState() != Lease.STATE_ACTIVE )
-        {
-            lease.setState( Lease.STATE_ACTIVE );
-            updateLease( lease );
+        if (lease.getState() != Lease.STATE_ACTIVE) {
+            lease.setState(Lease.STATE_ACTIVE);
+            updateLease(lease);
         }
 
         // store information about the lease
-        updateLease( lease );
+        updateLease(lease);
 
         return lease;
     }
-
 
     /**
      * Determine the lease time based on the time requested by the client, the
@@ -238,20 +217,15 @@ public abstract class AbstractDhcpStore implements DhcpStore
      * @param properties
      * @return long
      */
-    private long determineLeaseTime( long requestedLeaseTime, Map properties )
-    {
+    private long determineLeaseTime(long requestedLeaseTime, Map properties) {
         // built-in default
         long leaseTime = 1000L * 3600;
-        Integer propMaxLeaseTime = ( Integer ) properties.get( DhcpConfigElement.PROPERTY_MAX_LEASE_TIME );
+        Integer propMaxLeaseTime = (Integer) properties.get(DhcpConfigElement.PROPERTY_MAX_LEASE_TIME);
 
-        if ( null != propMaxLeaseTime )
-        {
-            if ( requestedLeaseTime > 0 )
-            {
-                leaseTime = Math.min( propMaxLeaseTime.intValue() * 1000L, requestedLeaseTime );
-            }
-            else
-            {
+        if (null != propMaxLeaseTime) {
+            if (requestedLeaseTime > 0) {
+                leaseTime = Math.min(propMaxLeaseTime.intValue() * 1000L, requestedLeaseTime);
+            } else {
                 leaseTime = propMaxLeaseTime.intValue() * 1000L;
             }
         }
@@ -263,20 +237,17 @@ public abstract class AbstractDhcpStore implements DhcpStore
     /*
      * @see org.apache.directory.server.dhcp.store.DhcpStore#releaseLease(org.apache.directory.server.dhcp.service.Lease)
      */
-    public void releaseLease( Lease lease )
-    {
-        lease.setState( Lease.STATE_RELEASED );
-        updateLease( lease );
+    public void releaseLease(Lease lease) {
+        lease.setState(Lease.STATE_RELEASED);
+        updateLease(lease);
     }
-
 
     /**
      * Update the (possibly changed) lease in the store.
      * 
      * @param lease
      */
-    protected abstract void updateLease( Lease lease );
-
+    protected abstract void updateLease(Lease lease);
 
     /**
      * Return a list of all options applicable to the given config element. List
@@ -288,8 +259,7 @@ public abstract class AbstractDhcpStore implements DhcpStore
      * @param element
      * @return OptionsField
      */
-    protected abstract OptionsField getOptions( DhcpConfigElement element );
-
+    protected abstract OptionsField getOptions(DhcpConfigElement element);
 
     /**
      * Return a list of all options applicable to the given config element. List
@@ -301,8 +271,7 @@ public abstract class AbstractDhcpStore implements DhcpStore
      * @param element
      * @return Map
      */
-    protected abstract Map getProperties( DhcpConfigElement element );
-
+    protected abstract Map getProperties(DhcpConfigElement element);
 
     /**
      * Find an existing lease in the store.
@@ -311,8 +280,7 @@ public abstract class AbstractDhcpStore implements DhcpStore
      * @param existingLease
      * @return Map
      */
-    protected abstract Lease findExistingLease( HardwareAddress hardwareAddress, Lease existingLease );
-
+    protected abstract Lease findExistingLease(HardwareAddress hardwareAddress, Lease existingLease);
 
     /**
      * Find a host to with the explicitely designated hardware address.
@@ -321,8 +289,7 @@ public abstract class AbstractDhcpStore implements DhcpStore
      * @return Host
      * @throws DhcpException
      */
-    protected abstract Host findDesignatedHost( HardwareAddress hardwareAddress ) throws DhcpException;
-
+    protected abstract Host findDesignatedHost(HardwareAddress hardwareAddress) throws DhcpException;
 
     /**
      * Find the subnet definition matching the given address.
@@ -330,5 +297,5 @@ public abstract class AbstractDhcpStore implements DhcpStore
      * @param clientAddress
      * @return Subnet
      */
-    protected abstract Subnet findSubnet( InetAddress clientAddress );
+    protected abstract Subnet findSubnet(InetAddress clientAddress);
 }

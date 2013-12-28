@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.tcp;
 
-
 import org.apache.directory.server.dhcp.options.ByteOption;
-
 
 /**
  * This option specifies the default TTL that the client should use when
@@ -33,13 +30,12 @@ import org.apache.directory.server.dhcp.options.ByteOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class TcpDefaultTimeToLive extends ByteOption
-{
+public class TcpDefaultTimeToLive extends ByteOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 37;
     }
 }

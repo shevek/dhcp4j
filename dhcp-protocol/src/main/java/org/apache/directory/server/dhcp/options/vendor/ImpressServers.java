@@ -14,7 +14,6 @@
  *   limitations under the License.
  *
  */
-
 /**
  * The Impress server option specifies a list of Imagen Impress servers
  * available to the client.  Servers SHOULD be listed in order of
@@ -26,9 +25,7 @@
  */
 package org.apache.directory.server.dhcp.options.vendor;
 
-
 import org.apache.directory.server.dhcp.options.AddressListOption;
-
 
 /**
  * The Impress server option specifies a list of Imagen Impress servers
@@ -41,13 +38,12 @@ import org.apache.directory.server.dhcp.options.AddressListOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class ImpressServers extends AddressListOption
-{
+public class ImpressServers extends AddressListOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 10;
     }
 }

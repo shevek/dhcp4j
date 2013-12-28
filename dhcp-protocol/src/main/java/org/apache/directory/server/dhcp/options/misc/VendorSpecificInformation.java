@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.misc;
 
-
 import org.apache.directory.server.dhcp.options.DhcpOption;
-
 
 /**
  * This option is used by clients and servers to exchange vendor-
@@ -60,13 +57,12 @@ import org.apache.directory.server.dhcp.options.DhcpOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class VendorSpecificInformation extends DhcpOption
-{
+public class VendorSpecificInformation extends DhcpOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 43;
     }
 }

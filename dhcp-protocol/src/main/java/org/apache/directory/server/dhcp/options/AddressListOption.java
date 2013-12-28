@@ -17,9 +17,7 @@
  *  under the License. 
  *
  */
-
 package org.apache.directory.server.dhcp.options;
-
 
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework
@@ -32,6 +30,5 @@ package org.apache.directory.server.dhcp.options;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public abstract class AddressListOption extends DhcpOption
-{
+public abstract class AddressListOption extends DhcpOption {
 }

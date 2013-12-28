@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.perhost;
 
-
 import org.apache.directory.server.dhcp.options.DhcpOption;
-
 
 /**
  * This option specifies a table of MTU sizes to use when performing
@@ -35,13 +32,12 @@ import org.apache.directory.server.dhcp.options.DhcpOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class PathMtuPlateauTable extends DhcpOption
-{
+public class PathMtuPlateauTable extends DhcpOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 25;
     }
 }

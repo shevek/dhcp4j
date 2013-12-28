@@ -17,13 +17,9 @@
  *  under the License. 
  *  
  */
-
 /**
  * Provides vendor options for the DHCP protocol.
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-
 package org.apache.directory.server.dhcp.options.vendor;
-
-

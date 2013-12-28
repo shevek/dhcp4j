@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.perinterface;
 
-
 import org.apache.directory.server.dhcp.options.AddressOption;
-
 
 /**
  * This option specifies the broadcast address in use on the client's
@@ -32,13 +29,12 @@ import org.apache.directory.server.dhcp.options.AddressOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class BroadcastAddress extends AddressOption
-{
+public class BroadcastAddress extends AddressOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 28;
     }
 }

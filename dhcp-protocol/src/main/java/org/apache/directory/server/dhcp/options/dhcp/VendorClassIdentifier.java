@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.dhcp;
 
-
 import org.apache.directory.server.dhcp.options.StringOption;
-
 
 /**
  * This option is used by DHCP clients to optionally identify the vendor
@@ -41,13 +38,12 @@ import org.apache.directory.server.dhcp.options.StringOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class VendorClassIdentifier extends StringOption
-{
+public class VendorClassIdentifier extends StringOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 60;
     }
 

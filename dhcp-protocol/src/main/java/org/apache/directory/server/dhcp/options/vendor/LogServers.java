@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.vendor;
 
-
 import org.apache.directory.server.dhcp.options.AddressListOption;
-
 
 /**
  * The log server option specifies a list of MIT-LCS UDP log servers
@@ -34,13 +31,12 @@ import org.apache.directory.server.dhcp.options.AddressListOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class LogServers extends AddressListOption
-{
+public class LogServers extends AddressListOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 7;
     }
 }

@@ -19,19 +19,17 @@
  */
 package org.apache.directory.server.dhcp.store;
 
-
 import java.net.InetAddress;
 
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
-
 
 /**
  * The definition of a host.
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class Host extends DhcpConfigElement
-{
+public class Host extends DhcpConfigElement {
+
     private final String name;
 
     private HardwareAddress hardwareAddress;
@@ -41,29 +39,21 @@ public class Host extends DhcpConfigElement
      */
     private InetAddress address;
 
-
-    public Host( String name, InetAddress address, HardwareAddress hardwareAddress )
-    {
+    public Host(String name, InetAddress address, HardwareAddress hardwareAddress) {
         this.name = name;
         this.address = address;
         this.hardwareAddress = hardwareAddress;
     }
 
-
-    public HardwareAddress getHardwareAddress()
-    {
+    public HardwareAddress getHardwareAddress() {
         return hardwareAddress;
     }
 
-
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-
-    public InetAddress getAddress()
-    {
+    public InetAddress getAddress() {
         return address;
     }
 }

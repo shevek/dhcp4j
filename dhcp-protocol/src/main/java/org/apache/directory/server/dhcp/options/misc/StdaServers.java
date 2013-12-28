@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.misc;
 
-
 import org.apache.directory.server.dhcp.options.AddressListOption;
-
 
 /**
  * The StreetTalk Directory Assistance (STDA) server option specifies a
@@ -35,13 +32,12 @@ import org.apache.directory.server.dhcp.options.AddressListOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class StdaServers extends AddressListOption
-{
+public class StdaServers extends AddressListOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 76;
     }
 }

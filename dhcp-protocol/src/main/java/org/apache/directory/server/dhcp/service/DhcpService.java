@@ -17,15 +17,12 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.service;
-
 
 import java.net.InetSocketAddress;
 
 import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
-
 
 /**
  * DHCP Protocol (RFC 2131, RFC 2132). Implementations of the DHCP service must
@@ -33,8 +30,8 @@ import org.apache.directory.server.dhcp.messages.DhcpMessage;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public interface DhcpService
-{
+public interface DhcpService {
+
     /**
      * Retrieve the reply to a given message. The reply may be zero, if the
      * message should be ignored.
@@ -44,6 +41,6 @@ public interface DhcpService
      * @return DhcpMessage
      * @throws DhcpException 
      */
-    DhcpMessage getReplyFor( InetSocketAddress localAddress, InetSocketAddress clientAddress, DhcpMessage request )
-        throws DhcpException;
+    DhcpMessage getReplyFor(InetSocketAddress localAddress, InetSocketAddress clientAddress, DhcpMessage request)
+            throws DhcpException;
 }

@@ -17,7 +17,6 @@
  *  under the License. 
  *  
  */
-
 /**
  * Provides the {@link org.apache.mina.core.service.IoHandler} and associated
  * {@link org.apache.mina.filter.codec.ProtocolCodecFactory} required
@@ -25,7 +24,4 @@
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-
 package org.apache.directory.server.dhcp.protocol;
-
-

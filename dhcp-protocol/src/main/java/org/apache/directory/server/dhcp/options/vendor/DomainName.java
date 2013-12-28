@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.vendor;
 
-
 import org.apache.directory.server.dhcp.options.StringOption;
-
 
 /**
  * This option specifies the domain name that client should use when
@@ -32,13 +29,12 @@ import org.apache.directory.server.dhcp.options.StringOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DomainName extends StringOption
-{
+public class DomainName extends StringOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 15;
     }
 

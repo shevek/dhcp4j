@@ -17,9 +17,7 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp;
-
 
 import java.nio.ByteBuffer;
 
@@ -30,43 +28,36 @@ import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
 // @RunWith(ConcurrentJunitRunner.class)
 // @Concurrency()
-public class DhcpMessageDecoderTest extends AbstractDhcpTestCase
-{
+public class DhcpMessageDecoderTest extends AbstractDhcpTestCase {
+
     private ByteBuffer requestByteBuffer;
 
-
-    public DhcpMessageDecoderTest()
-    {
-        super( DhcpMessageDecoderTest.class );
+    public DhcpMessageDecoderTest() {
+        super(DhcpMessageDecoderTest.class);
     }
 
-
     @Test
-    public void testParseDiscover() throws Exception
-    {
-        requestByteBuffer = getByteBufferFromFile( "DHCPDISCOVER.pdu" );
+    public void testParseDiscover() throws Exception {
+        requestByteBuffer = getByteBufferFromFile("DHCPDISCOVER.pdu");
 
         DhcpMessageDecoder decoder = new DhcpMessageDecoder();
-        DhcpMessage dhcpRequest = decoder.decode( requestByteBuffer );
+        DhcpMessage dhcpRequest = decoder.decode(requestByteBuffer);
 
-        print( dhcpRequest );
+        print(dhcpRequest);
     }
 
-
     @Test
-    public void testParseOffer() throws Exception
-    {
-        requestByteBuffer = getByteBufferFromFile( "DHCPOFFER.pdu" );
+    public void testParseOffer() throws Exception {
+        requestByteBuffer = getByteBufferFromFile("DHCPOFFER.pdu");
 
         DhcpMessageDecoder decoder = new DhcpMessageDecoder();
-        DhcpMessage dhcpRequest = decoder.decode( requestByteBuffer );
+        DhcpMessage dhcpRequest = decoder.decode(requestByteBuffer);
 
-        print( dhcpRequest );
+        print(dhcpRequest);
     }
 }

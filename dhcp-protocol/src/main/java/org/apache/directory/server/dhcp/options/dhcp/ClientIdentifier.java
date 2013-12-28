@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.dhcp;
 
-
 import org.apache.directory.server.dhcp.options.DhcpOption;
-
 
 /**
  * This option is used by DHCP clients to specify their unique
@@ -50,13 +47,12 @@ import org.apache.directory.server.dhcp.options.DhcpOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class ClientIdentifier extends DhcpOption
-{
+public class ClientIdentifier extends DhcpOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 61;
     }
 }

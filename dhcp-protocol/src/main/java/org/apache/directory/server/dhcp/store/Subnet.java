@@ -19,19 +19,17 @@
  */
 package org.apache.directory.server.dhcp.store;
 
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-
 
 /**
  * The definition of a Subnet.
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class Subnet extends DhcpConfigElement
-{
+public class Subnet extends DhcpConfigElement {
+
     /** the subnet's address */
     private final InetAddress address;
 
@@ -44,28 +42,21 @@ public class Subnet extends DhcpConfigElement
     /** the subnet's range: maximum address in range */
     private InetAddress rangeMax;
 
-
     // This will suppress PMD.EmptyCatchBlock warnings in this method
     @SuppressWarnings("PMD.EmptyCatchBlock")
-    public Subnet( InetAddress address, InetAddress netmask, InetAddress rangeMin, InetAddress rangeMax )
-    {
+    public Subnet(InetAddress address, InetAddress netmask, InetAddress rangeMin, InetAddress rangeMax) {
         // mask address to match subnet
         byte masked[] = netmask.getAddress();
         byte addrBytes[] = netmask.getAddress();
 
-        for ( int i = 0; i < addrBytes.length; i++ )
-        {
+        for (int i = 0; i < addrBytes.length; i++) {
             masked[i] &= addrBytes[i];
         }
 
-        if ( !Arrays.equals( masked, addrBytes ) )
-        {
-            try
-            {
-                address = InetAddress.getByAddress( masked );
-            }
-            catch ( UnknownHostException e )
-            {
+        if (!Arrays.equals(masked, addrBytes)) {
+            try {
+                address = InetAddress.getByAddress(masked);
+            } catch (UnknownHostException e) {
                 // ignore - doesn't happen.
             }
         }
@@ -76,42 +67,29 @@ public class Subnet extends DhcpConfigElement
         this.rangeMax = rangeMax;
     }
 
-
-    public InetAddress getAddress()
-    {
+    public InetAddress getAddress() {
         return address;
     }
 
-
-    public InetAddress getNetmask()
-    {
+    public InetAddress getNetmask() {
         return netmask;
     }
 
-
-    public InetAddress getRangeMax()
-    {
+    public InetAddress getRangeMax() {
         return rangeMax;
     }
 
-
-    public void setRangeMax( InetAddress rangeMax )
-    {
+    public void setRangeMax(InetAddress rangeMax) {
         this.rangeMax = rangeMax;
     }
 
-
-    public InetAddress getRangeMin()
-    {
+    public InetAddress getRangeMin() {
         return rangeMin;
     }
 
-
-    public void setRangeMin( InetAddress rangeMin )
-    {
+    public void setRangeMin(InetAddress rangeMin) {
         this.rangeMin = rangeMin;
     }
-
 
     /**
      * Check whether the given client address resides within this subnet and
@@ -120,25 +98,21 @@ public class Subnet extends DhcpConfigElement
      * @param clientAddress
      * @return boolean
      */
-    public boolean contains( InetAddress clientAddress )
-    {
+    public boolean contains(InetAddress clientAddress) {
         // check address type
-        if ( !clientAddress.getClass().equals( address.getClass() ) )
-        {
+        if (!clientAddress.getClass().equals(address.getClass())) {
             return false;
         }
 
         byte client[] = clientAddress.getAddress();
         byte masked[] = netmask.getAddress();
 
-        for ( int i = 0; i < masked.length; i++ )
-        {
+        for (int i = 0; i < masked.length; i++) {
             masked[i] &= client[i];
         }
 
-        return Arrays.equals( masked, address.getAddress() );
+        return Arrays.equals(masked, address.getAddress());
     }
-
 
     /**
      * Check whether the specified address is within the range for this subnet.
@@ -146,37 +120,29 @@ public class Subnet extends DhcpConfigElement
      * @param clientAddress
      * @return boolean
      */
-    public boolean isInRange( InetAddress clientAddress )
-    {
+    public boolean isInRange(InetAddress clientAddress) {
         byte client[] = clientAddress.getAddress();
         byte masked[] = netmask.getAddress();
 
-        for ( int i = 0; i < masked.length; i++ )
-        {
+        for (int i = 0; i < masked.length; i++) {
             masked[i] &= client[i];
         }
 
-        if ( null != rangeMin && arrayComp( masked, rangeMin.getAddress() ) < 0 )
-        {
+        if (null != rangeMin && arrayComp(masked, rangeMin.getAddress()) < 0) {
             return false;
         }
 
-        if ( null != rangeMin && arrayComp( masked, rangeMax.getAddress() ) > 0 )
-        {
+        if (null != rangeMin && arrayComp(masked, rangeMax.getAddress()) > 0) {
             return false;
         }
 
         return true;
     }
 
-
-    private static int arrayComp( byte a1[], byte a2[] )
-    {
-        for ( int i = 0; i < a1.length && i < a2.length; i++ )
-        {
-            if ( a1[i] != a2[i] )
-            {
-                return ( a1[i] & 0xff ) - ( a2[i] & 0xff );
+    private static int arrayComp(byte a1[], byte a2[]) {
+        for (int i = 0; i < a1.length && i < a2.length; i++) {
+            if (a1[i] != a2[i]) {
+                return (a1[i] & 0xff) - (a2[i] & 0xff);
             }
         }
 

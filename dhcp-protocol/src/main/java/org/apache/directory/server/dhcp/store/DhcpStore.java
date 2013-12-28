@@ -19,7 +19,6 @@
  */
 package org.apache.directory.server.dhcp.store;
 
-
 import java.net.InetAddress;
 
 import org.apache.directory.server.dhcp.DhcpException;
@@ -27,13 +26,12 @@ import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.options.OptionsField;
 import org.apache.directory.server.dhcp.service.Lease;
 
-
 /**
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public interface DhcpStore
-{
+public interface DhcpStore {
+
     /**
      * Find a lease to offer in response to a DHCPDISCOVER request.
      * <p>
@@ -74,9 +72,8 @@ public interface DhcpStore
      * @return a lease or <code>null</code> if no matching lease was found.
      * @throws DhcpException
      */
-    Lease getLeaseOffer( HardwareAddress hardwareAddress, InetAddress requestedAddress, InetAddress selectionBase,
-        long requestedLeaseTime, OptionsField options ) throws DhcpException;
-
+    Lease getLeaseOffer(HardwareAddress hardwareAddress, InetAddress requestedAddress, InetAddress selectionBase,
+            long requestedLeaseTime, OptionsField options) throws DhcpException;
 
     /**
      * Retrieve an existing lease from the dhcp store.
@@ -89,14 +86,13 @@ public interface DhcpStore
      * @return Lease
      * @throws DhcpException 
      */
-    Lease getExistingLease( HardwareAddress hardwareAddress, InetAddress requestedAddress, InetAddress selectionBase,
-        long requestedLeaseTime, OptionsField options ) throws DhcpException;
-
+    Lease getExistingLease(HardwareAddress hardwareAddress, InetAddress requestedAddress, InetAddress selectionBase,
+            long requestedLeaseTime, OptionsField options) throws DhcpException;
 
     /**
      * Release the specified lease. 
      * 
      * @param lease
      */
-    void releaseLease( Lease lease );
+    void releaseLease(Lease lease);
 }

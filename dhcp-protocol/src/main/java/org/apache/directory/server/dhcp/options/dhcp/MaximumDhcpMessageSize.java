@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.dhcp;
 
-
 import org.apache.directory.server.dhcp.options.ShortOption;
-
 
 /**
  * This option specifies the maximum length DHCP message that it is
@@ -36,13 +33,12 @@ import org.apache.directory.server.dhcp.options.ShortOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class MaximumDhcpMessageSize extends ShortOption
-{
+public class MaximumDhcpMessageSize extends ShortOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 57;
     }
 }

@@ -17,14 +17,11 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.dhcp;
-
 
 import java.net.InetAddress;
 
 import org.apache.directory.server.dhcp.options.AddressOption;
-
 
 /**
  * This option is used in DHCPOFFER and DHCPREQUEST messages, and may
@@ -42,24 +39,20 @@ import org.apache.directory.server.dhcp.options.AddressOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class ServerIdentifier extends AddressOption
-{
-    public ServerIdentifier()
-    {
+public class ServerIdentifier extends AddressOption {
+
+    public ServerIdentifier() {
     }
 
-
-    public ServerIdentifier( InetAddress localHost )
-    {
-        setAddress( localHost );
+    public ServerIdentifier(InetAddress localHost) {
+        setAddress(localHost);
     }
 
 
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+    public byte getTag() {
         return 54;
     }
 }

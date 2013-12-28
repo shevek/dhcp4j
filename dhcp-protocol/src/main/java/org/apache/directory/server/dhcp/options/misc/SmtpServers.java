@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.misc;
 
-
 import org.apache.directory.server.dhcp.options.AddressListOption;
-
 
 /**
  * The SMTP server option specifies a list of SMTP servers available to
@@ -34,13 +31,12 @@ import org.apache.directory.server.dhcp.options.AddressListOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class SmtpServers extends AddressListOption
-{
+public class SmtpServers extends AddressListOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 69;
     }
 }

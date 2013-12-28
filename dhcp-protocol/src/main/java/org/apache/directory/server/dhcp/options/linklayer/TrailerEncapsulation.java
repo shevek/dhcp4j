@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.linklayer;
 
-
 import org.apache.directory.server.dhcp.options.ByteOption;
-
 
 /**
  * This option specifies whether or not the client should negotiate the
@@ -34,13 +31,12 @@ import org.apache.directory.server.dhcp.options.ByteOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class TrailerEncapsulation extends ByteOption
-{
+public class TrailerEncapsulation extends ByteOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 34;
     }
 }

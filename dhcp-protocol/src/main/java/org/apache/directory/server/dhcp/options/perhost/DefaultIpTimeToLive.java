@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.perhost;
 
-
 import org.apache.directory.server.dhcp.options.ByteOption;
-
 
 /**
  * This option specifies the default time-to-live that the client should
@@ -33,13 +30,12 @@ import org.apache.directory.server.dhcp.options.ByteOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DefaultIpTimeToLive extends ByteOption
-{
+public class DefaultIpTimeToLive extends ByteOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 23;
     }
 }

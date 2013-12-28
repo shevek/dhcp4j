@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.dhcp;
 
-
 import org.apache.directory.server.dhcp.options.IntOption;
-
 
 /**
  * This option is used in a client request (DHCPDISCOVER or DHCPREQUEST)
@@ -37,24 +34,20 @@ import org.apache.directory.server.dhcp.options.IntOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class IpAddressLeaseTime extends IntOption
-{
-    public IpAddressLeaseTime()
-    {
+public class IpAddressLeaseTime extends IntOption {
+
+    public IpAddressLeaseTime() {
     }
 
-
-    public IpAddressLeaseTime( long leaseTime )
-    {
-        setIntValue( leaseTime );
+    public IpAddressLeaseTime(long leaseTime) {
+        setIntValue(leaseTime);
     }
 
 
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+    public byte getTag() {
         return 51;
     }
 }

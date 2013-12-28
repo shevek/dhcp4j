@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.perhost;
 
-
 import org.apache.directory.server.dhcp.options.IntOption;
-
 
 /**
  * This option specifies the timeout (in seconds) to use when aging Path
@@ -33,13 +30,12 @@ import org.apache.directory.server.dhcp.options.IntOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class PathMtuAgingTimeout extends IntOption
-{
+public class PathMtuAgingTimeout extends IntOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 24;
     }
 }

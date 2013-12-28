@@ -17,9 +17,7 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.protocol;
-
 
 import java.io.IOException;
 import org.apache.directory.server.dhcp.io.DhcpMessageEncoder;
@@ -29,28 +27,24 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolEncoder;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 
-
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DhcpEncoder implements ProtocolEncoder
-{
+public class DhcpEncoder implements ProtocolEncoder {
+
     // FIXME: what's the point of splitting this class from the actual encoder?
     private DhcpMessageEncoder encoder = new DhcpMessageEncoder();
 
-
-    public void encode( IoSession session, Object message, ProtocolEncoderOutput out )
-    throws IOException {
-        IoBuffer buf = IoBuffer.allocate( 1024 );
-        encoder.encode( buf.buf(), ( DhcpMessage ) message );
+    public void encode(IoSession session, Object message, ProtocolEncoderOutput out)
+            throws IOException {
+        IoBuffer buf = IoBuffer.allocate(1024);
+        encoder.encode(buf.buf(), (DhcpMessage) message);
 
         buf.flip();
 
-        out.write( buf );
+        out.write(buf);
     }
 
-
-    public void dispose( IoSession arg0 ) throws Exception
-    {
+    public void dispose(IoSession arg0) throws Exception {
     }
 }

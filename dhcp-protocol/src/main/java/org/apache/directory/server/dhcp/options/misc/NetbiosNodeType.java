@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.misc;
 
-
 import org.apache.directory.server.dhcp.options.ByteOption;
-
 
 /**
  * The NetBIOS node type option allows NetBIOS over TCP/IP clients which
@@ -41,13 +38,12 @@ import org.apache.directory.server.dhcp.options.ByteOption;
  * (hexadecimal). The code for this option is 46. The length of this option is
  * always 1.
  */
-public class NetbiosNodeType extends ByteOption
-{
+public class NetbiosNodeType extends ByteOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 46;
     }
 }

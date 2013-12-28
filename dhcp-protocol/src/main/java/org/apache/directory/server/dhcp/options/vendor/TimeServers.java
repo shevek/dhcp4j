@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.vendor;
 
-
 import org.apache.directory.server.dhcp.options.AddressListOption;
-
 
 /**
  * The time server option specifies a list of RFC 868 time servers
@@ -35,13 +32,12 @@ import org.apache.directory.server.dhcp.options.AddressListOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class TimeServers extends AddressListOption
-{
+public class TimeServers extends AddressListOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 4;
     }
 }

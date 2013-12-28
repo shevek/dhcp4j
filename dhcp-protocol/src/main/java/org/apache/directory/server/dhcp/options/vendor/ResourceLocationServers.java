@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.vendor;
 
-
 import org.apache.directory.server.dhcp.options.AddressListOption;
-
 
 /**
  * This option specifies a list of RFC 887 Resource Location
@@ -34,13 +31,12 @@ import org.apache.directory.server.dhcp.options.AddressListOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class ResourceLocationServers extends AddressListOption
-{
+public class ResourceLocationServers extends AddressListOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 11;
     }
 }

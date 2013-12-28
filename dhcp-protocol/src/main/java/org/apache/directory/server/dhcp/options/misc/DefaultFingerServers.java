@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.misc;
 
-
 import org.apache.directory.server.dhcp.options.AddressListOption;
-
 
 /**
  * The Finger server option specifies a list of Finger available to the
@@ -34,13 +31,12 @@ import org.apache.directory.server.dhcp.options.AddressListOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DefaultFingerServers extends AddressListOption
-{
+public class DefaultFingerServers extends AddressListOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 73;
     }
 }

@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.misc;
 
-
 import org.apache.directory.server.dhcp.options.AddressListOption;
-
 
 /**
  * The WWW server option specifies a list of WWW available to the
@@ -34,13 +31,12 @@ import org.apache.directory.server.dhcp.options.AddressListOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DefaultWwwServers extends AddressListOption
-{
+public class DefaultWwwServers extends AddressListOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 72;
     }
 }

@@ -17,9 +17,7 @@
  *  under the License. 
  *
  */
-
 package org.apache.directory.server.dhcp.options;
-
 
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework for
@@ -34,8 +32,8 @@ package org.apache.directory.server.dhcp.options;
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  * 
  */
-public abstract class ByteOption extends DhcpOption
-{
+public abstract class ByteOption extends DhcpOption {
+
     /**
      * The byte value (represented as a short because of the unsignedness).
      */
@@ -45,30 +43,23 @@ public abstract class ByteOption extends DhcpOption
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#setData(byte[])
      */
-    public void setData( byte[] data )
-    {
-        byteValue = ( short ) ( data[0] & 0xff );
+    public void setData(byte[] data) {
+        byteValue = (short) (data[0] & 0xff);
     }
 
 
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getData()
      */
-    public byte[] getData()
-    {
-        return new byte[]
-            { ( byte ) ( byteValue & 0xff ) };
+    public byte[] getData() {
+        return new byte[]{(byte) (byteValue & 0xff)};
     }
 
-
-    public short getByteValue()
-    {
+    public short getByteValue() {
         return byteValue;
     }
 
-
-    public void setShortValue( short shortValue )
-    {
+    public void setShortValue(short shortValue) {
         this.byteValue = shortValue;
     }
 }

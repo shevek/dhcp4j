@@ -17,27 +17,22 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp;
-
 
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DhcpException extends Exception
-{
-    private static final long serialVersionUID = 3985748516732135317L;
+public class DhcpException extends Exception {
 
+    private static final long serialVersionUID = 3985748516732135317L;
 
     /**
      * This empty constructor is used if no 
      * explanation of the DHCP exception is required.
      */
-    public DhcpException()
-    {
+    public DhcpException() {
         super();
     }
-
 
     /**
      * This constructor is used if a description of the event
@@ -45,11 +40,9 @@ public class DhcpException extends Exception
      * 
      * @param description this is a description of the exception
      */
-    public DhcpException( String description )
-    {
-        super( description );
+    public DhcpException(String description) {
+        super(description);
     }
-
 
     /**
      * This constructor is used if a description of the event that caused the
@@ -59,8 +52,7 @@ public class DhcpException extends Exception
      *            this is a description of the exception
      * @param e
      */
-    public DhcpException( String description, Exception e )
-    {
-        super( description, e );
+    public DhcpException(String description, Exception e) {
+        super(description, e);
     }
 }

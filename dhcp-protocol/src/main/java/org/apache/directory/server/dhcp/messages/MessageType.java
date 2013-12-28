@@ -17,68 +17,48 @@
  *  under the License. 
  * 
  */
-
 package org.apache.directory.server.dhcp.messages;
-
 
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public enum MessageType
-{
-    DHCPUNRECOGNIZED(( byte ) -1, "unrecognized"),
+public enum MessageType {
 
-    DHCPDISCOVER(( byte ) 1, "DHCP Discover"),
-
-    DHCPOFFER(( byte ) 2, "DHCP Offer"),
-
-    DHCPREQUEST(( byte ) 3, "DHCP Request"),
-
-    DHCPDECLINE(( byte ) 4, "DHCP Decline"),
-
-    DHCPACK(( byte ) 5, "DHCP Acknowledge"),
-
-    DHCPNAK(( byte ) 6, "DHCP Not Acknowledge"),
-
-    DHCPRELEASE(( byte ) 7, "DHCP Release"),
-
-    DHCPINFORM(( byte ) 8, "DHCP Inform");
+    DHCPUNRECOGNIZED((byte) -1, "unrecognized"),
+    DHCPDISCOVER((byte) 1, "DHCP Discover"),
+    DHCPOFFER((byte) 2, "DHCP Offer"),
+    DHCPREQUEST((byte) 3, "DHCP Request"),
+    DHCPDECLINE((byte) 4, "DHCP Decline"),
+    DHCPACK((byte) 5, "DHCP Acknowledge"),
+    DHCPNAK((byte) 6, "DHCP Not Acknowledge"),
+    DHCPRELEASE((byte) 7, "DHCP Release"),
+    DHCPINFORM((byte) 8, "DHCP Inform");
 
     private String name;
     private byte ordinal;
 
-
-    public static MessageType getTypeByCode( byte type )
-    {
-        for ( MessageType mt : MessageType.values() )
-        {
-            if ( type == mt.getCode() )
-            {
+    public static MessageType getTypeByCode(byte type) {
+        for (MessageType mt : MessageType.values()) {
+            if (type == mt.getCode()) {
                 return mt;
             }
         }
         return DHCPUNRECOGNIZED;
     }
 
-
-    public byte getCode()
-    {
+    public byte getCode() {
         return ordinal;
     }
-
 
     /**
      * Private constructor prevents construction outside of this class.
      */
-    private MessageType( byte ordinal, String name )
-    {
+    private MessageType(byte ordinal, String name) {
         this.ordinal = ordinal;
         this.name = name;
     }
 
-
-    public String toString()
-    {
+    public String toString() {
         return name;
     }
 

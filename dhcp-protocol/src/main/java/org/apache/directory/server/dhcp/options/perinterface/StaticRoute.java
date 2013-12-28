@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.perinterface;
 
-
 import org.apache.directory.server.dhcp.options.DhcpOption;
-
 
 /**
  * This option specifies a list of static routes that the client should
@@ -42,13 +39,12 @@ import org.apache.directory.server.dhcp.options.DhcpOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class StaticRoute extends DhcpOption
-{
+public class StaticRoute extends DhcpOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 33;
     }
 }

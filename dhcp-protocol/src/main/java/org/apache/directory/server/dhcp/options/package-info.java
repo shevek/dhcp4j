@@ -17,13 +17,9 @@
  *  under the License. 
  *  
  */
-
 /**
  * Provides base message objects for DHCP options.
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-
 package org.apache.directory.server.dhcp.options;
-
-

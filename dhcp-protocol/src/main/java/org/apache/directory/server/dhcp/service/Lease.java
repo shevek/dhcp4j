@@ -19,20 +19,18 @@
  */
 package org.apache.directory.server.dhcp.service;
 
-
 import java.net.InetAddress;
 
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.options.OptionsField;
-
 
 /**
  * Leases represent a temporary assignment of an IP address to a DHCP client.
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class Lease
-{
+public class Lease {
+
     /** Lease state: newly created */
     public static final int STATE_NEW = 1;
 
@@ -83,90 +81,66 @@ public class Lease
 
     private long expires = -1;
 
-
     /**
      * @return InetAddress
      */
-    public InetAddress getClientAddress()
-    {
+    public InetAddress getClientAddress() {
         return clientAddress;
     }
 
-
     /**
      * @return InetAddress
      */
-    public InetAddress getNextServerAddress()
-    {
+    public InetAddress getNextServerAddress() {
         return nextServerAddress;
     }
-
 
     /**
      * @return OptionsField
      */
-    public OptionsField getOptions()
-    {
+    public OptionsField getOptions() {
         return options;
     }
-
 
     /**
      * @return int
      */
-    public int getState()
-    {
+    public int getState() {
         return state;
     }
-
 
     /**
      * @param state
      */
-    public void setState( int state )
-    {
+    public void setState(int state) {
         this.state = state;
     }
 
-
-    public HardwareAddress getHardwareAddress()
-    {
+    public HardwareAddress getHardwareAddress() {
         return hardwareAddress;
     }
 
-
-    public void setHardwareAddress( HardwareAddress hardwareAddress )
-    {
+    public void setHardwareAddress(HardwareAddress hardwareAddress) {
         this.hardwareAddress = hardwareAddress;
     }
 
-
-    public long getAcquired()
-    {
+    public long getAcquired() {
         return acquired;
     }
 
-
-    public void setAcquired( long acquired )
-    {
+    public void setAcquired(long acquired) {
         this.acquired = acquired;
     }
 
-
-    public long getExpires()
-    {
+    public long getExpires() {
         return expires;
     }
 
-
-    public void setExpires( long expires )
-    {
+    public void setExpires(long expires) {
         this.expires = expires;
     }
 
-
-    public void setClientAddress( InetAddress clientAddress )
-    {
+    public void setClientAddress(InetAddress clientAddress) {
         this.clientAddress = clientAddress;
     }
 

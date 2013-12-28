@@ -17,9 +17,7 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.protocol;
-
 
 import java.io.IOException;
 import org.apache.directory.server.dhcp.DhcpException;
@@ -29,29 +27,24 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
-
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DhcpDecoder implements ProtocolDecoder
-{
-    public void decode( IoSession session, IoBuffer in, ProtocolDecoderOutput out ) throws DhcpException, IOException
-    {
+public class DhcpDecoder implements ProtocolDecoder {
+
+    public void decode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws DhcpException, IOException {
         DhcpMessageDecoder decoder = new DhcpMessageDecoder();
-        out.write( decoder.decode( in.buf() ) );
+        out.write(decoder.decode(in.buf()));
     }
 
-
-    public void dispose( IoSession arg0 ) throws Exception
-    {
+    public void dispose(IoSession arg0) throws Exception {
     }
 
 
     /* 
      * @see org.apache.mina.filter.codec.ProtocolDecoder#finishDecode(org.apache.mina.common.IoSession, org.apache.mina.filter.codec.ProtocolDecoderOutput)
      */
-    public void finishDecode( IoSession session, ProtocolDecoderOutput out ) throws Exception
-    {
+    public void finishDecode(IoSession session, ProtocolDecoderOutput out) throws Exception {
         // TODO Auto-generated method stub
     }
 }

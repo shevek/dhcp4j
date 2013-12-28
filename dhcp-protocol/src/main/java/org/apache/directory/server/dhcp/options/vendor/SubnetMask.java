@@ -17,14 +17,11 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.vendor;
-
 
 import java.net.InetAddress;
 
 import org.apache.directory.server.dhcp.options.AddressOption;
-
 
 /**
  * The subnet mask option specifies the client's subnet mask as per RFC
@@ -37,27 +34,23 @@ import org.apache.directory.server.dhcp.options.AddressOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class SubnetMask extends AddressOption
-{
-    public SubnetMask()
-    {
-    }
+public class SubnetMask extends AddressOption {
 
+    public SubnetMask() {
+    }
 
     /**
      * @param netmask
      */
-    public SubnetMask( InetAddress netmask )
-    {
-        setAddress( netmask );
+    public SubnetMask(InetAddress netmask) {
+        setAddress(netmask);
     }
 
 
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+    public byte getTag() {
         return 1;
     }
 }

@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.vendor;
 
-
 import org.apache.directory.server.dhcp.options.StringOption;
-
 
 /**
  * This option specifies the name of the client.  The name may or may
@@ -34,27 +31,23 @@ import org.apache.directory.server.dhcp.options.StringOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class HostName extends StringOption
-{
-    public HostName()
-    {
-    }
+public class HostName extends StringOption {
 
+    public HostName() {
+    }
 
     /**
      * @param name
      */
-    public HostName( String name )
-    {
-        setString( name );
+    public HostName(String name) {
+        setString(name);
     }
 
 
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+    public byte getTag() {
         return 12;
     }
 }

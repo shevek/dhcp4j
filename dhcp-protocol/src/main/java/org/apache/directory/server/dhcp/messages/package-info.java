@@ -17,13 +17,9 @@
  *  under the License. 
  *  
  */
-
 /**
  * Provides message objects for DHCP messages.
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-
 package org.apache.directory.server.dhcp.messages;
-
-

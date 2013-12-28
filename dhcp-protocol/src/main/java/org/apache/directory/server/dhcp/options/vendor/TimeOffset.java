@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.vendor;
 
-
 import org.apache.directory.server.dhcp.options.AddressOption;
-
 
 /**
  * The time offset field specifies the offset of the client's subnet in
@@ -35,13 +32,12 @@ import org.apache.directory.server.dhcp.options.AddressOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class TimeOffset extends AddressOption
-{
+public class TimeOffset extends AddressOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 2;
     }
 }

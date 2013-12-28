@@ -17,12 +17,9 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.options.vendor;
 
-
 import org.apache.directory.server.dhcp.options.AddressOption;
-
 
 /**
  * This specifies the IP address of the client's swap server.
@@ -31,13 +28,12 @@ import org.apache.directory.server.dhcp.options.AddressOption;
  *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class SwapServer extends AddressOption
-{
+public class SwapServer extends AddressOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
-    public byte getTag()
-    {
+
+    public byte getTag() {
         return 16;
     }
 }

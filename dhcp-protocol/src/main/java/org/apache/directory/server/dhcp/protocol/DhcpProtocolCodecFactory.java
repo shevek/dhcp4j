@@ -17,44 +17,35 @@
  *  under the License. 
  *  
  */
-
 package org.apache.directory.server.dhcp.protocol;
-
 
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolEncoder;
 
-
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DhcpProtocolCodecFactory implements ProtocolCodecFactory
-{
-    private static DhcpProtocolCodecFactory INSTANCE = new DhcpProtocolCodecFactory();
+public class DhcpProtocolCodecFactory implements ProtocolCodecFactory {
 
+    private static DhcpProtocolCodecFactory INSTANCE = new DhcpProtocolCodecFactory();
 
     /**
      * Returns the singleton instance of {@link DhcpProtocolCodecFactory}.
      *
      * @return The singleton instance of {@link DhcpProtocolCodecFactory}.
      */
-    public static DhcpProtocolCodecFactory getInstance()
-    {
+    public static DhcpProtocolCodecFactory getInstance() {
         return INSTANCE;
     }
 
-
-    public ProtocolEncoder getEncoder( IoSession session )
-    {
+    public ProtocolEncoder getEncoder(IoSession session) {
         // Create a new encoder.
         return new DhcpEncoder();
     }
 
-
-    public ProtocolDecoder getDecoder( IoSession session )
-    {
+    public ProtocolDecoder getDecoder(IoSession session) {
         // Create a new decoder.
         return new DhcpDecoder();
     }
