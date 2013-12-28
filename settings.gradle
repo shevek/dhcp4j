@@ -1,0 +1,2 @@
+rootProject.name='dhcp4j'
+include 'dhcp-protocol','dhcp-server'
