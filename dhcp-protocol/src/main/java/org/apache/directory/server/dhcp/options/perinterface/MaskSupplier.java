@@ -36,6 +36,7 @@ public class MaskSupplier extends ByteOption {
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
 
+    @Override
     public byte getTag() {
         return 30;
     }

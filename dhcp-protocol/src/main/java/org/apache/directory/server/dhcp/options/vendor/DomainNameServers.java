@@ -37,6 +37,7 @@ public class DomainNameServers extends AddressListOption {
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
 
+    @Override
     public byte getTag() {
         return 6;
     }

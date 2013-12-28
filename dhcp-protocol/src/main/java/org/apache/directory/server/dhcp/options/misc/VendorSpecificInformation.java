@@ -62,6 +62,7 @@ public class VendorSpecificInformation extends DhcpOption {
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
 
+    @Override
     public byte getTag() {
         return 43;
     }

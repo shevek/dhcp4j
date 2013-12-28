@@ -35,6 +35,7 @@ public class DhcpEncoder implements ProtocolEncoder {
     // FIXME: what's the point of splitting this class from the actual encoder?
     private DhcpMessageEncoder encoder = new DhcpMessageEncoder();
 
+    @Override
     public void encode(IoSession session, Object message, ProtocolEncoderOutput out)
             throws IOException {
         IoBuffer buf = IoBuffer.allocate(1024);
@@ -45,6 +46,7 @@ public class DhcpEncoder implements ProtocolEncoder {
         out.write(buf);
     }
 
+    @Override
     public void dispose(IoSession arg0) throws Exception {
     }
 }

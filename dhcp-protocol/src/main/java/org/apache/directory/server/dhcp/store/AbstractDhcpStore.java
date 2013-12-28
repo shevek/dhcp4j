@@ -45,6 +45,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
      *      java.net.InetAddress, java.net.InetAddress, long,
      *      org.apache.directory.server.dhcp.options.OptionsField)
      */
+    @Override
     public Lease getLeaseOffer(HardwareAddress hardwareAddress, InetAddress requestedAddress,
             InetAddress selectionBase, long requestedLeaseTime, OptionsField options) throws DhcpException {
         Subnet subnet = findSubnet(selectionBase);
@@ -123,6 +124,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
      *      java.net.InetAddress, java.net.InetAddress, long,
      *      org.apache.directory.server.dhcp.options.OptionsField)
      */
+    @Override
     public Lease getExistingLease(HardwareAddress hardwareAddress, InetAddress requestedAddress,
             InetAddress selectionBase, long requestedLeaseTime, OptionsField options) throws DhcpException {
         // try to find existing lease. if we don't find a lease based on the
@@ -236,6 +238,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
     /*
      * @see org.apache.directory.server.dhcp.store.DhcpStore#releaseLease(org.apache.directory.server.dhcp.service.Lease)
      */
+    @Override
     public void releaseLease(Lease lease) {
         lease.setState(Lease.STATE_RELEASED);
         updateLease(lease);

@@ -42,6 +42,7 @@ public abstract class ShortOption extends DhcpOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#setData(byte[])
      */
+    @Override
     public void setData(byte[] data) {
         shortValue = (data[0] & 0xff) << 8 | (data[1] & 0xff);
     }
@@ -50,6 +51,7 @@ public abstract class ShortOption extends DhcpOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getData()
      */
+    @Override
     public byte[] getData() {
         return new byte[]{(byte) (shortValue >> 8 & 0xff),
             (byte) (shortValue & 0xff)};

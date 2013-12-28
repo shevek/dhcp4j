@@ -74,6 +74,7 @@ public final class HardwareAddress {
      * @see java.lang.Object#hashCode()
      * @return the instance's hash code 
      */
+    @Override
     public int hashCode() {
         int hashCode = 98643532 ^ type ^ length;
 
@@ -88,6 +89,7 @@ public final class HardwareAddress {
     /*
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object obj) {
         if (null == obj || !(obj.getClass().equals(HardwareAddress.class))) {
             return false;
@@ -144,6 +146,7 @@ public final class HardwareAddress {
      * 
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append(type);

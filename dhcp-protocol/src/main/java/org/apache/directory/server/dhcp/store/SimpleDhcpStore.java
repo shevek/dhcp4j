@@ -82,6 +82,7 @@ public class SimpleDhcpStore extends AbstractDhcpStore {
      * @param existingLease
      * @return Lease
      */
+    @Override
     protected Lease findExistingLease(HardwareAddress hardwareAddress, Lease existingLease) {
         if (leases.containsKey(hardwareAddress)) {
             existingLease = (Lease) leases.get(hardwareAddress);
@@ -95,6 +96,7 @@ public class SimpleDhcpStore extends AbstractDhcpStore {
      * @return Host
      * @throws DhcpException
      */
+    @Override
     protected Host findDesignatedHost(HardwareAddress hardwareAddress) throws DhcpException {
         try {
             DirContext ctx = getContext();
@@ -137,6 +139,7 @@ public class SimpleDhcpStore extends AbstractDhcpStore {
      * @param clientAddress
      * @return Subnet
      */
+    @Override
     protected Subnet findSubnet(InetAddress clientAddress) {
         for (Iterator i = subnets.iterator(); i.hasNext();) {
             Subnet subnet = (Subnet) i.next();
@@ -153,6 +156,7 @@ public class SimpleDhcpStore extends AbstractDhcpStore {
     /*
      * @see org.apache.directory.server.dhcp.store.AbstractDhcpStore#updateLease(org.apache.directory.server.dhcp.service.Lease)
      */
+    @Override
     public void updateLease(Lease lease) {
         leases.put(lease.getHardwareAddress(), lease);
     }
@@ -161,6 +165,7 @@ public class SimpleDhcpStore extends AbstractDhcpStore {
     /*
      * @see org.apache.directory.server.dhcp.store.AbstractDhcpStore#getOptions(org.apache.directory.server.dhcp.store.DhcpConfigElement)
      */
+    @Override
     protected OptionsField getOptions(DhcpConfigElement element) {
         // we don't have groups, classes, etc. yet.
         return element.getOptions();
@@ -170,6 +175,7 @@ public class SimpleDhcpStore extends AbstractDhcpStore {
     /*
      * @see org.apache.directory.server.dhcp.store.AbstractDhcpStore#getProperties(org.apache.directory.server.dhcp.store.DhcpConfigElement)
      */
+    @Override
     protected Map getProperties(DhcpConfigElement element) {
         // we don't have groups, classes, etc. yet.
         return element.getProperties();

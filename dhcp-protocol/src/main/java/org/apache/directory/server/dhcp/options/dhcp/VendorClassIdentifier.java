@@ -43,6 +43,7 @@ public class VendorClassIdentifier extends StringOption {
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
 
+    @Override
     public byte getTag() {
         return 60;
     }

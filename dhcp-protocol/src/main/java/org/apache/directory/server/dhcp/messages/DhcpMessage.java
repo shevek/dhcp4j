@@ -283,6 +283,7 @@ public class DhcpMessage {
         this.hardwareAddress = hardwareAddress;
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(messageType).append(": hwAddress=").append(hardwareAddress)

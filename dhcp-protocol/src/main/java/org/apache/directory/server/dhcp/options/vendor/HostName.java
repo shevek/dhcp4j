@@ -47,6 +47,7 @@ public class HostName extends StringOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
+    @Override
     public byte getTag() {
         return 12;
     }

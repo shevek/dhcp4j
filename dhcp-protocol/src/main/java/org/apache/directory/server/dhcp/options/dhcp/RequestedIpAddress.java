@@ -34,6 +34,7 @@ public class RequestedIpAddress extends AddressOption {
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
 
+    @Override
     public byte getTag() {
         return 50;
     }

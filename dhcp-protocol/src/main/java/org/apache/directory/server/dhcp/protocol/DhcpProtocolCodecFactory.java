@@ -40,11 +40,13 @@ public class DhcpProtocolCodecFactory implements ProtocolCodecFactory {
         return INSTANCE;
     }
 
+    @Override
     public ProtocolEncoder getEncoder(IoSession session) {
         // Create a new encoder.
         return new DhcpEncoder();
     }
 
+    @Override
     public ProtocolDecoder getDecoder(IoSession session) {
         // Create a new decoder.
         return new DhcpDecoder();

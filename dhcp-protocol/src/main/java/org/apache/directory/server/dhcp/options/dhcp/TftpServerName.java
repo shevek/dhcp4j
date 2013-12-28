@@ -34,6 +34,7 @@ public class TftpServerName extends StringOption {
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
 
+    @Override
     public byte getTag() {
         return 66;
     }

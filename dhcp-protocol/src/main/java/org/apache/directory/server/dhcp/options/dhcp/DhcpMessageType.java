@@ -55,14 +55,17 @@ public class DhcpMessageType extends DhcpOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
+    @Override
     public byte getTag() {
         return 53;
     }
 
+    @Override
     public void setData(byte[] messageType) {
         type = MessageType.getTypeByCode(messageType[0]);
     }
 
+    @Override
     public byte[] getData() {
         return new byte[]{type.getCode()};
     }

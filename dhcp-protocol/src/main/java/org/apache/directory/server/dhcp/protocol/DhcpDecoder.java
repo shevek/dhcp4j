@@ -32,11 +32,13 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
  */
 public class DhcpDecoder implements ProtocolDecoder {
 
+    @Override
     public void decode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws DhcpException, IOException {
         DhcpMessageDecoder decoder = new DhcpMessageDecoder();
         out.write(decoder.decode(in.buf()));
     }
 
+    @Override
     public void dispose(IoSession arg0) throws Exception {
     }
 
@@ -44,6 +46,7 @@ public class DhcpDecoder implements ProtocolDecoder {
     /* 
      * @see org.apache.mina.filter.codec.ProtocolDecoder#finishDecode(org.apache.mina.common.IoSession, org.apache.mina.filter.codec.ProtocolDecoderOutput)
      */
+    @Override
     public void finishDecode(IoSession session, ProtocolDecoderOutput out) throws Exception {
         // TODO Auto-generated method stub
     }

@@ -66,26 +66,31 @@ public class DhcpProtocolHandler implements IoHandler {
         this.dhcpService = service;
     }
 
+    @Override
     public void sessionCreated(IoSession session) throws Exception {
         logger.debug("{} CREATED", session.getLocalAddress());
         session.getFilterChain().addFirst("codec",
                 new ProtocolCodecFilter(new DhcpProtocolCodecFactory()));
     }
 
+    @Override
     public void sessionOpened(IoSession session) {
         logger.debug("{} -> {} OPENED", session.getRemoteAddress(), session
                 .getLocalAddress());
     }
 
+    @Override
     public void sessionClosed(IoSession session) {
         logger.debug("{} -> {} CLOSED", session.getRemoteAddress(), session
                 .getLocalAddress());
     }
 
+    @Override
     public void sessionIdle(IoSession session, IdleStatus status) {
         // ignore
     }
 
+    @Override
     public void exceptionCaught(IoSession session, Throwable cause) {
         logger.error("EXCEPTION CAUGHT ", cause);
         cause.printStackTrace(System.out);
@@ -93,6 +98,7 @@ public class DhcpProtocolHandler implements IoHandler {
         session.close(true);
     }
 
+    @Override
     public void messageReceived(IoSession session, Object message)
             throws Exception {
         if (logger.isDebugEnabled()) {
@@ -174,6 +180,7 @@ public class DhcpProtocolHandler implements IoHandler {
         return true;
     }
 
+    @Override
     public void messageSent(IoSession session, Object message) {
         if (logger.isDebugEnabled()) {
             logger.debug("{} -> {} SENT: " + message, session.getRemoteAddress(),

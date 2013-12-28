@@ -48,6 +48,7 @@ public abstract class AbstractDhcpService implements DhcpService {
     /*
      * @see org.apache.directory.server.dhcp.DhcpService#getReplyFor(org.apache.directory.server.dhcp.messages.DhcpMessage)
      */
+    @Override
     public final DhcpMessage getReplyFor(InetSocketAddress localAddress,
             InetSocketAddress clientAddress, DhcpMessage request)
             throws DhcpException {

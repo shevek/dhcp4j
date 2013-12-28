@@ -35,6 +35,7 @@ public class NisDomain extends StringOption {
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
 
+    @Override
     public byte getTag() {
         return 40;
     }

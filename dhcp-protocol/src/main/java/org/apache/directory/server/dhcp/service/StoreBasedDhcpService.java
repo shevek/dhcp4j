@@ -145,6 +145,7 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
      *      java.net.InetSocketAddress,
      *      org.apache.directory.server.dhcp.messages.DhcpMessage)
      */
+    @Override
     protected DhcpMessage handleRELEASE(InetSocketAddress localAddress, InetSocketAddress clientAddress,
             DhcpMessage request) throws DhcpException {
         // check server ident
@@ -199,6 +200,7 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
      * @see org.apache.directory.server.dhcp.service.AbstractDhcpService#handleDISCOVER(java.net.InetSocketAddress,
      *      org.apache.directory.server.dhcp.messages.DhcpMessage)
      */
+    @Override
     protected DhcpMessage handleDISCOVER(InetSocketAddress localAddress, InetSocketAddress clientAddress,
             DhcpMessage request) throws DhcpException {
         Lease lease = getLeaseOffer(clientAddress, request);
@@ -239,6 +241,7 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
      * @see org.apache.directory.server.dhcp.service.AbstractDhcpService#handleREQUEST(java.net.InetSocketAddress,
      *      org.apache.directory.server.dhcp.messages.DhcpMessage)
      */
+    @Override
     protected DhcpMessage handleREQUEST(InetSocketAddress localAddress, InetSocketAddress clientAddress,
             DhcpMessage request) throws DhcpException {
         // check server ident
