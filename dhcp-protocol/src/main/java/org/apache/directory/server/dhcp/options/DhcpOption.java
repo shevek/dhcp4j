@@ -88,8 +88,19 @@ public abstract class DhcpOption {
         }
     }
 
+    @Nonnull
+    protected String toStringData() throws DhcpException {
+        return Arrays.toString(getData());
+    }
+
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[" + (getTag() & 0xFF) + "]: " + Arrays.toString(getData());
+        String text;
+        try {
+            text = toStringData();
+        } catch (Exception e) {
+            text = Arrays.toString(getData());
+        }
+        return getClass().getSimpleName() + "[" + (getTag() & 0xFF) + "]: " + text;
     }
 }

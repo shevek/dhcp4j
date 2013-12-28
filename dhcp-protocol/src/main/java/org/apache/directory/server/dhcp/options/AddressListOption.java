@@ -19,6 +19,7 @@
  */
 package org.apache.directory.server.dhcp.options;
 
+import com.google.common.net.InetAddresses;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -67,6 +68,15 @@ public abstract class AddressListOption extends DhcpOption {
         if ((getData().length % 4) != 0)
             throw new DhcpException("Expected multiple of 4 data bytes in " + this);
         getAddresses();
+    }
+
+    @Override
+    protected String toStringData() throws DhcpException {
+        StringBuilder buf = new StringBuilder("[");
+        for (InetAddress address : getAddresses())
+            buf.append(" ").append(InetAddresses.toAddrString(address));
+        buf.append(" ]");
+        return buf.toString();
     }
 
 }

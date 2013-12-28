@@ -21,6 +21,7 @@ package org.apache.directory.server.dhcp.store;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.options.OptionsField;
 
 /**
@@ -32,15 +33,17 @@ public abstract class DhcpConfigElement {
     public static final String PROPERTY_MAX_LEASE_TIME = "max-lease-time";
 
     /** List of DhcpOptions for ths subnet */
-    private OptionsField options = new OptionsField();
+    private final OptionsField options = new OptionsField();
 
     /** Map of properties for this element */
-    private Map properties = new HashMap();
+    private final Map properties = new HashMap();
 
+    @Nonnull
     public OptionsField getOptions() {
         return options;
     }
 
+    @Nonnull
     public Map getProperties() {
         return properties;
     }

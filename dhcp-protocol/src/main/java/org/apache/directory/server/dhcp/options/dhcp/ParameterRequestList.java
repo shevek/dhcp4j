@@ -19,7 +19,9 @@
  */
 package org.apache.directory.server.dhcp.options.dhcp;
 
+import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.options.DhcpOption;
+import org.apache.directory.server.dhcp.options.DhcpOptionsRegistry;
 
 /**
  * This option is used by a DHCP client to request values for specified
@@ -45,4 +47,20 @@ public class ParameterRequestList extends DhcpOption {
     public byte getTag() {
         return 55;
     }
+
+    @Override
+    protected String toStringData() throws DhcpException {
+        DhcpOptionsRegistry registry = DhcpOptionsRegistry.getInstance();
+        StringBuilder buf = new StringBuilder("[ ");
+        for (byte tag : getData()) {
+            Class<? extends DhcpOption> type = registry.getOptionType(tag);
+            if (type == null)
+                type = UnrecognizedOption.class;
+            buf.append(type.getSimpleName());
+            buf.append("(").append(tag & 0xFF).append(") ");
+        }
+        buf.append("]");
+        return buf.toString();
+    }
+
 }

@@ -21,6 +21,7 @@ package org.apache.directory.server.dhcp.options;
 
 import com.google.common.base.Charsets;
 import javax.annotation.Nonnull;
+import org.apache.directory.server.dhcp.DhcpException;
 
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework for
@@ -53,4 +54,10 @@ public abstract class StringOption extends DhcpOption {
     public void setString(@Nonnull String string) {
         setStringData(string.getBytes(Charsets.ISO_8859_1));
     }
+
+    @Override
+    protected String toStringData() throws DhcpException {
+        return getString();
+    }
+
 }

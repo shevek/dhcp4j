@@ -53,4 +53,10 @@ public abstract class ByteOption extends DhcpOption {
         if (getData().length != 1)
             throw new DhcpException("Expected exactly 1 data byte in " + this);
     }
+
+    @Override
+    protected String toStringData() {
+        return String.valueOf(getByteValue());
+    }
+
 }

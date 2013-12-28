@@ -54,4 +54,10 @@ public abstract class ShortOption extends DhcpOption {
         if (getData().length != 2)
             throw new DhcpException("Expected exactly 2 data bytes in " + this);
     }
+
+    @Override
+    protected String toStringData() {
+        return String.valueOf(getShortValue());
+    }
+
 }

@@ -19,6 +19,7 @@ package org.apache.directory.server.dhcp.service;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,12 +67,17 @@ public abstract class AbstractDhcpService implements DhcpService {
 
         // dispatch based on the message type
         switch (request.getMessageType()) {
-            // client-to-server messages
             case DHCPDISCOVER:
                 return handleDISCOVER(localAddress, clientAddress, request);
 
+            case DHCPOFFER:
+                return handleOFFER(localAddress, clientAddress, request);
+
             case DHCPREQUEST:
                 return handleREQUEST(localAddress, clientAddress, request);
+
+            case DHCPDECLINE:
+                return handleDECLINE(localAddress, clientAddress, request);
 
             case DHCPRELEASE:
                 return handleRELEASE(localAddress, clientAddress, request);
@@ -79,11 +85,6 @@ public abstract class AbstractDhcpService implements DhcpService {
             case DHCPINFORM:
                 return handleINFORM(localAddress, clientAddress, request);
 
-            case DHCPOFFER:
-                return handleOFFER(localAddress, clientAddress, request);
-
-            // server-to-client messages
-            case DHCPDECLINE:
             case DHCPACK:
             case DHCPNAK:
                 return null; // just ignore them
@@ -94,25 +95,43 @@ public abstract class AbstractDhcpService implements DhcpService {
     }
 
     /**
-     * Handle unknown DHCP message. The default implementation just logs and
-     * ignores it.
+     * Handle DHCPDISCOVER message. The default implementation just ignores it.
      * 
+     * @param localAddress
      * @param clientAddress
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      *         it.
+     * @throws DhcpException
      */
-    protected DhcpMessage handleUnknownMessage(InetSocketAddress clientAddress,
-            DhcpMessage request) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Got unknkown DHCP message: " + request + " from " + clientAddress);
-        }
-
+    protected DhcpMessage handleDISCOVER(InetSocketAddress localAddress,
+            InetSocketAddress clientAddress, DhcpMessage request)
+            throws DhcpException {
+        if (LOG.isDebugEnabled())
+            LOG.debug("Got DISCOVER message: " + request + " from " + clientAddress);
         return null;
     }
 
     /**
-     * Handle DHCPINFORM message. The default implementation just ignores it.
+     * Handle DHCPOFFER message. The default implementation just ignores it.
+     * 
+     * @param localAddress
+     * @param clientAddress
+     * @param request the request message
+     * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
+     *         it.
+     * @throws DhcpException
+     */
+    protected DhcpMessage handleOFFER(InetSocketAddress localAddress,
+            InetSocketAddress clientAddress, DhcpMessage request)
+            throws DhcpException {
+        if (LOG.isDebugEnabled())
+            LOG.debug("Got OFFER message: " + request + " from " + clientAddress);
+        return null;
+    }
+
+    /**
+     * Handle DHCPREQUEST message. The default implementation just ignores it.
      * 
      * @param localAddress
      * @param clientAddress
@@ -120,13 +139,28 @@ public abstract class AbstractDhcpService implements DhcpService {
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      *         it.
      */
-    protected DhcpMessage handleINFORM(InetSocketAddress localAddress,
+    protected DhcpMessage handleREQUEST(InetSocketAddress localAddress,
             InetSocketAddress clientAddress, DhcpMessage request)
             throws DhcpException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Got INFORM message: " + request + " from " + clientAddress);
-        }
+        if (LOG.isDebugEnabled())
+            LOG.debug("Got REQUEST message: " + request + " from " + clientAddress);
+        return null;
+    }
 
+    /**
+     * Handle DHCPDECLINE message. The default implementation just ignores it.
+     * 
+     * @param localAddress
+     * @param clientAddress
+     * @param request the request message
+     * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
+     *         it.
+     */
+    protected DhcpMessage handleDECLINE(InetSocketAddress localAddress,
+            InetSocketAddress clientAddress, DhcpMessage request)
+            throws DhcpException {
+        if (LOG.isDebugEnabled())
+            LOG.debug("Got DECLINE message: " + request + " from " + clientAddress);
         return null;
     }
 
@@ -148,7 +182,7 @@ public abstract class AbstractDhcpService implements DhcpService {
     }
 
     /**
-     * Handle DHCPREQUEST message. The default implementation just ignores it.
+     * Handle DHCPINFORM message. The default implementation just ignores it.
      * 
      * @param localAddress
      * @param clientAddress
@@ -156,53 +190,27 @@ public abstract class AbstractDhcpService implements DhcpService {
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      *         it.
      */
-    protected DhcpMessage handleREQUEST(InetSocketAddress localAddress,
+    protected DhcpMessage handleINFORM(InetSocketAddress localAddress,
             InetSocketAddress clientAddress, DhcpMessage request)
             throws DhcpException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Got REQUEST message: " + request + " from " + clientAddress);
-        }
-
+        if (LOG.isDebugEnabled())
+            LOG.debug("Got INFORM message: " + request + " from " + clientAddress);
         return null;
     }
 
     /**
-     * Handle DHCPDISCOVER message. The default implementation just ignores it.
+     * Handle unknown DHCP message. The default implementation just logs and
+     * ignores it.
      * 
-     * @param localAddress
      * @param clientAddress
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      *         it.
-     * @throws DhcpException
      */
-    protected DhcpMessage handleDISCOVER(InetSocketAddress localAddress,
-            InetSocketAddress clientAddress, DhcpMessage request)
-            throws DhcpException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Got DISCOVER message: " + request + " from " + clientAddress);
-        }
-
-        return null;
-    }
-
-    /**
-     * Handle DHCPOFFER message. The default implementation just ignores it.
-     * 
-     * @param localAddress
-     * @param clientAddress
-     * @param request the request message
-     * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
-     *         it.
-     * @throws DhcpException
-     */
-    protected DhcpMessage handleOFFER(InetSocketAddress localAddress,
-            InetSocketAddress clientAddress, DhcpMessage request)
-            throws DhcpException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Got OFFER message: " + request + " from " + clientAddress);
-        }
-
+    protected DhcpMessage handleUnknownMessage(InetSocketAddress clientAddress,
+            DhcpMessage request) {
+        if (LOG.isWarnEnabled())
+            LOG.warn("Got unknkown DHCP message: " + request + " from " + clientAddress);
         return null;
     }
 
@@ -291,28 +299,18 @@ public abstract class AbstractDhcpService implements DhcpService {
      */
     protected final void stripUnwantedOptions(DhcpMessage request,
             OptionsField options) {
-        ParameterRequestList prl = (ParameterRequestList) request
-                .getOptions().get(ParameterRequestList.class);
+        ParameterRequestList prl = request.getOptions().get(ParameterRequestList.class);
+        if (prl == null)
+            return;
 
-        if (null != prl) {
-            byte[] list = prl.getData();
+        byte[] tags = prl.getData();
+        Arrays.sort(tags);
 
-            for (Iterator i = options.iterator(); i.hasNext();) {
-                DhcpOption o = (DhcpOption) i.next();
-
-                boolean found = false;
-
-                for (int j = 0; j < list.length; j++) {
-                    if (list[j] == o.getTag()) {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    i.remove();
-                }
-            }
+        for (Iterator<DhcpOption> i = options.iterator(); i.hasNext();) {
+            DhcpOption o = i.next();
+            if (Arrays.binarySearch(tags, o.getTag()) >= 0)
+                continue;
+            i.remove();
         }
     }
 }

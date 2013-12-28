@@ -52,4 +52,10 @@ public abstract class IntOption extends DhcpOption {
         if (getData().length != 4)
             throw new DhcpException("Expected exactly 4 data bytes in " + this);
     }
+
+    @Override
+    protected String toStringData() {
+        return String.valueOf(getIntValue());
+    }
+
 }

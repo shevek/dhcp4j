@@ -123,4 +123,9 @@ public class OptionsField implements Iterable<DhcpOption> {
     public void clear() {
         options.clear();
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" + options.values() + ")";
+    }
 }

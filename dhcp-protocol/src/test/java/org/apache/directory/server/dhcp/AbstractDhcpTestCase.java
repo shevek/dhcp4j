@@ -47,6 +47,7 @@ public abstract class AbstractDhcpTestCase {
         LOG.debug(String.valueOf(message.getRelayAgentAddress()));
         LOG.debug(String.valueOf(message.getServerHostname()));
         LOG.debug(String.valueOf(message.getBootFileName()));
+        LOG.debug(String.valueOf(message.getOptions()));
     }
 
     protected ByteBuffer getByteBufferFromFile(String file) throws IOException {
