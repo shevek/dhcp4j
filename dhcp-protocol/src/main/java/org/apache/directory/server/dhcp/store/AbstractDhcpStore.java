@@ -97,11 +97,11 @@ public abstract class AbstractDhcpStore implements DhcpStore {
 
                 // add subnet settings
                 o.add(new SubnetMask(subnet.getNetmask()));
-                o.merge(subnet.getOptions());
+                o.addAll(subnet.getOptions());
 
                 // add the host's options. they override existing
                 // subnet options as they take the precedence.
-                o.merge(host.getOptions());
+                o.addAll(host.getOptions());
             }
         }
 
@@ -171,7 +171,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
 
         // add subnet settings
         o.add(new SubnetMask(subnet.getNetmask()));
-        o.merge(subnet.getOptions());
+        o.addAll(subnet.getOptions());
 
         // check whether there is a designated host.
         Host host = findDesignatedHost(hardwareAddress);
@@ -190,7 +190,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
             o.add(new HostName(host.getName()));
 
             // add the host's options
-            o.merge(host.getOptions());
+            o.addAll(host.getOptions());
         }
 
         // update other lease fields

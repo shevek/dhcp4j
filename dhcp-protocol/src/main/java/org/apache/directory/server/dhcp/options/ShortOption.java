@@ -19,6 +19,11 @@
  */
 package org.apache.directory.server.dhcp.options;
 
+import com.google.common.base.Preconditions;
+import com.google.common.primitives.Shorts;
+import javax.annotation.Nonnegative;
+import org.apache.directory.server.dhcp.DhcpException;
+
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework for
  * passing configuration information to hosts on a TCP/IP network. Configuration
@@ -33,35 +38,20 @@ package org.apache.directory.server.dhcp.options;
  */
 public abstract class ShortOption extends DhcpOption {
 
-    /**
-     * The short value (represented as an int because of the unsignedness).
-     */
-    private int shortValue;
-
-
-    /*
-     * @see org.apache.directory.server.dhcp.options.DhcpOption#setData(byte[])
-     */
-    @Override
-    public void setData(byte[] data) {
-        shortValue = (data[0] & 0xff) << 8 | (data[1] & 0xff);
-    }
-
-
-    /*
-     * @see org.apache.directory.server.dhcp.options.DhcpOption#getData()
-     */
-    @Override
-    public byte[] getData() {
-        return new byte[]{(byte) (shortValue >> 8 & 0xff),
-            (byte) (shortValue & 0xff)};
-    }
-
+    @Nonnegative
     public int getShortValue() {
-        return shortValue;
+        return Shorts.fromByteArray(getData()) & 0xFFFF;
     }
 
-    public void setShortValue(int shortValue) {
-        this.shortValue = shortValue;
+    public void setShortValue(@Nonnegative int value) {
+        Preconditions.checkArgument(value >> Short.SIZE == 0, "out of range: %s", value);
+        setData(Shorts.toByteArray((short) value));
+    }
+
+    @Override
+    public void validate() throws DhcpException {
+        super.validate();
+        if (getData().length != 2)
+            throw new DhcpException("Expected exactly 2 data bytes in " + this);
     }
 }

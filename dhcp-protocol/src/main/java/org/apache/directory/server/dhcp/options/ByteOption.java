@@ -19,6 +19,10 @@
  */
 package org.apache.directory.server.dhcp.options;
 
+import com.google.common.primitives.UnsignedBytes;
+import javax.annotation.Nonnegative;
+import org.apache.directory.server.dhcp.DhcpException;
+
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework for
  * passing configuration information to hosts on a TCP/IP network. Configuration
@@ -26,42 +30,27 @@ package org.apache.directory.server.dhcp.options;
  * that are stored in the 'options' field of the DHCP message. The data items
  * themselves are also called "options."
  * 
- * This abstract base class is for options that carry an unsigned short value
- * (16 bit).
+ * This abstract base class is for options that carry an unsigned byte value
+ * (8 bit).
  *  
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  * 
  */
 public abstract class ByteOption extends DhcpOption {
 
-    /**
-     * The byte value (represented as a short because of the unsignedness).
-     */
-    private short byteValue;
+    @Nonnegative
+    public int getByteValue() {
+        return getData()[0] & 0xFF;
+    }
 
+    public void setByteValue(@Nonnegative int value) {
+        setData(new byte[]{UnsignedBytes.checkedCast(value)});
+    }
 
-    /*
-     * @see org.apache.directory.server.dhcp.options.DhcpOption#setData(byte[])
-     */
     @Override
-    public void setData(byte[] data) {
-        byteValue = (short) (data[0] & 0xff);
-    }
-
-
-    /*
-     * @see org.apache.directory.server.dhcp.options.DhcpOption#getData()
-     */
-    @Override
-    public byte[] getData() {
-        return new byte[]{(byte) (byteValue & 0xff)};
-    }
-
-    public short getByteValue() {
-        return byteValue;
-    }
-
-    public void setShortValue(short shortValue) {
-        this.byteValue = shortValue;
+    public void validate() throws DhcpException {
+        super.validate();
+        if (getData().length != 1)
+            throw new DhcpException("Expected exactly 1 data byte in " + this);
     }
 }

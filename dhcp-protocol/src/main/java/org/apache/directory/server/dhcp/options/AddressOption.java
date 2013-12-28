@@ -19,9 +19,12 @@
  */
 package org.apache.directory.server.dhcp.options;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import javax.annotation.Nonnull;
+import org.apache.directory.server.dhcp.DhcpException;
 
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework
@@ -36,35 +39,34 @@ import java.util.Arrays;
  */
 public abstract class AddressOption extends DhcpOption {
 
-    private InetAddress address;
-
-
-    /*
-     * @see org.apache.directory.server.dhcp.options.DhcpOption#getData()
-     */
-    @Override
-    public byte[] getData() {
-        return address.getAddress();
-    }
-
-
-    /*
-     * @see org.apache.directory.server.dhcp.options.DhcpOption#setData(byte[])
-     */
-    @Override
-    public void setData(byte[] data) {
+    @Nonnull
+    public Inet4Address getAddress() throws DhcpException {
         try {
-            address = InetAddress.getByAddress(data);
+            return (Inet4Address) Inet4Address.getByAddress(getData());
+        } catch (ClassCastException e) {
+            throw new DhcpException("Illegal InetAddress data: " + Arrays.toString(getData()) + " for " + this, e);
         } catch (UnknownHostException e) {
-            throw new IllegalArgumentException("Illegal address data " + Arrays.toString(data), e);
+            throw new DhcpException("Illegal InetAddress data: " + Arrays.toString(getData()) + " for " + this, e);
         }
     }
 
-    public InetAddress getAddress() {
-        return address;
+    public void setAddress(@Nonnull Inet4Address address) {
+        setData(address.getAddress());
     }
 
-    public void setAddress(InetAddress address) {
-        this.address = address;
+    /**
+     * @throws ClassCastException if the argument is not an Inet4Address.
+     */
+    public void setAddress(@Nonnull InetAddress address) {
+        setAddress((Inet4Address) address);
     }
+
+    @Override
+    public void validate() throws DhcpException {
+        super.validate();
+        if (getData().length != 4)
+            throw new DhcpException("Expected exactly 4 data bytes in " + this);
+        getAddress();
+    }
+
 }

@@ -20,6 +20,7 @@
 package org.apache.directory.server.dhcp.options.dhcp;
 
 import java.net.InetAddress;
+import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.options.AddressOption;
 
 /**
@@ -43,10 +44,9 @@ public class ServerIdentifier extends AddressOption {
     public ServerIdentifier() {
     }
 
-    public ServerIdentifier(InetAddress localHost) {
-        setAddress(localHost);
+    public ServerIdentifier(@Nonnull InetAddress address) {
+        setAddress(address);
     }
-
 
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()

@@ -37,6 +37,6 @@ public class BootFileSize extends ShortOption {
 
     @Override
     public byte getTag() {
-        return 21;
+        return 13;
     }
 }

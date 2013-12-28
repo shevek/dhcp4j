@@ -20,6 +20,7 @@
 package org.apache.directory.server.dhcp.options;
 
 import com.google.common.base.Charsets;
+import javax.annotation.Nonnull;
 
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework for
@@ -35,35 +36,21 @@ import com.google.common.base.Charsets;
  */
 public abstract class StringOption extends DhcpOption {
 
-    private String string;
-
-
-    /*
-     * @see org.apache.directory.server.dhcp.options.DhcpOption#setData(byte[])
-     */
-    @Override
-    public void setData(byte[] data) {
-        string = new String(data, Charsets.ISO_8859_1);
+    @Nonnull
+    protected byte[] getStringData() {
+        return getData();
     }
 
-
-    /*
-     * @see org.apache.directory.server.dhcp.options.DhcpOption#getData()
-     */
-    @Override
-    public byte[] getData() {
-        if (null == string) {
-            return new byte[]{};
-        }
-
-        return string.getBytes(Charsets.ISO_8859_1);
+    protected void setStringData(@Nonnull byte[] data) {
+        setData(data);
     }
 
+    @Nonnull
     public String getString() {
-        return string;
+        return new String(getStringData(), Charsets.ISO_8859_1);
     }
 
-    public void setString(String string) {
-        this.string = string;
+    public void setString(@Nonnull String string) {
+        setStringData(string.getBytes(Charsets.ISO_8859_1));
     }
 }

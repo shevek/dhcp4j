@@ -17,6 +17,12 @@
  */
 package org.apache.directory.server.dhcp.options;
 
+import com.google.common.base.Preconditions;
+import com.google.common.primitives.Ints;
+import com.google.common.primitives.UnsignedInts;
+import javax.annotation.Nonnegative;
+import org.apache.directory.server.dhcp.DhcpException;
+
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework for
  * passing configuration information to hosts on a TCP/IP network. Configuration
@@ -24,43 +30,26 @@ package org.apache.directory.server.dhcp.options;
  * that are stored in the 'options' field of the DHCP message. The data items
  * themselves are also called "options."
  * 
- * This abstract base class is for options that carry a short value (16 bit).
+ * This abstract base class is for options that carry an int value (32 bit).
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
 public abstract class IntOption extends DhcpOption {
 
-    /**
-     * The int value (represented as a long because of the unsignedness).
-     */
-    private long intValue;
-
-
-    /*
-     * @see org.apache.directory.server.dhcp.options.DhcpOption#setData(byte[])
-     */
-    @Override
-    public void setData(byte[] data) {
-        intValue = (data[0] & 0xff) << 24 | (data[1] & 0xff) << 16
-                | (data[2] & 0xff) << 8 | (data[3] & 0xff);
-    }
-
-
-    /*
-     * @see org.apache.directory.server.dhcp.options.DhcpOption#getData()
-     */
-    @Override
-    public byte[] getData() {
-        return new byte[]{(byte) (intValue >> 24 & 0xff),
-            (byte) (intValue >> 16 & 0xff), (byte) (intValue >> 8 & 0xff),
-            (byte) (intValue & 0xff)};
-    }
-
+    @Nonnegative
     public long getIntValue() {
-        return intValue;
+        return UnsignedInts.toLong(Ints.fromByteArray(getData()));
     }
 
-    public void setIntValue(long intValue) {
-        this.intValue = intValue;
+    public void setIntValue(@Nonnegative long value) {
+        Preconditions.checkArgument(value >> Integer.SIZE == 0, "out of range: %s", value);
+        setData(Ints.toByteArray((int) value));
+    }
+
+    @Override
+    public void validate() throws DhcpException {
+        super.validate();
+        if (getData().length != 4)
+            throw new DhcpException("Expected exactly 4 data bytes in " + this);
     }
 }

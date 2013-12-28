@@ -19,15 +19,21 @@
  */
 package org.apache.directory.server.dhcp.io;
 
+import com.google.common.base.Charsets;
+import com.google.common.primitives.Bytes;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.options.DhcpOption;
+import org.apache.directory.server.dhcp.options.DhcpOptionsRegistry;
 import org.apache.directory.server.dhcp.options.OptionsField;
 import org.apache.directory.server.dhcp.options.dhcp.DhcpMessageType;
 import org.apache.directory.server.dhcp.options.dhcp.UnrecognizedOption;
@@ -37,6 +43,8 @@ import org.apache.directory.server.dhcp.options.dhcp.UnrecognizedOption;
  */
 public class DhcpMessageDecoder {
 
+    private final DhcpOptionsRegistry registry = DhcpOptionsRegistry.getInstance();
+
     /**
      * Convert a byte buffer into a DhcpMessage.
      * 
@@ -44,7 +52,8 @@ public class DhcpMessageDecoder {
      * @param buffer ByteBuffer to convert to a DhcpMessage object
      * @throws DhcpException 
      */
-    public DhcpMessage decode(ByteBuffer buffer) throws DhcpException, IOException {
+    @Nonnull
+    public DhcpMessage decode(@Nonnull ByteBuffer buffer) throws DhcpException, IOException {
         byte op = buffer.get();
 
         short htype = (short) (buffer.get() & 0xff);
@@ -67,9 +76,9 @@ public class DhcpMessageDecoder {
         OptionsField options = decodeOptions(buffer);
 
         // message type option: may be null if option isn't set (BOOTP)
-        DhcpMessageType mto = (DhcpMessageType) options.get(DhcpMessageType.class);
+        DhcpMessageType mto = options.get(DhcpMessageType.class);
 
-        return new DhcpMessage(null != mto ? mto.getType() : null, op, new HardwareAddress(htype, hlen, chaddr),
+        return new DhcpMessage(null != mto ? mto.getMessageType(): null, op, new HardwareAddress(htype, hlen, chaddr),
                 hops, xid, secs, flags, ciaddr, yiaddr, siaddr, giaddr, sname, file, options);
     }
 
@@ -78,7 +87,8 @@ public class DhcpMessageDecoder {
      * @param len
      * @return
      */
-    private static byte[] decodeBytes(ByteBuffer buffer, int len) {
+    @Nonnull
+    private static byte[] decodeBytes(@Nonnull ByteBuffer buffer, @Nonnegative int len) {
         byte[] bytes = new byte[len];
         buffer.get(bytes);
         return bytes;
@@ -88,19 +98,15 @@ public class DhcpMessageDecoder {
      * @param buffer
      * @return
      */
-    private static String decodeString(ByteBuffer buffer, int len)
+    @Nonnull
+    private static String decodeString(@Nonnull ByteBuffer buffer, @Nonnegative int len)
             throws IOException {
-        byte[] bytes = new byte[len];
-        buffer.get(bytes);
-
+        byte[] bytes = decodeBytes(buffer, len);
         // find zero-terminator
-        int slen = 0;
-
-        while (bytes[slen] != 0) {
-            slen++;
-        }
-
-        return new String(bytes, 0, slen, "ASCII");
+        int slen = Bytes.indexOf(bytes, (byte) 0);
+        if (slen < 0)
+            slen = bytes.length;
+        return new String(bytes, 0, slen, Charsets.ISO_8859_1);
     }
 
     /**
@@ -110,12 +116,11 @@ public class DhcpMessageDecoder {
      * @return
      * @throws UnknownHostException
      */
-    private static InetAddress decodeAddress(ByteBuffer buffer) {
-        byte[] addr = new byte[4];
-        buffer.get(addr);
-
+    @CheckForNull
+    private static InetAddress decodeAddress(@Nonnull ByteBuffer buffer) {
         try {
-            return InetAddress.getByAddress(addr);
+            byte[] bytes = decodeBytes(buffer, 4);
+            return InetAddress.getByAddress(bytes);
         } catch (UnknownHostException e) {
             // should not happen
             return null;
@@ -125,55 +130,37 @@ public class DhcpMessageDecoder {
     private static final byte[] VENDOR_MAGIC_COOKIE
             = {(byte) 99, (byte) 130, (byte) 83, (byte) 99};
 
-    public OptionsField decodeOptions(ByteBuffer message) throws DhcpException {
-        byte[] magicCookie = new byte[4];
+    @Nonnull
+    public OptionsField decodeOptions(@Nonnull ByteBuffer message) throws DhcpException {
+        byte[] magicCookie = new byte[VENDOR_MAGIC_COOKIE.length];
         message.get(magicCookie);
-
-        if (!Arrays.equals(VENDOR_MAGIC_COOKIE, magicCookie)) {
+        if (!Arrays.equals(VENDOR_MAGIC_COOKIE, magicCookie))
             throw new DhcpException("Parse exception.");
-        }
-
-        byte code;
-        byte length;
-        byte value[];
 
         OptionsField options = new OptionsField();
 
-        while (true) {
-            code = message.get();
+        for (;;) {
+            byte code = message.get();
 
             if (code == 0) // pad option
-            {
                 continue;
-            }
-
             if (code == -1) // end option
-            {
                 break;
-            }
 
-            length = message.get();
-            value = new byte[length];
-            message.get(value);
-
-            options.add(getOptionInstance(code, value));
+            int length = message.get() & 0xFF;
+            byte[] value = decodeBytes(message, length);
+            options.add(newOptionInstance(code, value));
         }
 
         return options;
     }
 
-    private DhcpOption getOptionInstance(int tag, byte[] value) throws DhcpException {
-        try {
-            Class c = DhcpOption.getClassByTag(tag);
-
-            DhcpOption o = null != c ? (DhcpOption) c.newInstance() : new UnrecognizedOption((byte) tag);
-            o.setData(value);
-
-            return o;
-        } catch (InstantiationException e) {
-            throw new DhcpException("Failed to set option value", e);
-        } catch (IllegalAccessException e) {
-            throw new DhcpException("Failed to set option value", e);
-        }
+    @Nonnull
+    private DhcpOption newOptionInstance(@Nonnegative byte tag, @Nonnull byte[] value) throws DhcpException {
+        Class<? extends DhcpOption> type = registry.getOptionType(tag);
+        DhcpOption option = (type != null) ? DhcpOptionsRegistry.newInstance(type) : new UnrecognizedOption(tag);
+        option.setData(value);
+        option.validate();
+        return option;
     }
 }

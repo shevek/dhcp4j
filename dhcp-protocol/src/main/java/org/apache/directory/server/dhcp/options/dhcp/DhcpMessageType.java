@@ -19,8 +19,9 @@
  */
 package org.apache.directory.server.dhcp.options.dhcp;
 
+import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.messages.MessageType;
-import org.apache.directory.server.dhcp.options.DhcpOption;
+import org.apache.directory.server.dhcp.options.ByteOption;
 
 /**
  * This option is used to convey the type of the DHCP message.  The code
@@ -40,17 +41,14 @@ import org.apache.directory.server.dhcp.options.DhcpOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DhcpMessageType extends DhcpOption {
-
-    private MessageType type;
+public class DhcpMessageType extends ByteOption {
 
     public DhcpMessageType() {
     }
 
     public DhcpMessageType(MessageType type) {
-        this.type = type;
+        setMessageType(type);
     }
-
 
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
@@ -60,17 +58,12 @@ public class DhcpMessageType extends DhcpOption {
         return 53;
     }
 
-    @Override
-    public void setData(byte[] messageType) {
-        type = MessageType.getTypeByCode(messageType[0]);
+    @Nonnull
+    public MessageType getMessageType() {
+        return MessageType.forTypeCode((byte) getByteValue());
     }
 
-    @Override
-    public byte[] getData() {
-        return new byte[]{type.getCode()};
-    }
-
-    public MessageType getType() {
-        return type;
+    public void setMessageType(MessageType type) {
+        setByteValue(type.getCode());
     }
 }

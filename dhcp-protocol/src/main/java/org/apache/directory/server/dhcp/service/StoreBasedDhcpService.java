@@ -171,7 +171,7 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
 
             // lease Ok, send ACK
             // FIXME...
-            reply.getOptions().merge(lease.getOptions());
+            reply.getOptions().addAll(lease.getOptions());
 
             reply.setAssignedClientAddress(lease.getClientAddress());
             reply.setNextServerAddress(lease.getNextServerAddress());
@@ -212,7 +212,7 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
 
         DhcpMessage reply = initGeneralReply(localAddress, request);
 
-        reply.getOptions().merge(lease.getOptions());
+        reply.getOptions().addAll(lease.getOptions());
 
         reply.setMessageType(MessageType.DHCPOFFER);
 
@@ -263,7 +263,7 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
             reply.setNextServerAddress(null);
         } else {
             // lease Ok, send ACK
-            reply.getOptions().merge(lease.getOptions());
+            reply.getOptions().addAll(lease.getOptions());
 
             reply.setAssignedClientAddress(lease.getClientAddress());
             reply.setNextServerAddress(lease.getNextServerAddress());

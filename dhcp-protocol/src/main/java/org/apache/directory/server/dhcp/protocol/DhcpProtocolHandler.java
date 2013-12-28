@@ -70,7 +70,7 @@ public class DhcpProtocolHandler implements IoHandler {
     public void sessionCreated(IoSession session) throws Exception {
         logger.debug("{} CREATED", session.getLocalAddress());
         session.getFilterChain().addFirst("codec",
-                new ProtocolCodecFilter(new DhcpProtocolCodecFactory()));
+                new ProtocolCodecFilter(DhcpProtocolCodecFactory.getInstance()));
     }
 
     @Override

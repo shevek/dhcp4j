@@ -19,6 +19,8 @@
  */
 package org.apache.directory.server.dhcp.messages;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
@@ -37,15 +39,6 @@ public enum MessageType {
     private String name;
     private byte ordinal;
 
-    public static MessageType getTypeByCode(byte type) {
-        for (MessageType mt : MessageType.values()) {
-            if (type == mt.getCode()) {
-                return mt;
-            }
-        }
-        return DHCPUNRECOGNIZED;
-    }
-
     public byte getCode() {
         return ordinal;
     }
@@ -63,4 +56,11 @@ public enum MessageType {
         return name;
     }
 
+    @Nonnull
+    public static MessageType forTypeCode(byte type) {
+        for (MessageType mt : MessageType.values())
+            if (type == mt.getCode())
+                return mt;
+        return DHCPUNRECOGNIZED;
+    }
 }

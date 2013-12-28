@@ -33,16 +33,14 @@ import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 public class DhcpEncoder implements ProtocolEncoder {
 
     // FIXME: what's the point of splitting this class from the actual encoder?
-    private DhcpMessageEncoder encoder = new DhcpMessageEncoder();
+    private final DhcpMessageEncoder encoder = new DhcpMessageEncoder();
 
     @Override
     public void encode(IoSession session, Object message, ProtocolEncoderOutput out)
             throws IOException {
         IoBuffer buf = IoBuffer.allocate(1024);
         encoder.encode(buf.buf(), (DhcpMessage) message);
-
         buf.flip();
-
         out.write(buf);
     }
 

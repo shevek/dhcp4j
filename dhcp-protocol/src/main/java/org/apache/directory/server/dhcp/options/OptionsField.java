@@ -22,6 +22,8 @@ package org.apache.directory.server.dhcp.options;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework
@@ -32,23 +34,20 @@ import java.util.Map;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class OptionsField {
+public class OptionsField implements Iterable<DhcpOption> {
 
     /**
      * A map of option code (Integer)->DhcpOption. FIXME: use IntHashtable from
      * commons collections
      */
-    private Map options = new HashMap();
-
-    public void add(DhcpOption option) {
-        options.put(Integer.valueOf(option.getTag()), option);
-    }
+    private final Map<Byte, DhcpOption> options = new HashMap<Byte, DhcpOption>();
 
     public boolean isEmpty() {
         return options.isEmpty();
     }
 
-    public Iterator iterator() {
+    @Override
+    public Iterator<DhcpOption> iterator() {
         return options.values().iterator();
     }
 
@@ -58,9 +57,17 @@ public class OptionsField {
      * 
      * @param optionClass
      */
-    public DhcpOption get(Class optionClass) {
-        Integer key = Integer.valueOf(DhcpOption.getTagByClass(optionClass));
-        return (DhcpOption) options.get(key);
+    @CheckForNull
+    public <T extends DhcpOption> T get(@Nonnull Class<T> type) {
+        DhcpOptionsRegistry registry = DhcpOptionsRegistry.getInstance();
+        DhcpOption option = get(registry.getOptionTag(type));
+        if (option == null)
+            return null;
+        if (type.isInstance(option))
+            return type.cast(option);
+        T impl = DhcpOptionsRegistry.newInstance(type);
+        impl.setData(option.getData());
+        return impl;
     }
 
     /**
@@ -69,9 +76,13 @@ public class OptionsField {
      * 
      * @param tag
      */
-    public DhcpOption get(int tag) {
-        Integer key = Integer.valueOf(tag);
-        return (DhcpOption) options.get(key);
+    @CheckForNull
+    public DhcpOption get(byte tag) {
+        return options.get(tag);
+    }
+
+    public void add(@Nonnull DhcpOption option) {
+        options.put(option.getTag(), option);
     }
 
     /**
@@ -80,15 +91,11 @@ public class OptionsField {
      * 
      * @param options
      */
-    public void merge(OptionsField options) {
-        if (null == options) {
+    public void addAll(@CheckForNull OptionsField options) {
+        if (options == null)
             return;
-        }
-
-        for (Iterator i = options.iterator(); i.hasNext();) {
-            DhcpOption option = (DhcpOption) i.next();
-            this.options.put(Integer.valueOf(option.getTag()), option);
-        }
+        for (DhcpOption option : options)
+            add(option);
     }
 
     /**
@@ -96,9 +103,9 @@ public class OptionsField {
      * 
      * @param c
      */
-    public void remove(Class c) {
-        Integer key = Integer.valueOf(DhcpOption.getTagByClass(c));
-        options.remove(key);
+    public void remove(@Nonnull Class<? extends DhcpOption> type) {
+        DhcpOptionsRegistry registry = DhcpOptionsRegistry.getInstance();
+        remove(registry.getOptionTag(type));
     }
 
     /**
@@ -106,9 +113,8 @@ public class OptionsField {
      * 
      * @param tag
      */
-    public void remove(int tag) {
-        Integer key = Integer.valueOf(tag);
-        options.remove(key);
+    public void remove(byte tag) {
+        options.remove(tag);
     }
 
     /**

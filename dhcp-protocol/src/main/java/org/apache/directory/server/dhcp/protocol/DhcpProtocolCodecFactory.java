@@ -19,6 +19,7 @@
  */
 package org.apache.directory.server.dhcp.protocol;
 
+import javax.annotation.Nonnull;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolDecoder;
@@ -29,26 +30,31 @@ import org.apache.mina.filter.codec.ProtocolEncoder;
  */
 public class DhcpProtocolCodecFactory implements ProtocolCodecFactory {
 
-    private static DhcpProtocolCodecFactory INSTANCE = new DhcpProtocolCodecFactory();
+    private static class Inner {
+
+        private static final DhcpProtocolCodecFactory INSTANCE = new DhcpProtocolCodecFactory();
+    }
 
     /**
      * Returns the singleton instance of {@link DhcpProtocolCodecFactory}.
      *
      * @return The singleton instance of {@link DhcpProtocolCodecFactory}.
      */
+    @Nonnull
     public static DhcpProtocolCodecFactory getInstance() {
-        return INSTANCE;
+        return Inner.INSTANCE;
     }
+    private final DhcpEncoder encoder = new DhcpEncoder();
 
     @Override
     public ProtocolEncoder getEncoder(IoSession session) {
-        // Create a new encoder.
-        return new DhcpEncoder();
+        return encoder;
     }
+    private final DhcpDecoder decoder = new DhcpDecoder();
 
     @Override
     public ProtocolDecoder getDecoder(IoSession session) {
         // Create a new decoder.
-        return new DhcpDecoder();
+        return decoder;
     }
 }

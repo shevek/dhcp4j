@@ -19,10 +19,13 @@
  */
 package org.apache.directory.server.dhcp.io;
 
+import com.google.common.base.Charsets;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.options.DhcpOption;
@@ -66,7 +69,7 @@ public class DhcpMessageEncoder {
         OptionsField options = message.getOptions();
 
         // update message type option (if set)
-        if (null != message.getMessageType()) {
+        if (message.getMessageType() != null) {
             options.add(new DhcpMessageType(message.getMessageType()));
         }
 
@@ -74,22 +77,17 @@ public class DhcpMessageEncoder {
     }
 
     /**
-     * Write a zero-terminated string to a field of len bytes.
+     * Write a string to a field of len bytes.
      * 
      * @param byteBuffer
      * @param serverHostname
      * @param i
      */
-    private void writeString(ByteBuffer byteBuffer, String string, int len)
+    private void writeString(@Nonnull ByteBuffer byteBuffer, @CheckForNull String string, @Nonnegative int len)
             throws IOException {
-        if (null == string) {
+        if (string == null)
             string = "";
-        }
-
-        byte sbytes[] = string.getBytes("ASCII");
-
-        // writeBytes will automatically zero-pad and thus terminate the
-        // string.
+        byte sbytes[] = string.getBytes(Charsets.ISO_8859_1);
         writeBytes(byteBuffer, sbytes, len);
     }
 
@@ -118,19 +116,15 @@ public class DhcpMessageEncoder {
      * @param byteBuffer
      * @param currentClientAddress
      */
-    private void writeBytes(ByteBuffer byteBuffer, byte bytes[], int len) {
-        if (null == bytes) {
-            bytes = new byte[]{};
+    private void writeBytes(@Nonnull ByteBuffer byteBuffer, @CheckForNull byte bytes[], int len) {
+        if (bytes != null) {
+            int blen = Math.min(len, bytes.length);
+            byteBuffer.put(bytes, 0, blen);
+            len -= blen;
         }
 
-        byteBuffer.put(bytes, 0, Math.min(len, bytes.length));
-
-        // pad as necessary
-        int remain = len - bytes.length;
-
-        while (remain-- > 0) {
+        while (len-- > 0)
             byteBuffer.put((byte) 0);
-        }
     }
 
     private static final byte[] VENDOR_MAGIC_COOKIE
@@ -139,10 +133,8 @@ public class DhcpMessageEncoder {
     public void encodeOptions(OptionsField options, ByteBuffer message) {
         message.put(VENDOR_MAGIC_COOKIE);
 
-        for (Iterator i = options.iterator(); i.hasNext();) {
-            DhcpOption option = (DhcpOption) i.next();
+        for (DhcpOption option : options)
             option.writeTo(message);
-        }
 
         // add end option
         message.put((byte) 0xff);

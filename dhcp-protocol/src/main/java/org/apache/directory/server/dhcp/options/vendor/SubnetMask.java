@@ -20,6 +20,7 @@
 package org.apache.directory.server.dhcp.options.vendor;
 
 import java.net.InetAddress;
+import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.options.AddressOption;
 
 /**
@@ -41,10 +42,9 @@ public class SubnetMask extends AddressOption {
     /**
      * @param netmask
      */
-    public SubnetMask(InetAddress netmask) {
+    public SubnetMask(@Nonnull InetAddress netmask) {
         setAddress(netmask);
     }
-
 
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()

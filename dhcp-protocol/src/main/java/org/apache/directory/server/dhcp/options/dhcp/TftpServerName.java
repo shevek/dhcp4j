@@ -19,7 +19,7 @@
  */
 package org.apache.directory.server.dhcp.options.dhcp;
 
-import org.apache.directory.server.dhcp.options.StringOption;
+import org.apache.directory.server.dhcp.options.NulTerminatedStringOption;
 
 /**
  * This option is used to identify a TFTP server when the 'sname' field
@@ -29,7 +29,7 @@ import org.apache.directory.server.dhcp.options.StringOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class TftpServerName extends StringOption {
+public class TftpServerName extends NulTerminatedStringOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */
