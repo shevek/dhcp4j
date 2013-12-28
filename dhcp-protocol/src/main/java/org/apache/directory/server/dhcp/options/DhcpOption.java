@@ -77,6 +77,7 @@ public abstract class DhcpOption {
     }
 
     public final void writeTo(@Nonnull ByteBuffer out) {
+        // Option continuation per RFC3396
         byte tag = getTag();
         byte data[] = getData();
         for (int offset = 0; offset < data.length || offset == 0; offset += UnsignedBytes.MAX_VALUE) {

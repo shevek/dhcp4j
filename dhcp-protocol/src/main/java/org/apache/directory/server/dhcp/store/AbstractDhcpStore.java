@@ -21,14 +21,14 @@ package org.apache.directory.server.dhcp.store;
 
 import java.net.InetAddress;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.options.OptionsField;
 import org.apache.directory.server.dhcp.options.vendor.HostName;
 import org.apache.directory.server.dhcp.options.vendor.SubnetMask;
 import org.apache.directory.server.dhcp.service.Lease;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base implementation of a {@link DhcpStore}.
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractDhcpStore implements DhcpStore {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractDhcpStore.class);
+    private static final Log LOG = LogFactory.getLog(AbstractDhcpStore.class);
 
 
     /*
@@ -51,7 +51,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
         Subnet subnet = findSubnet(selectionBase);
 
         if (null == subnet) {
-            logger.warn("Don't know anything about the sbnet containing " + selectionBase);
+            LOG.warn("Don't know anything about the sbnet containing " + selectionBase);
             return null;
         }
 
@@ -71,7 +71,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
             // on the way the DhcpStore configuration is implemented, it is not
             // possible to violate this condition, but we can't be sure.
             if (!subnet.contains(host.getAddress())) {
-                logger.warn("Host " + host + " is not within the subnet for which an address is requested");
+                LOG.warn("Host " + host + " is not within the subnet for which an address is requested");
             } else {
                 // build properties map
                 Map properties = getProperties(subnet);
@@ -139,7 +139,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
 
         // check whether the notions of the client address match
         if (!lease.getClientAddress().equals(requestedAddress)) {
-            logger.warn("Requested address " + requestedAddress + " for " + hardwareAddress
+            LOG.warn("Requested address " + requestedAddress + " for " + hardwareAddress
                     + " doesn't match existing lease " + lease);
             return null;
         }
@@ -148,17 +148,17 @@ public abstract class AbstractDhcpStore implements DhcpStore {
         Subnet subnet = findSubnet(selectionBase);
 
         if (null == subnet) {
-            logger.warn("No subnet found for existing lease " + lease);
+            LOG.warn("No subnet found for existing lease " + lease);
             return null;
         }
 
         if (!subnet.contains(lease.getClientAddress())) {
-            logger.warn("Client with existing lease " + lease + " is on wrong subnet " + subnet);
+            LOG.warn("Client with existing lease " + lease + " is on wrong subnet " + subnet);
             return null;
         }
 
         if (!subnet.isInRange(lease.getClientAddress())) {
-            logger.warn("Client with existing lease " + lease + " is out of valid range for subnet " + subnet);
+            LOG.warn("Client with existing lease " + lease + " is out of valid range for subnet " + subnet);
             return null;
         }
 
@@ -179,7 +179,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
             // check whether the host matches the address (using a fixed
             // host address is mandatory).
             if (host.getAddress() != null && !host.getAddress().equals(lease.getClientAddress())) {
-                logger.warn("Existing fixed address for " + hardwareAddress + " conflicts with existing lease "
+                LOG.warn("Existing fixed address for " + hardwareAddress + " conflicts with existing lease "
                         + lease);
                 return null;
             }

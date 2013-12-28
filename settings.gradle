@@ -1,2 +1,2 @@
 rootProject.name='dhcp4j'
-include 'dhcp-protocol','dhcp-server'
+include 'dhcp-protocol','dhcp-server-mina'

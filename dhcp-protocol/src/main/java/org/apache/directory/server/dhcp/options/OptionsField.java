@@ -101,7 +101,7 @@ public class OptionsField implements Iterable<DhcpOption> {
     /**
      * Remove instances of the given option class.
      * 
-     * @param c
+     * @param type
      */
     public void remove(@Nonnull Class<? extends DhcpOption> type) {
         DhcpOptionsRegistry registry = DhcpOptionsRegistry.getInstance();

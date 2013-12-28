@@ -22,9 +22,10 @@ package org.apache.directory.server.dhcp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.logging.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
@@ -32,28 +33,20 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractDhcpTestCase {
 
     protected static final int MINIMUM_DHCP_DATAGRAM_SIZE = 576;
-    protected final Logger log;
-
-    public AbstractDhcpTestCase() {
-        log = LoggerFactory.getLogger(AbstractDhcpTestCase.class);
-    }
-
-    public AbstractDhcpTestCase(Class<?> subclass) {
-        log = LoggerFactory.getLogger(subclass);
-    }
+    private static final Log LOG = LogFactory.getLog(AbstractDhcpTestCase.class);
 
     protected void print(DhcpMessage message) {
-        log.debug(String.valueOf(message.getMessageType()));
-        log.debug(String.valueOf(message.getHardwareAddress()));
-        log.debug(String.valueOf(message.getTransactionId()));
-        log.debug(String.valueOf(message.getSeconds()));
-        log.debug(String.valueOf(message.getFlags()));
-        log.debug(String.valueOf(message.getCurrentClientAddress()));
-        log.debug(String.valueOf(message.getAssignedClientAddress()));
-        log.debug(String.valueOf(message.getNextServerAddress()));
-        log.debug(String.valueOf(message.getRelayAgentAddress()));
-        log.debug(String.valueOf(message.getServerHostname()));
-        log.debug(String.valueOf(message.getBootFileName()));
+        LOG.debug(String.valueOf(message.getMessageType()));
+        LOG.debug(String.valueOf(message.getHardwareAddress()));
+        LOG.debug(String.valueOf(message.getTransactionId()));
+        LOG.debug(String.valueOf(message.getSeconds()));
+        LOG.debug(String.valueOf(message.getFlags()));
+        LOG.debug(String.valueOf(message.getCurrentClientAddress()));
+        LOG.debug(String.valueOf(message.getAssignedClientAddress()));
+        LOG.debug(String.valueOf(message.getNextServerAddress()));
+        LOG.debug(String.valueOf(message.getRelayAgentAddress()));
+        LOG.debug(String.valueOf(message.getServerHostname()));
+        LOG.debug(String.valueOf(message.getBootFileName()));
     }
 
     protected ByteBuffer getByteBufferFromFile(String file) throws IOException {

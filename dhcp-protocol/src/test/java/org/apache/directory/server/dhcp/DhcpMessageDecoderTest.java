@@ -31,15 +31,9 @@ import org.junit.Test;
 // @Concurrency()
 public class DhcpMessageDecoderTest extends AbstractDhcpTestCase {
 
-    private ByteBuffer requestByteBuffer;
-
-    public DhcpMessageDecoderTest() {
-        super(DhcpMessageDecoderTest.class);
-    }
-
     @Test
     public void testParseDiscover() throws Exception {
-        requestByteBuffer = getByteBufferFromFile("DHCPDISCOVER.pdu");
+        ByteBuffer requestByteBuffer = getByteBufferFromFile("DHCPDISCOVER.pdu");
 
         DhcpMessageDecoder decoder = new DhcpMessageDecoder();
         DhcpMessage dhcpRequest = decoder.decode(requestByteBuffer);
@@ -49,7 +43,7 @@ public class DhcpMessageDecoderTest extends AbstractDhcpTestCase {
 
     @Test
     public void testParseOffer() throws Exception {
-        requestByteBuffer = getByteBufferFromFile("DHCPOFFER.pdu");
+        ByteBuffer requestByteBuffer = getByteBufferFromFile("DHCPOFFER.pdu");
 
         DhcpMessageDecoder decoder = new DhcpMessageDecoder();
         DhcpMessage dhcpRequest = decoder.decode(requestByteBuffer);

@@ -45,7 +45,7 @@ public abstract class AddressListOption extends DhcpOption {
             byte[] data = getData();
             Inet4Address[] out = new Inet4Address[data.length >> 2];
             for (int i = 0; i < out.length; i++)
-                out[i] = (Inet4Address) InetAddress.getByAddress(Arrays.copyOfRange(data, i * 4, 4));
+                out[i] = (Inet4Address) InetAddress.getByAddress(Arrays.copyOfRange(data, i * 4, i * 4 + 4));
             return out;
         } catch (ClassCastException e) {
             throw new DhcpException("Illegal InetAddress data: " + Arrays.toString(getData()) + " for " + this, e);
