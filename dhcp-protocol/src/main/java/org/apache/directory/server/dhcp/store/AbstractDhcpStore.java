@@ -21,7 +21,6 @@ package org.apache.directory.server.dhcp.store;
 
 import java.net.InetAddress;
 import java.util.Map;
-
 import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.options.OptionsField;

@@ -20,7 +20,6 @@ package org.apache.directory.server.dhcp.service;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Iterator;
-
 import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.options.DhcpOption;

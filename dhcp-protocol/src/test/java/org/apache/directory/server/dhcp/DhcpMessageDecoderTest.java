@@ -20,13 +20,9 @@
 package org.apache.directory.server.dhcp;
 
 import java.nio.ByteBuffer;
-
-// import com.mycila.junit.concurrent.Concurrency;
-// import com.mycila.junit.concurrent.ConcurrentJunitRunner;
 import org.apache.directory.server.dhcp.io.DhcpMessageDecoder;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>

@@ -20,7 +20,6 @@
 package org.apache.directory.server.dhcp.messages;
 
 import java.net.InetAddress;
-
 import org.apache.directory.server.dhcp.options.OptionsField;
 
 /**

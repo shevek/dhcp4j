@@ -22,7 +22,6 @@ package org.apache.directory.server.dhcp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

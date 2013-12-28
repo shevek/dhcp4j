@@ -20,7 +20,6 @@
 package org.apache.directory.server.dhcp.store;
 
 import java.net.InetAddress;
-
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 
 /**

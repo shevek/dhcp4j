@@ -21,7 +21,6 @@ package org.apache.directory.server.dhcp.options;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
 import java.util.Arrays;
 
 /**

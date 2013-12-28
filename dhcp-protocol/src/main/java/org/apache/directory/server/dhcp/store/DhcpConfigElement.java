@@ -21,7 +21,6 @@ package org.apache.directory.server.dhcp.store;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.directory.server.dhcp.options.OptionsField;
 
 /**

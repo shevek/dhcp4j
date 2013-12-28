@@ -20,7 +20,6 @@ import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.directory.server.dhcp.options.dhcp.BootfileName;
 import org.apache.directory.server.dhcp.options.dhcp.ClientIdentifier;
 import org.apache.directory.server.dhcp.options.dhcp.DhcpMessageType;

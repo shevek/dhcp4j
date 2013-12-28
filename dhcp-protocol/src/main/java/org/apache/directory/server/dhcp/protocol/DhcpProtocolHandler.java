@@ -21,7 +21,6 @@ package org.apache.directory.server.dhcp.protocol;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.service.DhcpService;

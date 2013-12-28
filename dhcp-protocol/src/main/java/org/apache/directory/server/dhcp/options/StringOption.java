@@ -20,7 +20,6 @@
 package org.apache.directory.server.dhcp.options;
 
 import com.google.common.base.Charsets;
-import java.io.UnsupportedEncodingException;
 
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework for
