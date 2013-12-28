@@ -19,10 +19,12 @@
  */
 package org.apache.directory.server.dhcp.messages;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import javax.annotation.Nonnull;
 
 /**
  * A representation of a DHCP hardware address.
@@ -169,37 +171,38 @@ public final class HardwareAddress {
         return sb.toString();
     }
 
-    private static final Pattern PARSE_PATTERN = Pattern
-            .compile("(\\d+)\\s+(?:(\\p{XDigit}{1,2}):)*(\\p{XDigit}{1,2})?");
-
     /**
-     * Parses a string representation of a hardware address according to the
-     * specification given in {@link #toString()}.
+     * Parses a string representation of a hardware address.
+     * Valid: 1/11:22:33:44:55:66    (toString())
+     * Valid: Ethernet/11:22:33:44:55:66
+     * Valid: 11:22:33:44:55:66     (defaults to Ethernet)
      * 
      * @param s
      * @return HardwareAddress
      * @throws ParseException
      */
-    public static HardwareAddress valueOf(String s) {
-        if (null == s || s.length() == 0) {
-            return null;
+    @Nonnull
+    public static HardwareAddress fromString(@Nonnull String text) {
+        int idx = text.indexOf('/');
+        HardwareAddressType hardwareAddressType = HardwareAddressType.Ethernet;
+        if (idx != -1) {
+            String hardwareAddressTypeText = text.substring(0, idx);
+            try {
+                int hardwareAddressTypeCode = Integer.parseInt(hardwareAddressTypeText);
+                hardwareAddressType = HardwareAddressType.forCode(hardwareAddressTypeCode);
+            } catch (NumberFormatException e) {
+                // This will throw IllegalArgumentException, which is roughly what we want.
+                hardwareAddressType = HardwareAddressType.valueOf(hardwareAddressTypeText);
+            }
+            text = text.substring(idx + 1);
         }
 
-        Matcher m = PARSE_PATTERN.matcher(s);
-
-        if (!m.matches()) {
-            throw new IllegalArgumentException("Failed to parse string " + s);
-        }
-
-        int type = Integer.parseInt(m.group(1));
-        int len = m.groupCount() - 1;
-
-        byte addr[] = new byte[len];
-
-        for (int i = 0; i < addr.length; i++) {
-            addr[i] = (byte) Integer.parseInt(m.group(i + 2), 16);
-        }
-
-        return new HardwareAddress((short) type, (short) len, addr);
+        CharMatcher separator = CharMatcher.BREAKING_WHITESPACE.or(CharMatcher.anyOf(":-"));
+        Iterable<String> parts = Splitter.on(separator).omitEmptyStrings().trimResults().split(text);
+        int i = 0;
+        byte[] out = new byte[Iterables.size(parts)];
+        for (String part : parts)
+            out[i++] = (byte) Integer.parseInt(part, 16);
+        return new HardwareAddress(hardwareAddressType.getCode(), (short) out.length, out);
     }
 }

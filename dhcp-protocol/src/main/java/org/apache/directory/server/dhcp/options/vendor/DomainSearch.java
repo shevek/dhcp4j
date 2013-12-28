@@ -8,6 +8,7 @@ package org.apache.directory.server.dhcp.options.vendor;
 import org.apache.directory.server.dhcp.options.DhcpOption;
 
 /**
+ * TODO: Use dnsjava to uncompress according to RFC3397.
  *
  * @author shevek
  */
