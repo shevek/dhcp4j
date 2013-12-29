@@ -17,34 +17,44 @@
  *  under the License. 
  *  
  */
-package org.apache.directory.server.dhcp.protocol;
+package org.apache.directory.server.dhcp.mina.protocol;
 
-import java.io.IOException;
-import org.apache.directory.server.dhcp.io.DhcpMessageEncoder;
-import org.apache.directory.server.dhcp.messages.DhcpMessage;
-import org.apache.mina.core.buffer.IoBuffer;
+import javax.annotation.Nonnull;
 import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.ProtocolCodecFactory;
+import org.apache.mina.filter.codec.ProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolEncoder;
-import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DhcpEncoder implements ProtocolEncoder {
+public class DhcpProtocolCodecFactory implements ProtocolCodecFactory {
 
-    // FIXME: what's the point of splitting this class from the actual encoder?
-    private final DhcpMessageEncoder encoder = new DhcpMessageEncoder();
+    private static class Inner {
 
-    @Override
-    public void encode(IoSession session, Object message, ProtocolEncoderOutput out)
-            throws IOException {
-        IoBuffer buf = IoBuffer.allocate(1024);
-        encoder.encode(buf.buf(), (DhcpMessage) message);
-        buf.flip();
-        out.write(buf);
+        private static final DhcpProtocolCodecFactory INSTANCE = new DhcpProtocolCodecFactory();
     }
 
+    /**
+     * Returns the singleton instance of {@link DhcpProtocolCodecFactory}.
+     *
+     * @return The singleton instance of {@link DhcpProtocolCodecFactory}.
+     */
+    @Nonnull
+    public static DhcpProtocolCodecFactory getInstance() {
+        return Inner.INSTANCE;
+    }
+    private final DhcpEncoder encoder = new DhcpEncoder();
+
     @Override
-    public void dispose(IoSession arg0) throws Exception {
+    public ProtocolEncoder getEncoder(IoSession session) {
+        return encoder;
+    }
+    private final DhcpDecoder decoder = new DhcpDecoder();
+
+    @Override
+    public ProtocolDecoder getDecoder(IoSession session) {
+        // Create a new decoder.
+        return decoder;
     }
 }

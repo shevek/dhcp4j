@@ -40,7 +40,7 @@ public class HostName extends StringOption {
      * @param name
      */
     public HostName(String name) {
-        setString(name);
+        setStringValue(name);
     }
 
 

@@ -19,11 +19,15 @@
  */
 package org.apache.directory.server.dhcp.options;
 
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import javax.annotation.CheckForNull;
+import javax.annotation.CheckForSigned;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import org.apache.directory.server.dhcp.DhcpException;
 
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework
@@ -122,6 +126,90 @@ public class OptionsField implements Iterable<DhcpOption> {
      */
     public void clear() {
         options.clear();
+    }
+
+    @CheckForNull
+    public byte[] getOption(@Nonnull Class<? extends DhcpOption> type) {
+        DhcpOption option = get(type);
+        if (option == null)
+            return null;
+        return option.getData();
+    }
+
+    public void setOption(@Nonnull Class<? extends DhcpOption> type, @Nonnull byte[] value) {
+        DhcpOption option = DhcpOptionsRegistry.newInstance(type);
+        option.setData(value);
+        add(option);
+    }
+
+    @CheckForSigned
+    public int getByteOption(@Nonnull Class<? extends ByteOption> type) {
+        ByteOption option = get(type);
+        if (option == null)
+            return -1;
+        return option.getByteValue();
+    }
+
+    public void setByteOption(@Nonnull Class<? extends ByteOption> type, @Nonnegative int value) {
+        ByteOption option = DhcpOptionsRegistry.newInstance(type);
+        option.setByteValue(value);
+        add(option);
+    }
+
+    @CheckForSigned
+    public int getShortOption(@Nonnull Class<? extends ShortOption> type) {
+        ShortOption option = get(type);
+        if (option == null)
+            return -1;
+        return option.getShortValue();
+    }
+
+    public void setShortOption(@Nonnull Class<? extends ShortOption> type, @Nonnegative int value) {
+        ShortOption option = DhcpOptionsRegistry.newInstance(type);
+        option.setShortValue(value);
+        add(option);
+    }
+
+    @CheckForSigned
+    public long getIntOption(@Nonnull Class<? extends IntOption> type) {
+        IntOption option = get(type);
+        if (option == null)
+            return -1;
+        return option.getIntValue();
+    }
+
+    public void setIntOption(@Nonnull Class<? extends IntOption> type, @Nonnegative long value) {
+        IntOption option = DhcpOptionsRegistry.newInstance(type);
+        option.setIntValue(value);
+        add(option);
+    }
+
+    @CheckForNull
+    public String getStringOption(@Nonnull Class<? extends StringOption> type) {
+        StringOption option = get(type);
+        if (option == null)
+            return null;
+        return option.getStringValue();
+    }
+
+    public void setStringOption(@Nonnull Class<? extends StringOption> type, @Nonnull String value) {
+        StringOption option = DhcpOptionsRegistry.newInstance(type);
+        option.setStringValue(value);
+        add(option);
+    }
+
+    @CheckForNull
+    public InetAddress getAddressOption(@Nonnull Class<? extends AddressOption> type) throws DhcpException {
+        AddressOption option = get(type);
+        if (option == null)
+            return null;
+        return option.getAddress();
+    }
+
+    public void setAddressOption(@Nonnull Class<? extends AddressOption> type, @Nonnull InetAddress value) {
+        AddressOption option = DhcpOptionsRegistry.newInstance(type);
+        option.setAddress(value);
+        add(option);
     }
 
     @Override

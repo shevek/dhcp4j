@@ -17,7 +17,7 @@
  *  under the License. 
  *  
  */
-package org.apache.directory.server.dhcp.store;
+package org.apache.directory.server.dhcp.service.store;
 
 import java.net.InetAddress;
 import java.util.Map;
@@ -28,7 +28,6 @@ import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.options.OptionsField;
 import org.apache.directory.server.dhcp.options.vendor.HostName;
 import org.apache.directory.server.dhcp.options.vendor.SubnetMask;
-import org.apache.directory.server.dhcp.service.Lease;
 
 /**
  * Abstract base implementation of a {@link DhcpStore}.
@@ -47,8 +46,8 @@ public abstract class AbstractDhcpStore implements DhcpStore {
      */
     @Override
     public Lease getLeaseOffer(HardwareAddress hardwareAddress, InetAddress requestedAddress,
-            InetAddress selectionBase, long requestedLeaseTime, OptionsField options) throws DhcpException {
-        Subnet subnet = findSubnet(selectionBase);
+            InetAddress selectionBase, long requestedLeaseTimeSecs, OptionsField options) throws DhcpException {
+        DhcpConfigSubnet subnet = findSubnet(selectionBase);
 
         if (null == subnet) {
             LOG.warn("Don't know anything about the sbnet containing " + selectionBase);
@@ -63,14 +62,14 @@ public abstract class AbstractDhcpStore implements DhcpStore {
             return lease;
         }
 
-        Host host = null;
+        DhcpConfigHost host = null;
         host = findDesignatedHost(hardwareAddress);
 
         if (null != host) {
             // make sure that the host is actually within the subnet. Depending
             // on the way the DhcpStore configuration is implemented, it is not
             // possible to violate this condition, but we can't be sure.
-            if (!subnet.contains(host.getAddress())) {
+            if (!subnet.contains(host.getClientAddress())) {
                 LOG.warn("Host " + host + " is not within the subnet for which an address is requested");
             } else {
                 // build properties map
@@ -81,13 +80,13 @@ public abstract class AbstractDhcpStore implements DhcpStore {
                 lease = new Lease();
                 lease.setAcquired(System.currentTimeMillis());
 
-                long leaseTime = determineLeaseTime(requestedLeaseTime, properties);
+                long leaseTime = determineLeaseTime(requestedLeaseTimeSecs, properties);
 
                 lease.setExpires(System.currentTimeMillis() + leaseTime);
 
                 lease.setHardwareAddress(hardwareAddress);
                 lease.setState(Lease.STATE_NEW);
-                lease.setClientAddress(host.getAddress());
+                lease.setClientAddress(host.getClientAddress());
 
                 // set lease options
                 OptionsField o = lease.getOptions();
@@ -126,7 +125,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
      */
     @Override
     public Lease getExistingLease(HardwareAddress hardwareAddress, InetAddress requestedAddress,
-            InetAddress selectionBase, long requestedLeaseTime, OptionsField options) throws DhcpException {
+            InetAddress selectionBase, long requestedLeaseTimeSecs, OptionsField options) throws DhcpException {
         // try to find existing lease. if we don't find a lease based on the
         // client's
         // hardware address, we send a NAK.
@@ -145,7 +144,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
         }
 
         // check whether addresses and subnet match
-        Subnet subnet = findSubnet(selectionBase);
+        DhcpConfigSubnet subnet = findSubnet(selectionBase);
 
         if (null == subnet) {
             LOG.warn("No subnet found for existing lease " + lease);
@@ -174,11 +173,11 @@ public abstract class AbstractDhcpStore implements DhcpStore {
         o.addAll(subnet.getOptions());
 
         // check whether there is a designated host.
-        Host host = findDesignatedHost(hardwareAddress);
+        DhcpConfigHost host = findDesignatedHost(hardwareAddress);
         if (null != host) {
             // check whether the host matches the address (using a fixed
             // host address is mandatory).
-            if (host.getAddress() != null && !host.getAddress().equals(lease.getClientAddress())) {
+            if (host.getClientAddress()!= null && !host.getClientAddress().equals(lease.getClientAddress())) {
                 LOG.warn("Existing fixed address for " + hardwareAddress + " conflicts with existing lease "
                         + lease);
                 return null;
@@ -194,7 +193,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
         }
 
         // update other lease fields
-        long leaseTime = determineLeaseTime(requestedLeaseTime, properties);
+        long leaseTime = determineLeaseTime(requestedLeaseTimeSecs, properties);
         lease.setExpires(System.currentTimeMillis() + leaseTime);
         lease.setHardwareAddress(hardwareAddress);
 
@@ -218,16 +217,16 @@ public abstract class AbstractDhcpStore implements DhcpStore {
      * @param properties
      * @return long
      */
-    private long determineLeaseTime(long requestedLeaseTime, Map properties) {
+    private long determineLeaseTime(long requestedLeaseTimeSecs, Map properties) {
         // built-in default
-        long leaseTime = 1000L * 3600;
+        long leaseTime = 3600;
         Integer propMaxLeaseTime = (Integer) properties.get(DhcpConfigElement.PROPERTY_MAX_LEASE_TIME);
 
         if (null != propMaxLeaseTime) {
-            if (requestedLeaseTime > 0) {
-                leaseTime = Math.min(propMaxLeaseTime.intValue() * 1000L, requestedLeaseTime);
+            if (requestedLeaseTimeSecs > 0) {
+                leaseTime = Math.min(propMaxLeaseTime.intValue(), requestedLeaseTimeSecs);
             } else {
-                leaseTime = propMaxLeaseTime.intValue() * 1000L;
+                leaseTime = propMaxLeaseTime.intValue();
             }
         }
 
@@ -273,7 +272,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
      * @param element
      * @return Map
      */
-    protected abstract Map getProperties(DhcpConfigElement element);
+    protected abstract Map<String, Object> getProperties(DhcpConfigElement element);
 
     /**
      * Find an existing lease in the store.
@@ -291,7 +290,7 @@ public abstract class AbstractDhcpStore implements DhcpStore {
      * @return Host
      * @throws DhcpException
      */
-    protected abstract Host findDesignatedHost(HardwareAddress hardwareAddress) throws DhcpException;
+    protected abstract DhcpConfigHost findDesignatedHost(HardwareAddress hardwareAddress) throws DhcpException;
 
     /**
      * Find the subnet definition matching the given address.
@@ -299,5 +298,5 @@ public abstract class AbstractDhcpStore implements DhcpStore {
      * @param clientAddress
      * @return Subnet
      */
-    protected abstract Subnet findSubnet(InetAddress clientAddress);
+    protected abstract DhcpConfigSubnet findSubnet(InetAddress clientAddress);
 }

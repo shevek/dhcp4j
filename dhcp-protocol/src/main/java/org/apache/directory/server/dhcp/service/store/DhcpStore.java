@@ -17,13 +17,12 @@
  *  under the License. 
  *  
  */
-package org.apache.directory.server.dhcp.store;
+package org.apache.directory.server.dhcp.service.store;
 
 import java.net.InetAddress;
 import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.options.OptionsField;
-import org.apache.directory.server.dhcp.service.Lease;
 
 /**
  * 
@@ -63,7 +62,7 @@ public interface DhcpStore {
      *            pool, i.e. either the address of the interface on which the
      *            request was received or the address of a DHCP relay agent.
      * @param requestedLeaseTime
-     *            the lease time in milliseconds as requested by the client, or
+     *            the lease time in seconds as requested by the client, or
      *            -1 if the client did not request a specific lease time.
      * @param options
      *            the supplied DHCP options. Lease selection may be refined by
@@ -72,7 +71,7 @@ public interface DhcpStore {
      * @throws DhcpException
      */
     Lease getLeaseOffer(HardwareAddress hardwareAddress, InetAddress requestedAddress, InetAddress selectionBase,
-            long requestedLeaseTime, OptionsField options) throws DhcpException;
+            long requestedLeaseTimeSecs, OptionsField options) throws DhcpException;
 
     /**
      * Retrieve an existing lease from the dhcp store.
@@ -86,7 +85,7 @@ public interface DhcpStore {
      * @throws DhcpException 
      */
     Lease getExistingLease(HardwareAddress hardwareAddress, InetAddress requestedAddress, InetAddress selectionBase,
-            long requestedLeaseTime, OptionsField options) throws DhcpException;
+            long requestedLeaseTimeSecs, OptionsField options) throws DhcpException;
 
     /**
      * Release the specified lease. 

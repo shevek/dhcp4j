@@ -17,9 +17,11 @@
  *  under the License. 
  *  
  */
-package org.apache.directory.server.dhcp.store;
+package org.apache.directory.server.dhcp.service.store;
 
 import java.net.InetAddress;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 
 /**
@@ -27,32 +29,41 @@ import org.apache.directory.server.dhcp.messages.HardwareAddress;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class Host extends DhcpConfigElement {
+public class DhcpConfigHost extends DhcpConfigElement {
 
     private final String name;
 
-    private HardwareAddress hardwareAddress;
+    private final HardwareAddress hardwareAddress;
 
     /**
      * The host's fixed address. May be <code>null</code>.
      */
-    private InetAddress address;
+    private final InetAddress clientAddress;
 
-    public Host(String name, InetAddress address, HardwareAddress hardwareAddress) {
+    public DhcpConfigHost(String name, HardwareAddress hardwareAddress, InetAddress clientAddress) {
         this.name = name;
-        this.address = address;
         this.hardwareAddress = hardwareAddress;
+        this.clientAddress = clientAddress;
     }
 
-    public HardwareAddress getHardwareAddress() {
-        return hardwareAddress;
-    }
-
+    @Nonnull
     public String getName() {
         return name;
     }
 
-    public InetAddress getAddress() {
-        return address;
+    @Nonnull
+    public HardwareAddress getHardwareAddress() {
+        return hardwareAddress;
     }
+
+    @CheckForNull
+    public InetAddress getClientAddress() {
+        return clientAddress;
+    }
+
+    @Override
+    public String toString() {
+        return getName() + "(" + getHardwareAddress() + ": " + getClientAddress() + ")";
+    }
+
 }

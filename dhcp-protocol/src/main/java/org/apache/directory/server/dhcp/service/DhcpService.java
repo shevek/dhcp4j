@@ -19,8 +19,12 @@
  */
 package org.apache.directory.server.dhcp.service;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
+import org.apache.directory.server.dhcp.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 
 /**
@@ -40,6 +44,10 @@ public interface DhcpService {
      * @return DhcpMessage
      * @throws DhcpException 
      */
-    DhcpMessage getReplyFor(InetSocketAddress localAddress, InetSocketAddress clientAddress, DhcpMessage request)
+    @CheckForNull
+    public DhcpMessage getReplyFor(
+            @Nonnull InterfaceAddress localAddress,
+            @CheckForNull InetSocketAddress clientAddress,
+            @Nonnull DhcpMessage request)
             throws DhcpException;
 }

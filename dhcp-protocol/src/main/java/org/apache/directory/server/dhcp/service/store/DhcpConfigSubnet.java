@@ -17,7 +17,7 @@
  *  under the License. 
  *  
  */
-package org.apache.directory.server.dhcp.store;
+package org.apache.directory.server.dhcp.service.store;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -28,7 +28,7 @@ import java.util.Arrays;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class Subnet extends DhcpConfigElement {
+public class DhcpConfigSubnet extends DhcpConfigElement {
 
     /** the subnet's address */
     private final InetAddress address;
@@ -44,7 +44,7 @@ public class Subnet extends DhcpConfigElement {
 
     // This will suppress PMD.EmptyCatchBlock warnings in this method
     @SuppressWarnings("PMD.EmptyCatchBlock")
-    public Subnet(InetAddress address, InetAddress netmask, InetAddress rangeMin, InetAddress rangeMax) {
+    public DhcpConfigSubnet(InetAddress address, InetAddress netmask, InetAddress rangeMin, InetAddress rangeMax) {
         // mask address to match subnet
         byte masked[] = netmask.getAddress();
         byte addrBytes[] = netmask.getAddress();

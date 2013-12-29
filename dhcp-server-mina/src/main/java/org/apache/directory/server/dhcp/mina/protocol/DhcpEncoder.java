@@ -17,34 +17,31 @@
  *  under the License. 
  *  
  */
-package org.apache.directory.server.dhcp.protocol;
+package org.apache.directory.server.dhcp.mina.protocol;
 
 import java.io.IOException;
-import org.apache.directory.server.dhcp.DhcpException;
-import org.apache.directory.server.dhcp.io.DhcpMessageDecoder;
+import org.apache.directory.server.dhcp.io.DhcpMessageEncoder;
+import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.ProtocolDecoder;
-import org.apache.mina.filter.codec.ProtocolDecoderOutput;
+import org.apache.mina.filter.codec.ProtocolEncoder;
+import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DhcpDecoder implements ProtocolDecoder {
+public class DhcpEncoder implements ProtocolEncoder {
 
-    private final DhcpMessageDecoder decoder = new DhcpMessageDecoder();
+    // FIXME: what's the point of splitting this class from the actual encoder?
+    private final DhcpMessageEncoder encoder = new DhcpMessageEncoder();
 
     @Override
-    public void decode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws DhcpException, IOException {
-        out.write(decoder.decode(in.buf()));
-    }
-
-    /* 
-     * @see org.apache.mina.filter.codec.ProtocolDecoder#finishDecode(org.apache.mina.common.IoSession, org.apache.mina.filter.codec.ProtocolDecoderOutput)
-     */
-    @Override
-    public void finishDecode(IoSession session, ProtocolDecoderOutput out) throws Exception {
-        // TODO Auto-generated method stub
+    public void encode(IoSession session, Object message, ProtocolEncoderOutput out)
+            throws IOException {
+        IoBuffer buf = IoBuffer.allocate(1024);
+        encoder.encode(buf.buf(), (DhcpMessage) message);
+        buf.flip();
+        out.write(buf);
     }
 
     @Override

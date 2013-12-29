@@ -17,34 +17,11 @@
  *  under the License. 
  *  
  */
-package org.apache.directory.server.dhcp.store;
-
-import java.util.HashMap;
-import java.util.Map;
-import javax.annotation.Nonnull;
-import org.apache.directory.server.dhcp.options.OptionsField;
-
 /**
+ * Provides the {@link org.apache.mina.core.service.IoHandler} and associated
+ * {@link org.apache.mina.filter.codec.ProtocolCodecFactory} required
+ * to implement the DHCP Service with the MINA NIO framework.
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public abstract class DhcpConfigElement {
-
-    public static final String PROPERTY_MAX_LEASE_TIME = "max-lease-time";
-
-    /** List of DhcpOptions for ths subnet */
-    private final OptionsField options = new OptionsField();
-
-    /** Map of properties for this element */
-    private final Map properties = new HashMap();
-
-    @Nonnull
-    public OptionsField getOptions() {
-        return options;
-    }
-
-    @Nonnull
-    public Map getProperties() {
-        return properties;
-    }
-}
+package org.apache.directory.server.dhcp.mina.protocol;

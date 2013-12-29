@@ -17,22 +17,21 @@
  *  under the License. 
  *  
  */
-package org.apache.directory.server.dhcp.service;
+package org.apache.directory.server.dhcp.service.store;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
+import org.apache.directory.server.dhcp.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.options.AddressOption;
 import org.apache.directory.server.dhcp.options.OptionsField;
-import org.apache.directory.server.dhcp.options.dhcp.ClientIdentifier;
 import org.apache.directory.server.dhcp.options.dhcp.IpAddressLeaseTime;
-import org.apache.directory.server.dhcp.options.dhcp.MaximumDhcpMessageSize;
-import org.apache.directory.server.dhcp.options.dhcp.ParameterRequestList;
 import org.apache.directory.server.dhcp.options.dhcp.RequestedIpAddress;
 import org.apache.directory.server.dhcp.options.dhcp.ServerIdentifier;
-import org.apache.directory.server.dhcp.store.DhcpStore;
+import org.apache.directory.server.dhcp.service.AbstractDhcpService;
 
 /**
  * A default implementation of the DHCP service. Does the tedious low-level
@@ -46,7 +45,7 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
 
     private final DhcpStore dhcpStore;
 
-    public StoreBasedDhcpService(DhcpStore dhcpStore) {
+    public StoreBasedDhcpService(@Nonnull DhcpStore dhcpStore) {
         this.dhcpStore = dhcpStore;
     }
 
@@ -61,24 +60,17 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
      */
     private Lease getExistingLease(InetSocketAddress clientAddress, DhcpMessage request) throws DhcpException {
         // determine requested lease time
-        IpAddressLeaseTime requestedLeaseTimeOption = (IpAddressLeaseTime) request.getOptions().get(
-                IpAddressLeaseTime.class);
+        IpAddressLeaseTime requestedLeaseTimeOption = request.getOptions().get(IpAddressLeaseTime.class);
         long requestedLeaseTime = null != requestedLeaseTimeOption ? requestedLeaseTimeOption.getIntValue() * 1000
                 : -1L;
+        long requestedLeaseTimeSecs = request.getOptions().getIntOption(IpAddressLeaseTime.class);
 
         // try to get the lease (address) requested by the client
-        InetAddress requestedAddress = null;
-        AddressOption requestedAddressOption = (AddressOption) request.getOptions().get(RequestedIpAddress.class);
-
-        if (null != requestedAddressOption) {
-            requestedAddress = requestedAddressOption.getAddress();
-        }
-
-        if (null == requestedAddress) {
+        InetAddress requestedAddress = request.getOptions().getAddressOption(RequestedIpAddress.class);
+        if (requestedAddress == null)
             requestedAddress = request.getCurrentClientAddress();
-        }
 
-        InetAddress selectionBase = determineSelectionBase(clientAddress, request);
+        InetAddress selectionBase = getRemoteAddress(null, request, clientAddress);
 
         Lease lease = dhcpStore.getExistingLease(request.getHardwareAddress(), requestedAddress, selectionBase,
                 requestedLeaseTime, request.getOptions());
@@ -118,8 +110,7 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
      */
     private Lease getLeaseOffer(InetSocketAddress clientAddress, DhcpMessage request) throws DhcpException {
         // determine requested lease time
-        IpAddressLeaseTime requestedLeaseTimeOption = (IpAddressLeaseTime) request.getOptions().get(
-                IpAddressLeaseTime.class);
+        IpAddressLeaseTime requestedLeaseTimeOption = request.getOptions().get(IpAddressLeaseTime.class);
         long requestedLeaseTime = null != requestedLeaseTimeOption ? requestedLeaseTimeOption.getIntValue() * 1000
                 : -1L;
 
@@ -131,7 +122,7 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
             requestedAddress = requestedAddressOption.getAddress();
         }
 
-        InetAddress selectionBase = determineSelectionBase(clientAddress, request);
+        InetAddress selectionBase = getRemoteAddress(null, request, clientAddress);
 
         Lease lease = dhcpStore.getLeaseOffer(request.getHardwareAddress(), requestedAddress, selectionBase,
                 requestedLeaseTime, request.getOptions());
@@ -146,50 +137,37 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
      *      org.apache.directory.server.dhcp.messages.DhcpMessage)
      */
     @Override
-    protected DhcpMessage handleRELEASE(InetSocketAddress localAddress, InetSocketAddress clientAddress,
+    protected DhcpMessage handleRELEASE(InterfaceAddress localAddress, InetSocketAddress clientAddress,
             DhcpMessage request) throws DhcpException {
         // check server ident
-        AddressOption serverIdentOption = (AddressOption) request.getOptions().get(ServerIdentifier.class);
+        AddressOption serverIdentOption = request.getOptions().get(ServerIdentifier.class);
 
         if (null != serverIdentOption && serverIdentOption.getAddress().isAnyLocalAddress()) {
             return null; // not me?! FIXME: handle authoritative server case
         }
 
         Lease lease = getExistingLease(clientAddress, request);
+        if (lease == null)
+            return newReplyNak(localAddress, request);
 
-        DhcpMessage reply = initGeneralReply(localAddress, request);
+        DhcpMessage reply = newReply(localAddress, request, MessageType.DHCPACK);
 
-        if (null == lease) {
-            // null lease? send NAK
-            // FIXME...
-            reply.setMessageType(MessageType.DHCPNAK);
-            reply.setCurrentClientAddress(null);
-            reply.setAssignedClientAddress(null);
-            reply.setNextServerAddress(null);
-        } else {
-            dhcpStore.releaseLease(lease);
+        dhcpStore.releaseLease(lease);
 
-            // lease Ok, send ACK
-            // FIXME...
-            reply.getOptions().addAll(lease.getOptions());
+        // lease Ok, send ACK
+        // FIXME...
+        reply.getOptions().addAll(lease.getOptions());
 
-            reply.setAssignedClientAddress(lease.getClientAddress());
-            reply.setNextServerAddress(lease.getNextServerAddress());
+        reply.setAssignedClientAddress(lease.getClientAddress());
+        reply.setNextServerAddress(lease.getNextServerAddress());
 
-            // fix options
-            OptionsField options = reply.getOptions();
+        // fix options
+        OptionsField options = reply.getOptions();
 
-            // these options must not be present
-            options.remove(RequestedIpAddress.class);
-            options.remove(ParameterRequestList.class);
-            options.remove(ClientIdentifier.class);
-            options.remove(MaximumDhcpMessageSize.class);
+        // these options must be present
+        options.add(new IpAddressLeaseTime((lease.getExpires() - System.currentTimeMillis()) / 1000L));
 
-            // these options must be present
-            options.add(new IpAddressLeaseTime((lease.getExpires() - System.currentTimeMillis()) / 1000L));
-
-            stripUnwantedOptions(request, options);
-        }
+        stripOptions(request, options);
 
         return reply;
 
@@ -201,20 +179,17 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
      *      org.apache.directory.server.dhcp.messages.DhcpMessage)
      */
     @Override
-    protected DhcpMessage handleDISCOVER(InetSocketAddress localAddress, InetSocketAddress clientAddress,
+    protected DhcpMessage handleDISCOVER(InterfaceAddress localAddress, InetSocketAddress clientAddress,
             DhcpMessage request) throws DhcpException {
         Lease lease = getLeaseOffer(clientAddress, request);
 
         // null lease? don't offer one.
-        if (null == lease) {
+        if (lease == null)
             return null;
-        }
 
-        DhcpMessage reply = initGeneralReply(localAddress, request);
+        DhcpMessage reply = newReply(localAddress, request, MessageType.DHCPOFFER);
 
         reply.getOptions().addAll(lease.getOptions());
-
-        reply.setMessageType(MessageType.DHCPOFFER);
 
         reply.setAssignedClientAddress(lease.getClientAddress());
         reply.setNextServerAddress(lease.getNextServerAddress());
@@ -222,16 +197,10 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
         // fix options
         OptionsField options = reply.getOptions();
 
-        // these options must not be present
-        options.remove(RequestedIpAddress.class);
-        options.remove(ParameterRequestList.class);
-        options.remove(ClientIdentifier.class);
-        options.remove(MaximumDhcpMessageSize.class);
-
         // these options must be present
         options.add(new IpAddressLeaseTime((lease.getExpires() - System.currentTimeMillis()) / 1000L));
 
-        stripUnwantedOptions(request, options);
+        stripOptions(request, options);
 
         return reply;
     }
@@ -242,7 +211,7 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
      *      org.apache.directory.server.dhcp.messages.DhcpMessage)
      */
     @Override
-    protected DhcpMessage handleREQUEST(InetSocketAddress localAddress, InetSocketAddress clientAddress,
+    protected DhcpMessage handleREQUEST(InterfaceAddress localAddress, InetSocketAddress clientAddress,
             DhcpMessage request) throws DhcpException {
         // check server ident
         AddressOption serverIdentOption = (AddressOption) request.getOptions().get(ServerIdentifier.class);
@@ -253,35 +222,23 @@ public class StoreBasedDhcpService extends AbstractDhcpService {
 
         Lease lease = getExistingLease(clientAddress, request);
 
-        DhcpMessage reply = initGeneralReply(localAddress, request);
+        if (lease == null)
+            return newReplyNak(localAddress, request);
 
-        if (null == lease) {
-            // null lease? send NAK
-            reply.setMessageType(MessageType.DHCPNAK);
-            reply.setCurrentClientAddress(null);
-            reply.setAssignedClientAddress(null);
-            reply.setNextServerAddress(null);
-        } else {
-            // lease Ok, send ACK
-            reply.getOptions().addAll(lease.getOptions());
+        DhcpMessage reply = newReply(localAddress, request, MessageType.DHCPACK);
+        // lease Ok, send ACK
+        reply.getOptions().addAll(lease.getOptions());
 
-            reply.setAssignedClientAddress(lease.getClientAddress());
-            reply.setNextServerAddress(lease.getNextServerAddress());
+        reply.setAssignedClientAddress(lease.getClientAddress());
+        reply.setNextServerAddress(lease.getNextServerAddress());
 
-            // fix options
-            OptionsField options = reply.getOptions();
+        // fix options
+        OptionsField options = reply.getOptions();
 
-            // these options must not be present
-            options.remove(RequestedIpAddress.class);
-            options.remove(ParameterRequestList.class);
-            options.remove(ClientIdentifier.class);
-            options.remove(MaximumDhcpMessageSize.class);
+        // these options must be present
+        options.add(new IpAddressLeaseTime((lease.getExpires() - System.currentTimeMillis()) / 1000L));
 
-            // these options must be present
-            options.add(new IpAddressLeaseTime((lease.getExpires() - System.currentTimeMillis()) / 1000L));
-
-            stripUnwantedOptions(request, options);
-        }
+        stripOptions(request, options);
         return reply;
     }
 }

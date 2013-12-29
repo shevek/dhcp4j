@@ -17,10 +17,12 @@
  *  under the License. 
  *  
  */
-package org.apache.directory.server.dhcp.protocol;
+package org.apache.directory.server.dhcp.mina.protocol;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import javax.annotation.Nonnull;
+import org.apache.directory.server.dhcp.address.AddressUtils;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.service.DhcpService;
@@ -62,7 +64,7 @@ public class DhcpProtocolHandler implements IoHandler {
     /**
      * 
      */
-    public DhcpProtocolHandler(DhcpService service) {
+    public DhcpProtocolHandler(@Nonnull DhcpService service) {
         this.dhcpService = service;
     }
 
@@ -91,14 +93,6 @@ public class DhcpProtocolHandler implements IoHandler {
     }
 
     @Override
-    public void exceptionCaught(IoSession session, Throwable cause) {
-        logger.error("EXCEPTION CAUGHT ", cause);
-        cause.printStackTrace(System.out);
-
-        session.close(true);
-    }
-
-    @Override
     public void messageReceived(IoSession session, Object message)
             throws Exception {
         if (logger.isDebugEnabled()) {
@@ -106,14 +100,13 @@ public class DhcpProtocolHandler implements IoHandler {
                     session.getLocalAddress());
         }
 
-        final DhcpMessage request = (DhcpMessage) message;
-
-        final DhcpMessage reply = dhcpService.getReplyFor(
-                (InetSocketAddress) session.getServiceAddress(),
+        DhcpMessage request = (DhcpMessage) message;
+        DhcpMessage reply = dhcpService.getReplyFor(
+                null,
                 (InetSocketAddress) session.getRemoteAddress(), request);
 
-        if (null != reply) {
-            final InetSocketAddress isa = determineMessageDestination(request, reply);
+        if (reply != null) {
+            InetSocketAddress isa = determineMessageDestination(request, reply);
             session.write(reply, isa);
         }
     }
@@ -143,7 +136,7 @@ public class DhcpProtocolHandler implements IoHandler {
 
         final MessageType mt = reply.getMessageType();
 
-        if (!isNullAddress(request.getRelayAgentAddress())) {
+        if (!AddressUtils.isZeroAddress(request.getRelayAgentAddress())) {
             // send to agent, if received via agent.
             return new InetSocketAddress(request.getRelayAgentAddress(), SERVER_PORT);
         } else if (null != mt && mt == MessageType.DHCPNAK) {
@@ -151,7 +144,7 @@ public class DhcpProtocolHandler implements IoHandler {
             return new InetSocketAddress("255.255.255.255", 68);
         } else {
             // not a NAK...
-            if (!isNullAddress(request.getCurrentClientAddress())) {
+            if (!AddressUtils.isZeroAddress(request.getCurrentClientAddress())) {
                 // have a current address? unicast to it.
                 return new InetSocketAddress(request.getCurrentClientAddress(),
                         CLIENT_PORT);
@@ -161,30 +154,18 @@ public class DhcpProtocolHandler implements IoHandler {
         }
     }
 
-    /**
-     * Determine, whether the given address ist actually the null address
-     * "0.0.0.0".
-     * 
-     * @param relayAgentAddress
-     * @return
-     */
-    private boolean isNullAddress(InetAddress addr) {
-        final byte a[] = addr.getAddress();
-
-        for (int i = 0; i < a.length; i++) {
-            if (a[i] != 0) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     @Override
     public void messageSent(IoSession session, Object message) {
         if (logger.isDebugEnabled()) {
             logger.debug("{} -> {} SENT: " + message, session.getRemoteAddress(),
                     session.getLocalAddress());
         }
+    }
+
+    @Override
+    public void exceptionCaught(IoSession session, Throwable cause) {
+        logger.error("EXCEPTION CAUGHT ", cause);
+        cause.printStackTrace(System.out);
+        session.close(true);
     }
 }

@@ -47,17 +47,17 @@ public abstract class StringOption extends DhcpOption {
     }
 
     @Nonnull
-    public String getString() {
+    public String getStringValue() {
         return new String(getStringData(), Charsets.ISO_8859_1);
     }
 
-    public void setString(@Nonnull String string) {
+    public void setStringValue(@Nonnull String string) {
         setStringData(string.getBytes(Charsets.ISO_8859_1));
     }
 
     @Override
     protected String toStringData() throws DhcpException {
-        return getString();
+        return getStringValue();
     }
 
 }

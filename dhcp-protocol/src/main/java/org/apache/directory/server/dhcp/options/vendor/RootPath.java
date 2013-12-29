@@ -39,7 +39,7 @@ public class RootPath extends StringOption {
      * @param path
      */
     public RootPath(String path) {
-        setString(path);
+        setStringValue(path);
     }
 
 

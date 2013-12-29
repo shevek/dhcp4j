@@ -17,7 +17,7 @@
  *  under the License. 
  *  
  */
-package org.apache.directory.server.dhcp.service;
+package org.apache.directory.server.dhcp.service.store;
 
 import java.net.InetAddress;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
