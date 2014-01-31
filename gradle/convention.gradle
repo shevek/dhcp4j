@@ -66,6 +66,7 @@ subprojects { project ->
     test {
         systemProperty 'org.apache.commons.logging.Log', 'org.apache.commons.logging.impl.SimpleLog'
         systemProperty 'org.apache.commons.logging.simplelog.defaultlog', 'debug'
+        systemProperty 'jna.nosys', 'true'
 
         testLogging {
             if (System.properties['test.single']) {
@@ -75,7 +76,7 @@ subprojects { project ->
                 exceptionFormat "full"
                 showStandardStreams true
             } else {
-                events "failed"
+                events "skipped", "failed"
             }
 
             debug {
@@ -87,7 +88,6 @@ subprojects { project ->
 
 }
 
-/*
 apply plugin: 'github-pages' // Used to create publishGhPages task
 
 def docTasks = [:]
@@ -118,7 +118,6 @@ githubPages {
         }
     }
 }
-*/
 
 // Generate wrapper, which is distributed as part of source to alleviate the need of installing gradle
 wrapper {
