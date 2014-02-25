@@ -131,7 +131,7 @@ public class DhcpMessageDecoder {
             = {(byte) 99, (byte) 130, (byte) 83, (byte) 99};
 
     @Nonnull
-    public OptionsField decodeOptions(@Nonnull ByteBuffer message) throws DhcpException {
+    private OptionsField decodeOptions(@Nonnull ByteBuffer message) throws DhcpException {
         byte[] magicCookie = new byte[VENDOR_MAGIC_COOKIE.length];
         message.get(magicCookie);
         if (!Arrays.equals(VENDOR_MAGIC_COOKIE, magicCookie))

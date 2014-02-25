@@ -5,16 +5,18 @@
  */
 package org.apache.directory.server.dhcp.mina.server;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.Iterators;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.net.SocketException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -22,6 +24,8 @@ import org.apache.directory.server.dhcp.address.AddressUtils;
 import org.apache.directory.server.dhcp.mina.protocol.DhcpProtocolCodecFactory;
 import org.apache.directory.server.dhcp.mina.protocol.DhcpProtocolHandler;
 import org.apache.directory.server.dhcp.service.DhcpService;
+import org.apache.directory.server.dhcp.service.manager.LeaseManager;
+import org.apache.directory.server.dhcp.service.manager.LeaseManagerDhcpService;
 import org.apache.mina.core.service.IoAcceptor;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.logging.LoggingFilter;
@@ -33,48 +37,65 @@ import org.apache.mina.transport.socket.nio.NioDatagramAcceptor;
  */
 public class DhcpServer {
 
-    private final DhcpService service;
     private final int port;
+    private final Iterable<NetworkInterface> interfaces;
+    private final LoggingFilter logger_wire = new LoggingFilter("dhcp-wire");
     private final ProtocolCodecFilter codec = new ProtocolCodecFilter(DhcpProtocolCodecFactory.getInstance());
-    private final List<NioDatagramAcceptor> acceptors = new ArrayList<NioDatagramAcceptor>();
+    private final LoggingFilter logger_packet = new LoggingFilter("dhcp-packet");
+    private final DhcpProtocolHandler handler;
+    private final Map<InetAddress, NioDatagramAcceptor> acceptors = new HashMap<InetAddress, NioDatagramAcceptor>();
 
-    public DhcpServer(@Nonnull DhcpService service, int port) {
-        this.service = service;
+    public DhcpServer(@Nonnull DhcpService service, @Nonnegative int port, @Nonnull Iterable<NetworkInterface> interfaces) {
         this.port = port;
+        this.interfaces = interfaces;
+        this.handler = new DhcpProtocolHandler(service);
     }
 
     public DhcpServer(@Nonnull DhcpService service) {
-        this(service, DhcpProtocolHandler.SERVER_PORT);
+        this(service, DhcpProtocolHandler.SERVER_PORT, new Iterable<NetworkInterface>() {
+            @Override
+            public Iterator<NetworkInterface> iterator() {
+                try {
+                    return Iterators.forEnumeration(NetworkInterface.getNetworkInterfaces());
+                } catch (SocketException e) {
+                    throw Throwables.propagate(e);
+                }
+            }
+        });
     }
 
-    private void bind(Set<InetAddress> addresses, InetAddress address) throws IOException {
+    public DhcpServer(@Nonnull LeaseManager leaseManager) {
+        this(new LeaseManagerDhcpService(leaseManager));
+    }
+
+    private void bind(@Nonnull InetAddress address) throws IOException {
         if (AddressUtils.isZeroAddress(address))
             return;
-        if (!addresses.add(address))
+        if (acceptors.containsKey(address))
             return;
         NioDatagramAcceptor acceptor = new NioDatagramAcceptor();
         acceptor.bind(new InetSocketAddress(address, port));
-        acceptor.getFilterChain().addLast("dhcp-wire", new LoggingFilter("dhcp-wire"));
+        acceptor.getFilterChain().addLast("dhcp-wire", logger_wire);
         acceptor.getFilterChain().addLast("dhcp-codec", codec);
-        acceptor.getFilterChain().addLast("dhcp-packet", new LoggingFilter("dhcp-packet"));
-        acceptor.setHandler(new DhcpProtocolHandler(service));
-        acceptors.add(acceptor);
+        acceptor.getFilterChain().addLast("dhcp-packet", logger_packet);
+        acceptor.setHandler(handler);
+        acceptors.put(address, acceptor);
     }
 
     @PostConstruct
     public void start() throws IOException {
-        Set<InetAddress> addresses = new HashSet<InetAddress>();
-        for (NetworkInterface iface : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+        for (NetworkInterface iface : interfaces) {
             for (InterfaceAddress addr : iface.getInterfaceAddresses()) {
-                bind(addresses, addr.getAddress());
-                bind(addresses, addr.getBroadcast());
+                bind(addr.getAddress());
+                bind(addr.getBroadcast());
             }
         }
     }
 
     @PreDestroy
     public void stop() throws IOException {
-        for (IoAcceptor acceptor : acceptors)
+        for (IoAcceptor acceptor : acceptors.values())
             acceptor.unbind();
+        acceptors.clear();
     }
 }

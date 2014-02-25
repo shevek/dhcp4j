@@ -6,6 +6,8 @@
 package org.apache.directory.server.dhcp.address;
 
 import java.net.InetAddress;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 /**
  *
@@ -13,8 +15,15 @@ import java.net.InetAddress;
  */
 public class NetworkAddress extends AbstractMaskedAddress {
 
-    public NetworkAddress(InetAddress address, int netmask) {
-        super(address, netmask);
+    @Nonnull
+    private static InetAddress toNetworkAddress(@Nonnull InetAddress address, @Nonnegative int netmask) {
+        byte[] data = address.getAddress();
+        AddressUtils.mask(data, netmask);
+        return AddressUtils.toAddress(data);
+    }
+
+    public NetworkAddress(@Nonnull InetAddress address, @Nonnegative int netmask) {
+        super(toNetworkAddress(address, netmask), netmask);
     }
 
 }

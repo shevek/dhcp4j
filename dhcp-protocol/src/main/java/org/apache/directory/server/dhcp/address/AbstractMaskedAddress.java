@@ -8,6 +8,8 @@ package org.apache.directory.server.dhcp.address;
 import com.google.common.base.Objects;
 import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 /**
  *
@@ -18,15 +20,17 @@ public abstract class AbstractMaskedAddress {
     private final InetAddress address;
     private final int netmask;
 
-    public AbstractMaskedAddress(InetAddress address, int netmask) {
+    public AbstractMaskedAddress(@Nonnull InetAddress address, @Nonnegative int netmask) {
         this.address = address;
         this.netmask = netmask;
     }
 
+    @Nonnull
     public InetAddress getAddress() {
         return address;
     }
 
+    @Nonnegative
     public int getNetmask() {
         return netmask;
     }

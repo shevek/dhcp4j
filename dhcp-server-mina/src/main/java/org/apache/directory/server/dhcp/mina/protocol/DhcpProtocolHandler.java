@@ -19,10 +19,10 @@
  */
 package org.apache.directory.server.dhcp.mina.protocol;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.address.AddressUtils;
+import org.apache.directory.server.dhcp.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.service.DhcpService;
@@ -100,9 +100,13 @@ public class DhcpProtocolHandler implements IoHandler {
                     session.getLocalAddress());
         }
 
+        // This doesn't work in practice. Pass the InterfaceAddress to the constructor.
+        InetSocketAddress localSocketAddress = (InetSocketAddress) session.getLocalAddress();
+        InterfaceAddress localAddress = new InterfaceAddress(localSocketAddress.getAddress(), 0);
+
         DhcpMessage request = (DhcpMessage) message;
         DhcpMessage reply = dhcpService.getReplyFor(
-                null,
+                localAddress,
                 (InetSocketAddress) session.getRemoteAddress(), request);
 
         if (reply != null) {

@@ -18,6 +18,7 @@
 package org.apache.directory.server.dhcp.service;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -62,6 +63,8 @@ public abstract class AbstractDhcpService implements DhcpService {
             InetSocketAddress clientAddress,
             DhcpMessage request)
             throws DhcpException {
+        Preconditions.checkNotNull(localAddress, "LocalAddress was null.");
+
         // ignore messages with an op != REQUEST/REPLY
         if ((request.getOp() != DhcpMessage.OP_BOOTREQUEST)
                 && (request.getOp() != DhcpMessage.OP_BOOTREPLY)) {
@@ -128,8 +131,9 @@ public abstract class AbstractDhcpService implements DhcpService {
      *         it.
      * @throws DhcpException
      */
-    protected DhcpMessage handleDISCOVER(InterfaceAddress localAddress,
-            InetSocketAddress clientAddress, DhcpMessage request)
+    @CheckForNull
+    protected DhcpMessage handleDISCOVER(@Nonnull InterfaceAddress localAddress,
+            @CheckForNull InetSocketAddress clientAddress, @Nonnull DhcpMessage request)
             throws DhcpException {
         if (LOG.isDebugEnabled())
             LOG.debug("Got DISCOVER message: " + request + " from " + clientAddress);
@@ -146,8 +150,9 @@ public abstract class AbstractDhcpService implements DhcpService {
      *         it.
      * @throws DhcpException
      */
-    protected DhcpMessage handleOFFER(InterfaceAddress localAddress,
-            InetSocketAddress clientAddress, DhcpMessage request)
+    @CheckForNull
+    protected DhcpMessage handleOFFER(@Nonnull InterfaceAddress localAddress,
+            @CheckForNull InetSocketAddress clientAddress, @Nonnull DhcpMessage request)
             throws DhcpException {
         if (LOG.isDebugEnabled())
             LOG.debug("Got OFFER message: " + request + " from " + clientAddress);
@@ -163,8 +168,9 @@ public abstract class AbstractDhcpService implements DhcpService {
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      *         it.
      */
-    protected DhcpMessage handleREQUEST(InterfaceAddress localAddress,
-            InetSocketAddress clientAddress, DhcpMessage request)
+    @CheckForNull
+    protected DhcpMessage handleREQUEST(@Nonnull InterfaceAddress localAddress,
+            @CheckForNull InetSocketAddress clientAddress, @Nonnull DhcpMessage request)
             throws DhcpException {
         if (LOG.isDebugEnabled())
             LOG.debug("Got REQUEST message: " + request + " from " + clientAddress);
@@ -180,8 +186,9 @@ public abstract class AbstractDhcpService implements DhcpService {
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      *         it.
      */
-    protected DhcpMessage handleDECLINE(InterfaceAddress localAddress,
-            InetSocketAddress clientAddress, DhcpMessage request)
+    @CheckForNull
+    protected DhcpMessage handleDECLINE(@Nonnull InterfaceAddress localAddress,
+            @CheckForNull InetSocketAddress clientAddress, @Nonnull DhcpMessage request)
             throws DhcpException {
         if (LOG.isDebugEnabled())
             LOG.debug("Got DECLINE message: " + request + " from " + clientAddress);
@@ -197,8 +204,9 @@ public abstract class AbstractDhcpService implements DhcpService {
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      *         it.
      */
-    protected DhcpMessage handleRELEASE(InterfaceAddress localAddress,
-            InetSocketAddress clientAddress, DhcpMessage request)
+    @CheckForNull
+    protected DhcpMessage handleRELEASE(@Nonnull InterfaceAddress localAddress,
+            @CheckForNull InetSocketAddress clientAddress, @Nonnull DhcpMessage request)
             throws DhcpException {
         if (LOG.isDebugEnabled())
             LOG.debug("Got RELEASE message: " + request + " from " + clientAddress);
@@ -214,8 +222,9 @@ public abstract class AbstractDhcpService implements DhcpService {
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      *         it.
      */
-    protected DhcpMessage handleINFORM(InterfaceAddress localAddress,
-            InetSocketAddress clientAddress, DhcpMessage request)
+    @CheckForNull
+    protected DhcpMessage handleINFORM(@Nonnull InterfaceAddress localAddress,
+            @CheckForNull InetSocketAddress clientAddress, @Nonnull DhcpMessage request)
             throws DhcpException {
         if (LOG.isDebugEnabled())
             LOG.debug("Got INFORM message: " + request + " from " + clientAddress);
@@ -231,9 +240,9 @@ public abstract class AbstractDhcpService implements DhcpService {
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      *         it.
      */
-    protected DhcpMessage handleUnknownMessage(InterfaceAddress localAddress,
-            InetSocketAddress clientAddress,
-            DhcpMessage request) {
+    @CheckForNull
+    protected DhcpMessage handleUnknownMessage(@Nonnull InterfaceAddress localAddress,
+            @CheckForNull InetSocketAddress clientAddress, @Nonnull DhcpMessage request) {
         if (LOG.isWarnEnabled())
             LOG.warn("Got unknkown DHCP message: " + request + " from " + clientAddress);
         return null;
