@@ -19,11 +19,11 @@ allprojects {
 apply from: file('gradle/convention.gradle')
 apply from: file('gradle/maven.gradle')
 apply from: file('gradle/check.gradle')
-// apply from: file('gradle/license.gradle')
+apply from: file('gradle/license.gradle')
 // apply from: file('gradle/release.gradle')
 
 subprojects {
-    group = "org.anarres.${githubProjectName}"
+    group = "org.anarres.dhcp"
 
     dependencies {
         compile 'com.google.code.findbugs:jsr305:2.0.2'
@@ -44,5 +44,12 @@ project(':dhcp-server-mina') {
 	dependencies {
 		compile project(':dhcp-protocol')
 		compile 'org.apache.mina:mina-core:2.0.7'
+	}
+}
+
+project(':dhcp-server-netty') {
+	dependencies {
+		compile project(':dhcp-protocol')
+		compile 'io.netty:netty-all:4.0.14.Final'
 	}
 }
