@@ -5,7 +5,6 @@
  */
 package org.apache.directory.server.dhcp.messages;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 

@@ -23,7 +23,7 @@ import java.net.InetSocketAddress;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
-import org.apache.directory.server.dhcp.address.InterfaceAddress;
+import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 
 /**

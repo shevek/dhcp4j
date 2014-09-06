@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.apache.directory.server.dhcp.address;
+package org.anarres.dhcp.common.address;
 
 import java.net.InetAddress;
+import java.util.Arrays;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
@@ -15,15 +16,14 @@ import javax.annotation.Nonnull;
  */
 public class NetworkAddress extends AbstractMaskedAddress {
 
-    @Nonnull
-    private static InetAddress toNetworkAddress(@Nonnull InetAddress address, @Nonnegative int netmask) {
-        byte[] data = address.getAddress();
-        AddressUtils.mask(data, netmask);
-        return AddressUtils.toAddress(data);
-    }
-
     public NetworkAddress(@Nonnull InetAddress address, @Nonnegative int netmask) {
-        super(toNetworkAddress(address, netmask), netmask);
+        super(AddressUtils.toNetworkAddress(address, netmask), netmask);
     }
 
+    public boolean contains(@Nonnull InetAddress address) {
+        if (!getAddress().getClass().equals(address.getClass()))
+            return false;
+        byte[] network = AddressUtils.toNetworkAddress(address.getAddress(), getNetmask());
+        return Arrays.equals(getAddress().getAddress(), network);
+    }
 }

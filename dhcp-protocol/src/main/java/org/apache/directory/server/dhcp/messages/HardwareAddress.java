@@ -23,7 +23,6 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import java.text.ParseException;
-import java.util.Arrays;
 import javax.annotation.Nonnull;
 
 /**
@@ -38,12 +37,10 @@ public final class HardwareAddress {
      * e.g., '1' = 10mb ethernet.
      */
     private final short type;
-
     /**
      * [hlen] Hardware address length (e.g. '6' for 10mb ethernet).
      */
     private final short length;
-
     /**
      * [chaddr] Client hardware address.
      */
@@ -54,22 +51,31 @@ public final class HardwareAddress {
      * @param length
      * @param address
      */
-    public HardwareAddress(short type, short length, byte[] address) {
+    public HardwareAddress(short type, short length, @Nonnull byte[] address) {
         this.type = type;
         this.length = length;
         this.address = address;
     }
 
+    public HardwareAddress(@Nonnull HardwareAddressType type, short length, @Nonnull byte[] address) {
+        this(type.getCode(), length, address);
+    }
+
+    public HardwareAddress(@Nonnull HardwareAddressType type, @Nonnull byte[] address) {
+        this(type.getCode(), (short) address.length, address);
+    }
+
+    @Nonnull
     public byte[] getAddress() {
         return address;
     }
 
-    public short getLength() {
-        return length;
-    }
-
     public short getType() {
         return type;
+    }
+
+    public short getLength() {
+        return length;
     }
 
     /**
@@ -93,13 +99,23 @@ public final class HardwareAddress {
      */
     @Override
     public boolean equals(Object obj) {
-        if (null == obj || !(obj.getClass().equals(HardwareAddress.class))) {
+        if (this == obj)
+            return true;
+        if (null == obj)
             return false;
-        }
+        if (!getClass().equals(obj.getClass()))
+            return false;
 
         HardwareAddress hw = (HardwareAddress) obj;
 
-        return length == hw.length && type == hw.type && Arrays.equals(address, hw.address);
+        if (type != hw.type)
+            return false;
+        if (length != hw.length)
+            return false;
+        for (int i = 0; i < length; i++)
+            if (address[i] != hw.address[i])
+                return false;
+        return true;
     }
 
     /**
@@ -177,7 +193,7 @@ public final class HardwareAddress {
      * Valid: Ethernet/11:22:33:44:55:66
      * Valid: 11:22:33:44:55:66     (defaults to Ethernet)
      * 
-     * @param s
+     * @param text
      * @return HardwareAddress
      * @throws ParseException
      */

@@ -16,12 +16,6 @@
  */
 package org.apache.directory.server.dhcp.options;
 
-import com.google.common.primitives.UnsignedBytes;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import javax.annotation.Nonnull;
-import org.apache.directory.server.dhcp.DhcpException;
-
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework
  * for passing configuration information to hosts on a TCP/IP network.  
@@ -33,12 +27,7 @@ import org.apache.directory.server.dhcp.DhcpException;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public abstract class DhcpOption {
-
-    /**
-     * The default data array used for simple (unparsed) options.
-     */
-    private byte[] data;
+public abstract class DhcpOption extends BaseDhcpOption {
 
     /**
      * Get the option's code tag.
@@ -47,60 +36,8 @@ public abstract class DhcpOption {
      */
     public abstract byte getTag();
 
-    /**
-     * Get the data (wire format) into a byte array. Subclasses must provide an
-     * implementation which serializes the parsed data back into a byte array if
-     * they override {@link #setData(byte[])}.
-     * 
-     * @return byte[]
-     */
-    @Nonnull
-    public final byte[] getData() {
-        return data;
-    }
-
-    /**
-     * Set the data (wire format) from a byte array. The default implementation
-     * just records the data as a byte array. Subclasses may parse the data into
-     * something more meaningful.
-     * 
-     * @param data
-     */
-    public final void setData(@Nonnull byte data[]) {
-        this.data = data;
-    }
-
-    /**
-     * Ensures that the byte array held after deserialization is valid.
-     */
-    public void validate() throws DhcpException {
-    }
-
-    public final void writeTo(@Nonnull ByteBuffer out) {
-        // Option continuation per RFC3396
-        byte tag = getTag();
-        byte data[] = getData();
-        for (int offset = 0; offset < data.length || offset == 0; offset += UnsignedBytes.MAX_VALUE) {
-            int length = Math.min(data.length - offset, UnsignedBytes.MAX_VALUE);
-            out.put(tag);
-            out.put((byte) length);
-            out.put(data, offset, length);
-        }
-    }
-
-    @Nonnull
-    protected String toStringData() throws DhcpException {
-        return Arrays.toString(getData());
-    }
-
     @Override
-    public String toString() {
-        String text;
-        try {
-            text = toStringData();
-        } catch (Exception e) {
-            text = Arrays.toString(getData());
-        }
-        return getClass().getSimpleName() + "[" + (getTag() & 0xFF) + "]: " + text;
+    protected int getTagAsInt() {
+        return getTag() & 0xFF;
     }
 }

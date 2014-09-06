@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
-import org.apache.directory.server.dhcp.address.InterfaceAddress;
+import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.MessageType;
@@ -46,13 +46,10 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
     // private static final String DEFAULT_INITIAL_CONTEXT_FACTORY =
     // "org.apache.directory.server.core.jndi.CoreContextFactory";
 
-    private final LeaseTimeRange TTL_OFFER = new LeaseTimeRange(60, 600, 600);
-    private final LeaseTimeRange TTL_LEASE = new LeaseTimeRange(60, 3600, 36000);
-
     // a map of current leases
     private final List<DhcpConfigSubnet> subnets = new ArrayList<DhcpConfigSubnet>();
     private final Cache<HardwareAddress, Lease> leases = CacheBuilder.newBuilder()
-            .expireAfterAccess((long) (TTL_LEASE.maxLeaseTime * 1.2), TimeUnit.SECONDS)
+            .expireAfterAccess((long) (TTL_LEASE.maxLeaseTime * 2), TimeUnit.SECONDS)
             .recordStats()
             .build();
 
@@ -61,8 +58,7 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
     public SimpleStoreLeaseManager() {
         subnets.add(new DhcpConfigSubnet(
                 InetAddresses.forString("192.168.168.0"), InetAddresses.forString("255.255.255.0"),
-                InetAddresses.forString("192.168.168.159"), InetAddresses.forString("192.168.168.179")
-        ));
+                InetAddresses.forString("192.168.168.159"), InetAddresses.forString("192.168.168.179")));
     }
 
     /**
@@ -85,10 +81,10 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
             @Nonnull InterfaceAddress localAddress,
             @Nonnull DhcpMessage request,
             @Nonnull MessageType type,
-            @Nonnull Lease lease
-    ) {
+            @Nonnull Lease lease) {
         long leaseTimeSecs = lease.getExpires() - System.currentTimeMillis() / 1000;
-        DhcpMessage reply = newReply(localAddress, request, type, leaseTimeSecs, lease.getClientAddress(), lease.getNextServerAddress(), null);
+        DhcpMessage reply = newReplyAck(localAddress, request, type, lease.getClientAddress(), leaseTimeSecs);
+        setBootParameters(reply, lease.getNextServerAddress(), null);
         reply.getOptions().addAll(lease.getOptions());
         return reply;
     }
@@ -145,5 +141,4 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
         leases.invalidate(request.getHardwareAddress());
         return true;       // Should check if present.
     }
-
 }

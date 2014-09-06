@@ -20,8 +20,8 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import org.apache.directory.server.dhcp.DhcpException;
-import org.apache.directory.server.dhcp.address.AddressUtils;
-import org.apache.directory.server.dhcp.address.InterfaceAddress;
+import org.anarres.dhcp.common.address.AddressUtils;
+import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.MessageType;
@@ -92,7 +92,7 @@ public class LdapStoreLeaseManager extends AbstractLeaseManager {
             @Nonnull DhcpConfigHost host,
             @Nonnegative long leaseTimeSecs
     ) {
-        DhcpMessage reply = newReply(localAddress, request, type, leaseTimeSecs, host.getClientAddress(), null, null);
+        DhcpMessage reply = newReplyAck(localAddress, request, type, host.getClientAddress(), leaseTimeSecs);
         reply.getOptions().add(new HostName(host.getName()));
         reply.getOptions().addAll(host.getOptions());
         return reply;

@@ -35,13 +35,8 @@ public enum MessageType {
     DHCPNAK((byte) 6, "DHCP Not Acknowledge"),
     DHCPRELEASE((byte) 7, "DHCP Release"),
     DHCPINFORM((byte) 8, "DHCP Inform");
-
-    private String name;
-    private byte ordinal;
-
-    public byte getCode() {
-        return ordinal;
-    }
+    private final String name;
+    private final byte ordinal;
 
     /**
      * Private constructor prevents construction outside of this class.
@@ -49,6 +44,10 @@ public enum MessageType {
     private MessageType(byte ordinal, String name) {
         this.ordinal = ordinal;
         this.name = name;
+    }
+
+    public byte getCode() {
+        return ordinal;
     }
 
     @Override

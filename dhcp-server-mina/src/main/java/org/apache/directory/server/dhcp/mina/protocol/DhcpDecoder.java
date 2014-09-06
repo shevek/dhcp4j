@@ -37,6 +37,7 @@ public class DhcpDecoder implements ProtocolDecoder {
     @Override
     public void decode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws DhcpException, IOException {
         out.write(decoder.decode(in.buf()));
+        in.position(in.limit());    // Consume the remaining bytes, as they will be handed back to us.
     }
 
     /* 

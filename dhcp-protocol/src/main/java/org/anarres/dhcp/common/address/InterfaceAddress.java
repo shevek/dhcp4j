@@ -3,9 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.apache.directory.server.dhcp.address;
+package org.anarres.dhcp.common.address;
 
 import java.net.InetAddress;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 /**
  *
@@ -13,8 +15,11 @@ import java.net.InetAddress;
  */
 public class InterfaceAddress extends AbstractMaskedAddress {
 
-    public InterfaceAddress(InetAddress address, int netmask) {
+    public InterfaceAddress(@Nonnull InetAddress address, @Nonnegative int netmask) {
         super(address, netmask);
     }
 
+    public InterfaceAddress(@Nonnull java.net.InterfaceAddress address) {
+        this(address.getAddress(), address.getNetworkPrefixLength());
+    }
 }

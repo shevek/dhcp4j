@@ -9,8 +9,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
-import org.apache.directory.server.dhcp.address.AddressUtils;
-import org.apache.directory.server.dhcp.address.InterfaceAddress;
+import org.anarres.dhcp.common.address.AddressUtils;
+import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.options.dhcp.IpAddressLeaseTime;
@@ -36,11 +36,11 @@ public class LeaseManagerDhcpService extends AbstractDhcpService {
     }
 
     @Override
-    protected DhcpMessage handleDISCOVER(InterfaceAddress localAddress, InetSocketAddress clientAddress, DhcpMessage request) throws DhcpException {
-        InetAddress remoteAddress = getRemoteAddress(localAddress, request, clientAddress);
+    protected DhcpMessage handleDISCOVER(InterfaceAddress localAddress, InetSocketAddress remoteAddress, DhcpMessage request) throws DhcpException {
+        InetAddress networkAddress = getRemoteAddress(localAddress, request, remoteAddress);
         InetAddress requestedAddress = request.getOptions().getAddressOption(RequestedIpAddress.class);
         long requestedExpirySecs = request.getOptions().getIntOption(IpAddressLeaseTime.class);
-        DhcpMessage reply = getLeaseManager().leaseOffer(localAddress, request, remoteAddress, requestedAddress, requestedExpirySecs);
+        DhcpMessage reply = getLeaseManager().leaseOffer(localAddress, request, networkAddress, requestedAddress, requestedExpirySecs);
         if (reply == null)
             return null;
         stripOptions(request, reply.getOptions());
@@ -48,7 +48,7 @@ public class LeaseManagerDhcpService extends AbstractDhcpService {
     }
 
     @Override
-    protected DhcpMessage handleREQUEST(InterfaceAddress localAddress, InetSocketAddress clientAddress, DhcpMessage request) throws DhcpException {
+    protected DhcpMessage handleREQUEST(InterfaceAddress localAddress, InetSocketAddress remoteAddress, DhcpMessage request) throws DhcpException {
         InetAddress requestedAddress = request.getOptions().getAddressOption(RequestedIpAddress.class);
         if (requestedAddress == null)
             return newReplyNak(localAddress, request);
@@ -68,7 +68,7 @@ public class LeaseManagerDhcpService extends AbstractDhcpService {
         boolean result = getLeaseManager().leaseDecline(localAddress, request, declinedAddress);
         if (!result)
             return newReplyNak(localAddress, request);
-        DhcpMessage reply = newReply(localAddress, request, MessageType.DHCPACK, -1, declinedAddress, null, null);
+        DhcpMessage reply = newReplyAck(localAddress, request, MessageType.DHCPACK, declinedAddress, -1);
         stripOptions(request, reply.getOptions());
         return reply;
     }
@@ -84,7 +84,7 @@ public class LeaseManagerDhcpService extends AbstractDhcpService {
         boolean result = getLeaseManager().leaseRelease(localAddress, request, releasedAddress);
         if (!result)
             return newReplyNak(localAddress, request);
-        DhcpMessage reply = newReply(localAddress, request, MessageType.DHCPACK, -1, releasedAddress, null, null);
+        DhcpMessage reply = newReplyAck(localAddress, request, MessageType.DHCPACK, releasedAddress, -1);
         stripOptions(request, reply.getOptions());
         return reply;
     }

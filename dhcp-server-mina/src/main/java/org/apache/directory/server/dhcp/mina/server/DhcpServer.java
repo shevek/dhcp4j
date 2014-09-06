@@ -20,7 +20,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import org.apache.directory.server.dhcp.address.AddressUtils;
+import org.anarres.dhcp.common.address.AddressUtils;
 import org.apache.directory.server.dhcp.mina.protocol.DhcpProtocolCodecFactory;
 import org.apache.directory.server.dhcp.mina.protocol.DhcpProtocolHandler;
 import org.apache.directory.server.dhcp.service.DhcpService;

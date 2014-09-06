@@ -20,6 +20,7 @@
 package org.apache.directory.server.dhcp.io;
 
 import com.google.common.base.Charsets;
+import com.google.common.primitives.UnsignedBytes;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
@@ -99,8 +100,7 @@ public class DhcpMessageEncoder {
      */
     private void writeAddress(ByteBuffer byteBuffer, InetAddress currentClientAddress) {
         if (null == currentClientAddress) {
-            byte emptyAddress[]
-                    = {0, 0, 0, 0};
+            byte emptyAddress[] = {0, 0, 0, 0};
             byteBuffer.put(emptyAddress);
         } else {
             byte[] addressBytes = currentClientAddress.getAddress();
@@ -126,15 +126,22 @@ public class DhcpMessageEncoder {
         while (len-- > 0)
             byteBuffer.put((byte) 0);
     }
-
-    private static final byte[] VENDOR_MAGIC_COOKIE
-            = {(byte) 99, (byte) 130, (byte) 83, (byte) 99};
+    private static final byte[] VENDOR_MAGIC_COOKIE = {(byte) 99, (byte) 130, (byte) 83, (byte) 99};
 
     public void encodeOptions(OptionsField options, ByteBuffer message) {
         message.put(VENDOR_MAGIC_COOKIE);
 
-        for (DhcpOption option : options)
-            option.writeTo(message);
+        for (DhcpOption option : options) {
+            // Option continuation per RFC3396
+            byte tag = option.getTag();
+            byte[] data = option.getData();
+            for (int offset = 0; offset < data.length || offset == 0; offset += UnsignedBytes.MAX_VALUE) {
+                int length = Math.min(data.length - offset, UnsignedBytes.MAX_VALUE);
+                message.put(tag);
+                message.put((byte) length);
+                message.put(data, offset, length);
+            }
+        }
 
         // add end option
         message.put((byte) 0xff);

@@ -8,6 +8,7 @@ package org.apache.directory.server.dhcp.options;
 import org.apache.directory.server.dhcp.options.misc.UserClass;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.options.dhcp.BootfileName;
@@ -23,6 +24,7 @@ import org.apache.directory.server.dhcp.options.dhcp.RelayAgentInformation;
 import org.apache.directory.server.dhcp.options.dhcp.RenewalTimeValue;
 import org.apache.directory.server.dhcp.options.dhcp.RequestedIpAddress;
 import org.apache.directory.server.dhcp.options.dhcp.ServerIdentifier;
+import org.apache.directory.server.dhcp.options.dhcp.ClientSystemArchitecture;
 import org.apache.directory.server.dhcp.options.dhcp.TftpServerName;
 import org.apache.directory.server.dhcp.options.dhcp.UUIDClientIdentifier;
 import org.apache.directory.server.dhcp.options.dhcp.UnrecognizedOption;
@@ -95,6 +97,7 @@ import org.apache.directory.server.dhcp.options.vendor.TimeOffset;
 import org.apache.directory.server.dhcp.options.vendor.TimeServers;
 
 /**
+ * See http://www.iana.org/assignments/bootp-dhcp-parameters/bootp-dhcp-parameters.xhtml#options
  *
  * @author shevek
  */
@@ -116,6 +119,7 @@ public class DhcpOptionsRegistry {
             BroadcastAddress.class,
             ClientIdentifier.class,
             ClientFQDN.class,
+            ClientSystemArchitecture.class,
             CookieServers.class,
             DefaultFingerServers.class,
             DefaultIpTimeToLive.class,
@@ -210,7 +214,7 @@ public class DhcpOptionsRegistry {
     }
 
     private final Map<Byte, Class<? extends DhcpOption>> optionTypes = new HashMap<Byte, Class<? extends DhcpOption>>();
-    private final Map<Class<? extends DhcpOption>, Byte> optionTags = new HashMap<Class<? extends DhcpOption>, Byte>();
+    private final Map<Class<? extends DhcpOption>, Byte> optionTags = new WeakHashMap<Class<? extends DhcpOption>, Byte>();
 
     @Nonnull
     public static <T extends DhcpOption> T newInstance(@Nonnull Class<T> type) {
@@ -225,7 +229,9 @@ public class DhcpOptionsRegistry {
 
     private byte getTagFrom(@Nonnull Class<? extends DhcpOption> type) {
         DhcpOption o = newInstance(type);
-        return o.getTag();
+        byte tag = o.getTag();
+        optionTags.put(type, tag);
+        return tag;
     }
 
     public void addOptionType(@Nonnull Class<? extends DhcpOption> type) {

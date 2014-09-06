@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.apache.directory.server.dhcp.address;
+package org.anarres.dhcp.common.address;
 
 import com.google.common.base.Objects;
 import com.google.common.net.InetAddresses;
@@ -33,6 +33,11 @@ public abstract class AbstractMaskedAddress {
     @Nonnegative
     public int getNetmask() {
         return netmask;
+    }
+
+    @Nonnull
+    public InetAddress getBroadcastAddress() {
+        return AddressUtils.toBroadcastAddress(getAddress(), getNetmask());
     }
 
     @Override

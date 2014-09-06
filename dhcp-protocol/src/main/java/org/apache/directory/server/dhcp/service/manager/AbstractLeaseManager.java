@@ -9,7 +9,8 @@ import java.net.InetAddress;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import org.apache.directory.server.dhcp.address.InterfaceAddress;
+import org.apache.directory.server.dhcp.DhcpException;
+import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.service.AbstractDhcpService;
@@ -34,8 +35,9 @@ public abstract class AbstractLeaseManager implements LeaseManager {
             this.defaultLeaseTime = defaultLeaseTime;
             this.maxLeaseTime = maxLeaseTime;
         }
-
     }
+    public final LeaseTimeRange TTL_OFFER = new LeaseTimeRange(60, 600, 600);
+    public final LeaseTimeRange TTL_LEASE = new LeaseTimeRange(60, 3600, 36000);
 
     public static long getLeaseTime(@Nonnull LeaseTimeRange leaseTimeSecs, long requestedLeaseTimeSecs) {
         if (requestedLeaseTimeSecs < 0)
@@ -56,15 +58,35 @@ public abstract class AbstractLeaseManager implements LeaseManager {
     }
 
     @Nonnull
-    public static DhcpMessage newReply(
+    public static DhcpMessage newReplyAck(
             @Nonnull InterfaceAddress localAddress,
             @Nonnull DhcpMessage request,
             @Nonnull MessageType type,
-            @Nonnegative long leaseTimeSecs,
             @CheckForNull InetAddress assignedClientAddress,
-            @CheckForNull InetAddress nextServerAddress,
-            @CheckForNull String bootFileName) {
-        return AbstractDhcpService.newReply(localAddress, request, type, leaseTimeSecs, assignedClientAddress, nextServerAddress, bootFileName);
+            @Nonnegative long leaseTimeSecs) {
+        return AbstractDhcpService.newReplyAck(localAddress, request, type, assignedClientAddress, leaseTimeSecs);
     }
 
+    public static void setBootParameters(
+            @Nonnull DhcpMessage reply,
+            @CheckForNull InetAddress nextServerAddress,
+            @CheckForNull String bootFileName) {
+        AbstractDhcpService.setBootParameters(reply, nextServerAddress, bootFileName);
+    }
+
+    @Override
+    public boolean leaseDecline(
+            InterfaceAddress localAddress,
+            DhcpMessage request,
+            InetAddress clientAddress) throws DhcpException {
+        return false;
+    }
+
+    @Override
+    public boolean leaseRelease(
+            InterfaceAddress localAddress,
+            DhcpMessage request,
+            InetAddress clientAddress) throws DhcpException {
+        return false;
+    }
 }

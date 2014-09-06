@@ -30,18 +30,20 @@ import javax.annotation.Nonnull;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.directory.server.dhcp.DhcpException;
-import org.apache.directory.server.dhcp.address.AddressUtils;
-import org.apache.directory.server.dhcp.address.InterfaceAddress;
+import org.anarres.dhcp.common.address.AddressUtils;
+import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.options.DhcpOption;
 import org.apache.directory.server.dhcp.options.OptionsField;
+import org.apache.directory.server.dhcp.options.dhcp.BootfileName;
 import org.apache.directory.server.dhcp.options.dhcp.ClientIdentifier;
 import org.apache.directory.server.dhcp.options.dhcp.IpAddressLeaseTime;
 import org.apache.directory.server.dhcp.options.dhcp.MaximumDhcpMessageSize;
 import org.apache.directory.server.dhcp.options.dhcp.ParameterRequestList;
 import org.apache.directory.server.dhcp.options.dhcp.RequestedIpAddress;
 import org.apache.directory.server.dhcp.options.dhcp.ServerIdentifier;
+import org.apache.directory.server.dhcp.options.dhcp.TftpServerName;
 
 /**
  * Abstract implementation of the server-side DHCP protocol. This class just
@@ -60,7 +62,7 @@ public abstract class AbstractDhcpService implements DhcpService {
     @Override
     public DhcpMessage getReplyFor(
             InterfaceAddress localAddress,
-            InetSocketAddress clientAddress,
+            InetSocketAddress clientAddress, // Might be zero/broadcast.
             DhcpMessage request)
             throws DhcpException {
         Preconditions.checkNotNull(localAddress, "LocalAddress was null.");
@@ -253,19 +255,30 @@ public abstract class AbstractDhcpService implements DhcpService {
      * set, we use the relay agent's address, otherwise we use the address we
      * received the request from.
      * 
-     * @param clientAddress
+     * @param clientAddress The remote address of the socket the request came in over.
      * @param request
      * @return InetAddress
      */
     @Nonnull
-    protected InetAddress getRemoteAddress(
+    public static InetAddress getRemoteAddress(
             @Nonnull InterfaceAddress localAddress,
             @Nonnull DhcpMessage request,
-            @CheckForNull InetSocketAddress clientAddress) {
+            @CheckForNull InetSocketAddress clientAddress)
+            throws DhcpException {
         // FIXME: do we know
         // a) the interface address over which we received a message (!)
         // b) the client address (if specified)
         // c) the relay agent address?
+
+        InetAddress assignedClientAddress = request.getAssignedClientAddress();
+        if (!AddressUtils.isZeroAddress(assignedClientAddress))
+            return assignedClientAddress;
+        InetAddress currentClientAddress = request.getCurrentClientAddress();
+        if (!AddressUtils.isZeroAddress(currentClientAddress))
+            return currentClientAddress;
+        InetAddress requestedClientAddress = request.getOptions().getAddressOption(RequestedIpAddress.class);
+        if (!AddressUtils.isZeroAddress(requestedClientAddress))
+            return requestedClientAddress;
 
         // if the relay agent address is set, we use it as the selection base
         if (!AddressUtils.isZeroAddress(request.getRelayAgentAddress()))
@@ -340,24 +353,32 @@ public abstract class AbstractDhcpService implements DhcpService {
     }
 
     @Nonnull
-    public static DhcpMessage newReply(
+    public static DhcpMessage newReplyAck(
             @Nonnull InterfaceAddress localAddress,
             @Nonnull DhcpMessage request,
             @Nonnull MessageType type,
-            @CheckForSigned long leaseTimeSecs,
             @CheckForNull InetAddress assignedClientAddress,
-            @CheckForNull InetAddress nextServerAddress,
-            @CheckForNull String bootFileName) {
+            @CheckForSigned long leaseTimeSecs) {
         DhcpMessage reply = newReply(localAddress, request, type);
         if (leaseTimeSecs > 0)
             reply.getOptions().setIntOption(IpAddressLeaseTime.class, leaseTimeSecs);
         if (assignedClientAddress != null)
             reply.setAssignedClientAddress(assignedClientAddress);
-        if (nextServerAddress != null)
-            reply.setNextServerAddress(nextServerAddress);
-        if (bootFileName != null)
-            reply.setBootFileName(bootFileName);
         return reply;
+    }
+
+    public static void setBootParameters(
+            @Nonnull DhcpMessage reply,
+            @CheckForNull InetAddress nextServerAddress,
+            @CheckForNull String bootFileName) {
+        if (nextServerAddress != null) {
+            reply.setNextServerAddress(nextServerAddress);
+            reply.getOptions().setStringOption(TftpServerName.class, InetAddresses.toAddrString(nextServerAddress));
+        }
+        if (bootFileName != null) {
+            reply.setBootFileName(bootFileName);
+            reply.getOptions().setStringOption(BootfileName.class, bootFileName);
+        }
     }
 
     /**

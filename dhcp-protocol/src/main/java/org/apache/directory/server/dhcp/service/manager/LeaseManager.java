@@ -10,7 +10,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
-import org.apache.directory.server.dhcp.address.InterfaceAddress;
+import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 
 /**
@@ -43,7 +43,7 @@ public interface LeaseManager {
      */
     @CheckForNull
     public DhcpMessage leaseOffer(@Nonnull InterfaceAddress localAddress,
-            @Nonnull DhcpMessage request, @Nonnull InetAddress remoteAddress,
+            @Nonnull DhcpMessage request, @Nonnull InetAddress networkAddress,
             @CheckForNull InetAddress clientRequestedAddress, @CheckForSigned long clientRequestedExpirySecs)
             throws DhcpException;
 

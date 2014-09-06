@@ -21,8 +21,8 @@ package org.apache.directory.server.dhcp.mina.protocol;
 
 import java.net.InetSocketAddress;
 import javax.annotation.Nonnull;
-import org.apache.directory.server.dhcp.address.AddressUtils;
-import org.apache.directory.server.dhcp.address.InterfaceAddress;
+import org.anarres.dhcp.common.address.AddressUtils;
+import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.service.DhcpService;
@@ -42,19 +42,15 @@ import org.slf4j.LoggerFactory;
  */
 public class DhcpProtocolHandler implements IoHandler {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(DhcpProtocolHandler.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(DhcpProtocolHandler.class);
     /**
      * Default DHCP client port
      */
     public static final int CLIENT_PORT = 68;
-
     /**
      * Default DHCP server port
      */
     public static final int SERVER_PORT = 67;
-
     /**
      * The DHCP service implementation. The implementation is supposed to be
      * thread-safe.
@@ -104,13 +100,15 @@ public class DhcpProtocolHandler implements IoHandler {
         InetSocketAddress localSocketAddress = (InetSocketAddress) session.getLocalAddress();
         InterfaceAddress localAddress = new InterfaceAddress(localSocketAddress.getAddress(), 0);
 
+        InetSocketAddress remoteAddress = (InetSocketAddress) session.getRemoteAddress();
+
         DhcpMessage request = (DhcpMessage) message;
         DhcpMessage reply = dhcpService.getReplyFor(
-                localAddress,
-                (InetSocketAddress) session.getRemoteAddress(), request);
+                localAddress, remoteAddress,
+                request);
 
         if (reply != null) {
-            InetSocketAddress isa = determineMessageDestination(request, reply);
+            InetSocketAddress isa = determineMessageDestination(request, reply, localAddress, remoteAddress.getPort());
             session.write(reply, isa);
         }
     }
@@ -135,26 +133,20 @@ public class DhcpProtocolHandler implements IoHandler {
      */
     //This will suppress PMD.AvoidUsingHardCodedIP warnings in this class
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
-    private InetSocketAddress determineMessageDestination(DhcpMessage request,
-            DhcpMessage reply) {
-
-        final MessageType mt = reply.getMessageType();
-
+    private InetSocketAddress determineMessageDestination(DhcpMessage request, DhcpMessage reply,
+            InterfaceAddress localAddress, int remotePort) {
         if (!AddressUtils.isZeroAddress(request.getRelayAgentAddress())) {
             // send to agent, if received via agent.
             return new InetSocketAddress(request.getRelayAgentAddress(), SERVER_PORT);
-        } else if (null != mt && mt == MessageType.DHCPNAK) {
+        } else if (reply.getMessageType() == MessageType.DHCPNAK) {
             // force broadcast for DHCPNAKs
-            return new InetSocketAddress("255.255.255.255", 68);
+            return new InetSocketAddress(localAddress.getBroadcastAddress(), remotePort);
+        } else if (!AddressUtils.isZeroAddress(request.getCurrentClientAddress())) {
+            // have a current address? unicast to it.
+            return new InetSocketAddress(request.getCurrentClientAddress(), remotePort);
         } else {
             // not a NAK...
-            if (!AddressUtils.isZeroAddress(request.getCurrentClientAddress())) {
-                // have a current address? unicast to it.
-                return new InetSocketAddress(request.getCurrentClientAddress(),
-                        CLIENT_PORT);
-            } else {
-                return new InetSocketAddress("255.255.255.255", 68);
-            }
+            return new InetSocketAddress(localAddress.getBroadcastAddress(), remotePort);
         }
     }
 

@@ -19,6 +19,8 @@
  */
 package org.apache.directory.server.dhcp.options;
 
+import com.google.common.net.InetAddresses;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -142,12 +144,16 @@ public class OptionsField implements Iterable<DhcpOption> {
         add(option);
     }
 
-    @CheckForSigned
-    public int getByteOption(@Nonnull Class<? extends ByteOption> type) {
+    public int getByteOption(@Nonnull Class<? extends ByteOption> type, int dflt) {
         ByteOption option = get(type);
         if (option == null)
-            return -1;
+            return dflt;
         return option.getByteValue();
+    }
+
+    @CheckForSigned
+    public int getByteOption(@Nonnull Class<? extends ByteOption> type) {
+        return getByteOption(type, -1);
     }
 
     public void setByteOption(@Nonnull Class<? extends ByteOption> type, @Nonnegative int value) {
@@ -156,12 +162,16 @@ public class OptionsField implements Iterable<DhcpOption> {
         add(option);
     }
 
-    @CheckForSigned
-    public int getShortOption(@Nonnull Class<? extends ShortOption> type) {
+    public int getShortOption(@Nonnull Class<? extends ShortOption> type, int dflt) {
         ShortOption option = get(type);
         if (option == null)
-            return -1;
+            return dflt;
         return option.getShortValue();
+    }
+
+    @CheckForSigned
+    public int getShortOption(@Nonnull Class<? extends ShortOption> type) {
+        return getShortOption(type, -1);
     }
 
     public void setShortOption(@Nonnull Class<? extends ShortOption> type, @Nonnegative int value) {
@@ -170,12 +180,16 @@ public class OptionsField implements Iterable<DhcpOption> {
         add(option);
     }
 
-    @CheckForSigned
-    public long getIntOption(@Nonnull Class<? extends IntOption> type) {
+    public long getIntOption(@Nonnull Class<? extends IntOption> type, int dflt) {
         IntOption option = get(type);
         if (option == null)
-            return -1;
+            return dflt;
         return option.getIntValue();
+    }
+
+    @CheckForSigned
+    public long getIntOption(@Nonnull Class<? extends IntOption> type) {
+        return getIntOption(type, -1);
     }
 
     public void setIntOption(@Nonnull Class<? extends IntOption> type, @Nonnegative long value) {
@@ -209,6 +223,25 @@ public class OptionsField implements Iterable<DhcpOption> {
     public void setAddressOption(@Nonnull Class<? extends AddressOption> type, @Nonnull InetAddress value) {
         AddressOption option = DhcpOptionsRegistry.newInstance(type);
         option.setAddress(value);
+        add(option);
+    }
+
+    public void setAddressOption(@Nonnull Class<? extends AddressOption> type, @Nonnull String value) {
+        setAddressOption(type, InetAddresses.forString(value));
+    }
+
+    @CheckForNull
+    public Inet4Address[] getAddressListOption(@Nonnull Class<? extends AddressListOption> type) throws DhcpException {
+        AddressListOption option = get(type);
+        if (option == null)
+            return null;
+        return option.getAddresses();
+    }
+
+    @CheckForNull
+    public void setAddressListOption(@Nonnull Class<? extends AddressListOption> type, Inet4Address... value) {
+        AddressListOption option = DhcpOptionsRegistry.newInstance(type);
+        option.setAddresses(value);
         add(option);
     }
 
