@@ -24,6 +24,7 @@ import com.google.common.primitives.Bytes;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import javax.annotation.CheckForNull;
@@ -54,32 +55,38 @@ public class DhcpMessageDecoder {
      */
     @Nonnull
     public DhcpMessage decode(@Nonnull ByteBuffer buffer) throws DhcpException, IOException {
-        byte op = buffer.get();
+        try {
+            byte op = buffer.get();
 
-        short htype = (short) (buffer.get() & 0xff);
-        short hlen = (short) (buffer.get() & 0xff);
-        short hops = (short) (buffer.get() & 0xff);
-        int xid = buffer.getInt();
-        int secs = buffer.getShort() & 0xffff;
-        short flags = buffer.getShort();
+            short htype = (short) (buffer.get() & 0xff);
+            short hlen = (short) (buffer.get() & 0xff);
+            short hops = (short) (buffer.get() & 0xff);
+            int xid = buffer.getInt();
+            int secs = buffer.getShort() & 0xffff;
+            short flags = buffer.getShort();
 
-        InetAddress ciaddr = decodeAddress(buffer);
-        InetAddress yiaddr = decodeAddress(buffer);
-        InetAddress siaddr = decodeAddress(buffer);
-        InetAddress giaddr = decodeAddress(buffer);
+            InetAddress ciaddr = decodeAddress(buffer);
+            InetAddress yiaddr = decodeAddress(buffer);
+            InetAddress siaddr = decodeAddress(buffer);
+            InetAddress giaddr = decodeAddress(buffer);
 
-        byte[] chaddr = decodeBytes(buffer, 16);
+            byte[] chaddr = decodeBytes(buffer, 16);
 
-        String sname = decodeString(buffer, 64);
-        String file = decodeString(buffer, 128);
+            String sname = decodeString(buffer, 64);
+            String file = decodeString(buffer, 128);
 
-        OptionsField options = decodeOptions(buffer);
+            OptionsField options = decodeOptions(buffer);
 
-        // message type option: may be null if option isn't set (BOOTP)
-        DhcpMessageType mto = options.get(DhcpMessageType.class);
+            // message type option: may be null if option isn't set (BOOTP)
+            DhcpMessageType mto = options.get(DhcpMessageType.class);
 
-        return new DhcpMessage(null != mto ? mto.getMessageType(): null, op, new HardwareAddress(htype, hlen, chaddr),
-                hops, xid, secs, flags, ciaddr, yiaddr, siaddr, giaddr, sname, file, options);
+            return new DhcpMessage(null != mto ? mto.getMessageType() : null, op, new HardwareAddress(htype, hlen, chaddr),
+                    hops, xid, secs, flags, ciaddr, yiaddr, siaddr, giaddr, sname, file, options);
+        } catch (BufferUnderflowException e) {
+            throw new IOException("Failed to decode " + buffer, e);
+        } catch (IndexOutOfBoundsException e) {
+            throw new IOException("Failed to decode " + buffer, e);
+        }
     }
 
     /**
@@ -126,9 +133,7 @@ public class DhcpMessageDecoder {
             return null;
         }
     }
-
-    private static final byte[] VENDOR_MAGIC_COOKIE
-            = {(byte) 99, (byte) 130, (byte) 83, (byte) 99};
+    private static final byte[] VENDOR_MAGIC_COOKIE = {(byte) 99, (byte) 130, (byte) 83, (byte) 99};
 
     @Nonnull
     private OptionsField decodeOptions(@Nonnull ByteBuffer message) throws DhcpException {

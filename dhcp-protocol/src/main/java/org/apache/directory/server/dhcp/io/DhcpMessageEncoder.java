@@ -20,9 +20,9 @@
 package org.apache.directory.server.dhcp.io;
 
 import com.google.common.base.Charsets;
-import com.google.common.primitives.UnsignedBytes;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
@@ -32,11 +32,15 @@ import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.options.DhcpOption;
 import org.apache.directory.server.dhcp.options.OptionsField;
 import org.apache.directory.server.dhcp.options.dhcp.DhcpMessageType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
 public class DhcpMessageEncoder {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DhcpMessageEncoder.class);
 
     /**
      * Converts a DhcpMessage object into a byte buffer.
@@ -46,35 +50,41 @@ public class DhcpMessageEncoder {
      */
     public void encode(ByteBuffer byteBuffer, DhcpMessage message)
             throws IOException {
-        byteBuffer.put(message.getOp());
+        try {
+            byteBuffer.put(message.getOp());
 
-        HardwareAddress hardwareAddress = message.getHardwareAddress();
+            HardwareAddress hardwareAddress = message.getHardwareAddress();
 
-        byteBuffer.put((byte) (null != hardwareAddress ? hardwareAddress.getType() : 0));
-        byteBuffer.put((byte) (null != hardwareAddress ? hardwareAddress.getLength() : 0));
-        byteBuffer.put((byte) message.getHopCount());
-        byteBuffer.putInt(message.getTransactionId());
-        byteBuffer.putShort((short) message.getSeconds());
-        byteBuffer.putShort(message.getFlags());
+            byteBuffer.put((byte) (null != hardwareAddress ? hardwareAddress.getType() : 0));
+            byteBuffer.put((byte) (null != hardwareAddress ? hardwareAddress.getLength() : 0));
+            byteBuffer.put((byte) message.getHopCount());
+            byteBuffer.putInt(message.getTransactionId());
+            byteBuffer.putShort((short) message.getSeconds());
+            byteBuffer.putShort(message.getFlags());
 
-        writeAddress(byteBuffer, message.getCurrentClientAddress());
-        writeAddress(byteBuffer, message.getAssignedClientAddress());
-        writeAddress(byteBuffer, message.getNextServerAddress());
-        writeAddress(byteBuffer, message.getRelayAgentAddress());
+            writeAddress(byteBuffer, message.getCurrentClientAddress());
+            writeAddress(byteBuffer, message.getAssignedClientAddress());
+            writeAddress(byteBuffer, message.getNextServerAddress());
+            writeAddress(byteBuffer, message.getRelayAgentAddress());
 
-        writeBytes(byteBuffer, (null != hardwareAddress ? hardwareAddress.getAddress() : new byte[]{}), 16);
+            writeBytes(byteBuffer, (null != hardwareAddress ? hardwareAddress.getAddress() : new byte[]{}), 16);
 
-        writeString(byteBuffer, message.getServerHostname(), 64);
-        writeString(byteBuffer, message.getBootFileName(), 128);
+            writeString(byteBuffer, message.getServerHostname(), 64);
+            writeString(byteBuffer, message.getBootFileName(), 128);
 
-        OptionsField options = message.getOptions();
+            OptionsField options = message.getOptions();
 
-        // update message type option (if set)
-        if (message.getMessageType() != null) {
-            options.add(new DhcpMessageType(message.getMessageType()));
+            // update message type option (if set)
+            if (message.getMessageType() != null) {
+                options.add(new DhcpMessageType(message.getMessageType()));
+            }
+
+            encodeOptions(options, byteBuffer);
+        } catch (BufferOverflowException e) {
+            throw new IOException("Failed to encode " + message + " into " + byteBuffer, e);
+        } catch (IndexOutOfBoundsException e) {
+            throw new IOException("Failed to encode " + message + " into " + byteBuffer, e);
         }
-
-        encodeOptions(options, byteBuffer);
     }
 
     /**
@@ -135,8 +145,8 @@ public class DhcpMessageEncoder {
             // Option continuation per RFC3396
             byte tag = option.getTag();
             byte[] data = option.getData();
-            for (int offset = 0; offset < data.length || offset == 0; offset += UnsignedBytes.MAX_VALUE) {
-                int length = Math.min(data.length - offset, UnsignedBytes.MAX_VALUE);
+            for (int offset = 0; offset < data.length || offset == 0; offset += 0xFF) {
+                int length = Math.min(data.length - offset, 0xFF);
                 message.put(tag);
                 message.put((byte) length);
                 message.put(data, offset, length);

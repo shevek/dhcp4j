@@ -59,7 +59,7 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOG.error(cause);
+        LOG.error("Error on channel: " + cause, cause);
         ctx.close();
     }
 

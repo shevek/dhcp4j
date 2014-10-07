@@ -8,10 +8,13 @@ package org.apache.directory.server.dhcp.netty;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoop;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import java.io.IOException;
+import java.util.concurrent.ThreadFactory;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
@@ -26,7 +29,6 @@ public class DhcpServer {
 
     private final DhcpService service;
     private final int port;
-    private EventLoopGroup group;
     private Channel channel;
 
     public DhcpServer(@Nonnull DhcpService service, @Nonnegative int port) {
@@ -36,7 +38,9 @@ public class DhcpServer {
 
     @PostConstruct
     public void start() throws IOException, InterruptedException {
-        group = new NioEventLoopGroup();
+        ThreadFactory factory = new DefaultThreadFactory("dhcp-server");
+        EventLoopGroup group = new NioEventLoopGroup(0, factory);
+
         Bootstrap b = new Bootstrap();
         b.group(group);
         b.channel(NioDatagramChannel.class);
@@ -47,7 +51,8 @@ public class DhcpServer {
 
     @PreDestroy
     public void stop() throws IOException, InterruptedException {
+        EventLoop loop = channel.eventLoop();
         channel.close().sync();
-        group.shutdownGracefully();
+        loop.shutdownGracefully();
     }
 }

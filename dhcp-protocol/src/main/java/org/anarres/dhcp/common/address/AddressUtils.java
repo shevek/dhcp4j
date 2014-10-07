@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.primitives.UnsignedBytes;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import javax.annotation.CheckForNull;
@@ -108,6 +109,10 @@ public class AddressUtils {
         return in;
     }
 
+    /**
+     * Determines whether the given address is actually the null address, or
+     * "0.0.0.0" (or the IPv6 equivalent).
+     */
     public static boolean isZeroAddress(@CheckForNull byte[] address) {
         if (address == null)
             return true;
@@ -117,7 +122,17 @@ public class AddressUtils {
         return true;
     }
 
+    /**
+     * Determines whether the given address is actually the null address, or
+     * "0.0.0.0" (or the IPv6 equivalent).
+     */
     public static boolean isZeroAddress(@CheckForNull InetAddress address) {
+        if (address == null)
+            return true;
+        return isZeroAddress(address.getAddress());
+    }
+
+    public static boolean isZeroAddress(@CheckForNull InetSocketAddress address) {
         if (address == null)
             return true;
         return isZeroAddress(address.getAddress());
