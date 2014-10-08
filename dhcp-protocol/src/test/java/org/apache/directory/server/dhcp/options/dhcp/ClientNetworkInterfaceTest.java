@@ -16,7 +16,7 @@ public class ClientNetworkInterfaceTest {
     @Test
     public void testToString() {
         ClientNetworkInterface option = new ClientNetworkInterface();
-        option.setData(new byte[]{3, 45});
+        option.setData(new byte[]{1, 3, 45});
         assertEquals("3.45", option.toStringData());
     }
 }
