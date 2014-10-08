@@ -10,6 +10,7 @@ import org.apache.directory.server.dhcp.options.ShortOption;
 
 /**
  *
+ * @see RFC4578
  * @author shevek
  */
 public class ClientSystemArchitecture extends ShortOption {

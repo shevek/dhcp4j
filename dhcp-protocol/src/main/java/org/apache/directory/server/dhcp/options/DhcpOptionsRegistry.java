@@ -5,7 +5,6 @@
  */
 package org.apache.directory.server.dhcp.options;
 
-import org.apache.directory.server.dhcp.options.misc.UserClass;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -13,6 +12,8 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.options.dhcp.BootfileName;
 import org.apache.directory.server.dhcp.options.dhcp.ClientIdentifier;
+import org.apache.directory.server.dhcp.options.dhcp.ClientNetworkInterface;
+import org.apache.directory.server.dhcp.options.dhcp.ClientSystemArchitecture;
 import org.apache.directory.server.dhcp.options.dhcp.DhcpMessageType;
 import org.apache.directory.server.dhcp.options.dhcp.IpAddressLeaseTime;
 import org.apache.directory.server.dhcp.options.dhcp.MaximumDhcpMessageSize;
@@ -24,7 +25,6 @@ import org.apache.directory.server.dhcp.options.dhcp.RelayAgentInformation;
 import org.apache.directory.server.dhcp.options.dhcp.RenewalTimeValue;
 import org.apache.directory.server.dhcp.options.dhcp.RequestedIpAddress;
 import org.apache.directory.server.dhcp.options.dhcp.ServerIdentifier;
-import org.apache.directory.server.dhcp.options.dhcp.ClientSystemArchitecture;
 import org.apache.directory.server.dhcp.options.dhcp.TftpServerName;
 import org.apache.directory.server.dhcp.options.dhcp.UUIDClientIdentifier;
 import org.apache.directory.server.dhcp.options.dhcp.UnrecognizedOption;
@@ -50,6 +50,7 @@ import org.apache.directory.server.dhcp.options.misc.Pop3Servers;
 import org.apache.directory.server.dhcp.options.misc.SmtpServers;
 import org.apache.directory.server.dhcp.options.misc.StdaServers;
 import org.apache.directory.server.dhcp.options.misc.StreetTalkServers;
+import org.apache.directory.server.dhcp.options.misc.UserClass;
 import org.apache.directory.server.dhcp.options.misc.VendorSpecificInformation;
 import org.apache.directory.server.dhcp.options.misc.XWindowDisplayManagers;
 import org.apache.directory.server.dhcp.options.misc.XWindowFontServers;
@@ -68,6 +69,14 @@ import org.apache.directory.server.dhcp.options.perinterface.PerformMaskDiscover
 import org.apache.directory.server.dhcp.options.perinterface.PerformRouterDiscovery;
 import org.apache.directory.server.dhcp.options.perinterface.RouterSolicitationAddress;
 import org.apache.directory.server.dhcp.options.perinterface.StaticRoute;
+import org.apache.directory.server.dhcp.options.pxe.PxeReservedOption.PxeReserved128;
+import org.apache.directory.server.dhcp.options.pxe.PxeReservedOption.PxeReserved129;
+import org.apache.directory.server.dhcp.options.pxe.PxeReservedOption.PxeReserved130;
+import org.apache.directory.server.dhcp.options.pxe.PxeReservedOption.PxeReserved131;
+import org.apache.directory.server.dhcp.options.pxe.PxeReservedOption.PxeReserved132;
+import org.apache.directory.server.dhcp.options.pxe.PxeReservedOption.PxeReserved133;
+import org.apache.directory.server.dhcp.options.pxe.PxeReservedOption.PxeReserved134;
+import org.apache.directory.server.dhcp.options.pxe.PxeReservedOption.PxeReserved135;
 import org.apache.directory.server.dhcp.options.tcp.TcpDefaultTimeToLive;
 import org.apache.directory.server.dhcp.options.tcp.TcpKeepaliveGarbage;
 import org.apache.directory.server.dhcp.options.tcp.TcpKeepaliveInterval;
@@ -106,12 +115,10 @@ public class DhcpOptionsRegistry {
     private static class Inner {
 
         private static final DhcpOptionsRegistry INSTANCE = new DhcpOptionsRegistry();
-
         /**
          * An array of concrete implementations of DhcpOption.
          */
         private static final Class OPTION_CLASSES[] = {
-
             AllSubnetsAreLocal.class,
             ArpCacheTimeout.class,
             BootfileName.class,
@@ -119,6 +126,7 @@ public class DhcpOptionsRegistry {
             BroadcastAddress.class,
             ClientIdentifier.class,
             ClientFQDN.class,
+            ClientNetworkInterface.class,
             ClientSystemArchitecture.class,
             CookieServers.class,
             DefaultFingerServers.class,
@@ -167,6 +175,14 @@ public class DhcpOptionsRegistry {
             PerformRouterDiscovery.class,
             PolicyFilter.class,
             Pop3Servers.class,
+            PxeReserved128.class,
+            PxeReserved129.class,
+            PxeReserved130.class,
+            PxeReserved131.class,
+            PxeReserved132.class,
+            PxeReserved133.class,
+            PxeReserved134.class,
+            PxeReserved135.class,
             RebindingTimeValue.class,
             RelayAgentInformation.class,
             RenewalTimeValue.class,
@@ -205,14 +221,12 @@ public class DhcpOptionsRegistry {
                 INSTANCE.addOptionType(optionType);
             }
         }
-
     }
 
     @Nonnull
     public static DhcpOptionsRegistry getInstance() {
         return Inner.INSTANCE;
     }
-
     private final Map<Byte, Class<? extends DhcpOption>> optionTypes = new HashMap<Byte, Class<? extends DhcpOption>>();
     private final Map<Class<? extends DhcpOption>, Byte> optionTags = new WeakHashMap<Class<? extends DhcpOption>, Byte>();
 
@@ -259,5 +273,4 @@ public class DhcpOptionsRegistry {
     public String toString() {
         return getClass().getSimpleName() + "(" + optionTypes + ")";
     }
-
 }
