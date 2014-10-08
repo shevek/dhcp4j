@@ -17,6 +17,7 @@
 package org.apache.directory.server.dhcp.options;
 
 import java.util.Arrays;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
 
@@ -72,6 +73,12 @@ public abstract class BaseDhcpOption {
      * Ensures that the byte array held after deserialization is valid.
      */
     public void validate() throws DhcpException {
+    }
+
+    protected void validateLength(@Nonnegative int length) throws DhcpException {
+        byte[] b = getData();
+        if (b.length != length)
+            throw new DhcpException("Expected exactly " + length + " data bytes in " + this + ", not " + b.length);
     }
 
     @Nonnull

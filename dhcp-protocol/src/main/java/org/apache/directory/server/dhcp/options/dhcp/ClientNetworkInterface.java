@@ -21,19 +21,22 @@ public class ClientNetworkInterface extends DhcpOption {
         return TAG;
     }
 
+    public int getType() {
+        return getData()[0] & 0xFF; // Always 1: UNDI.
+    }
+
     public int getRevisionMajor() {
-        return getData()[0] & 0xFF;
+        return getData()[1] & 0xFF;
     }
 
     public int getRevisionMinor() {
-        return getData()[1] & 0xFF;
+        return getData()[2] & 0xFF;
     }
 
     @Override
     public void validate() throws DhcpException {
         super.validate();
-        if (getData().length != 2)
-            throw new DhcpException("Expected exactly 2 data bytes in " + this);
+        validateLength(3);
     }
 
     @Override

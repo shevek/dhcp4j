@@ -35,6 +35,13 @@ public class LeaseManagerDhcpService extends AbstractDhcpService {
         return leaseManager;
     }
 
+    private static void checkReplyType(DhcpMessage request, DhcpMessage reply, MessageType...types) {
+        for (MessageType type : types)
+            if (type.equals(reply.getMessageType()))
+                return;
+        throw new IllegalStateException("Illegal response type " + reply.getMessageType() + " to request type " + request.getMessageType());
+    }
+
     @Override
     protected DhcpMessage handleDISCOVER(InterfaceAddress localAddress, InetSocketAddress remoteAddress, DhcpMessage request) throws DhcpException {
         InetAddress networkAddress = getRemoteAddress(localAddress, request, remoteAddress);
@@ -43,6 +50,7 @@ public class LeaseManagerDhcpService extends AbstractDhcpService {
         DhcpMessage reply = getLeaseManager().leaseOffer(localAddress, request, networkAddress, requestedAddress, requestedExpirySecs);
         if (reply == null)
             return null;
+        checkReplyType(request, reply, MessageType.DHCPOFFER, MessageType.DHCPNAK);
         stripOptions(request, reply.getOptions());
         return reply;
     }
@@ -56,6 +64,7 @@ public class LeaseManagerDhcpService extends AbstractDhcpService {
         DhcpMessage reply = getLeaseManager().leaseRequest(localAddress, request, requestedAddress, requestedExpirySecs);
         if (reply == null)
             return newReplyNak(localAddress, request);
+        checkReplyType(request, reply, MessageType.DHCPACK, MessageType.DHCPNAK);
         stripOptions(request, reply.getOptions());
         return reply;
     }
