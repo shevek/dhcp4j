@@ -9,8 +9,8 @@ import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.options.ShortOption;
 
 /**
+ * See RFC4578.
  *
- * @see RFC4578
  * @author shevek
  */
 public class ClientSystemArchitecture extends ShortOption {

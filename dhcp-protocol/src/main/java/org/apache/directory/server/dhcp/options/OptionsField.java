@@ -60,8 +60,6 @@ public class OptionsField implements Iterable<DhcpOption> {
     /**
      * Return the (first) DHCP option matching a given option class or
      * <code>null</code> of the option isn't set.
-     * 
-     * @param optionClass
      */
     @CheckForNull
     public <T extends DhcpOption> T get(@Nonnull Class<T> type) {

@@ -19,7 +19,7 @@
  */
 package org.apache.directory.server.dhcp.options.misc;
 
-import org.apache.directory.server.dhcp.options.DhcpOption;
+import org.apache.directory.server.dhcp.options.StringOption;
 
 /**
  * This option specifies the name of the client's NIS+ domain.  The
@@ -30,7 +30,7 @@ import org.apache.directory.server.dhcp.options.DhcpOption;
  * 
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class NisPlusDomain extends DhcpOption {
+public class NisPlusDomain extends StringOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */

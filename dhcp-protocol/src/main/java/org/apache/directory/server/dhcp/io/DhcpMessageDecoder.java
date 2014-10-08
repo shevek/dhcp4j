@@ -89,11 +89,6 @@ public class DhcpMessageDecoder {
         }
     }
 
-    /**
-     * @param buffer
-     * @param len
-     * @return
-     */
     @Nonnull
     private static byte[] decodeBytes(@Nonnull ByteBuffer buffer, @Nonnegative int len) {
         byte[] bytes = new byte[len];
@@ -101,10 +96,6 @@ public class DhcpMessageDecoder {
         return bytes;
     }
 
-    /**
-     * @param buffer
-     * @return
-     */
     @Nonnull
     private static String decodeString(@Nonnull ByteBuffer buffer, @Nonnegative int len)
             throws IOException {
@@ -118,10 +109,6 @@ public class DhcpMessageDecoder {
 
     /**
      * Read a 4-byte inet address from the buffer.
-     * 
-     * @param buffer
-     * @return
-     * @throws UnknownHostException
      */
     @CheckForNull
     private static InetAddress decodeAddress(@Nonnull ByteBuffer buffer) {

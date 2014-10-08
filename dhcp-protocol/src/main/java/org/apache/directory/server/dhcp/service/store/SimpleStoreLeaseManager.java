@@ -62,10 +62,7 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
     }
 
     /**
-     * Find the subnet for the given client address.
-     * 
-     * @param clientAddress
-     * @return Subnet
+     * Finds the subnet for the given client address.
      */
     @CheckForNull
     protected DhcpConfigSubnet findSubnet(@Nonnull InetAddress remoteAddress) {

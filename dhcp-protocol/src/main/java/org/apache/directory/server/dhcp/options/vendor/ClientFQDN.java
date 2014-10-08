@@ -8,6 +8,7 @@ package org.apache.directory.server.dhcp.options.vendor;
 import org.apache.directory.server.dhcp.options.DhcpOption;
 
 /**
+ * http://tools.ietf.org/html/rfc4702
  *
  * @author shevek
  */
@@ -17,5 +18,4 @@ public class ClientFQDN extends DhcpOption {
     public byte getTag() {
         return 81;
     }
-
 }

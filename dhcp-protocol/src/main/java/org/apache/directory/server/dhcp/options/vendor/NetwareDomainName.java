@@ -5,17 +5,16 @@
  */
 package org.apache.directory.server.dhcp.options.vendor;
 
-import org.apache.directory.server.dhcp.options.DhcpOption;
+import org.apache.directory.server.dhcp.options.StringOption;
 
 /**
  *
  * @author shevek
  */
-public class NetwareDomainName extends DhcpOption {
+public class NetwareDomainName extends StringOption {
 
     @Override
     public byte getTag() {
         return 62;
     }
-
 }

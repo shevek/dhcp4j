@@ -8,8 +8,8 @@ import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.options.DhcpOption;
 
 /**
+ * See RFC4578.
  *
- * @see RFC4578
  * @author shevek
  */
 public class ClientNetworkInterface extends DhcpOption {

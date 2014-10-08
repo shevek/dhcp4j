@@ -126,10 +126,6 @@ public class DhcpProtocolHandler extends IoHandlerAdapter {
      * DHCPOFFER and DHCPACK messages to the client's hardware address and
      * 'yiaddr' address. In all cases, when 'giaddr' is zero, the server
      * broadcasts any DHCPNAK messages to 0xffffffff.
-     * 
-     * @param request
-     * @param reply
-     * @return
      */
     //This will suppress PMD.AvoidUsingHardCodedIP warnings in this class
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")

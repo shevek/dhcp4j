@@ -32,11 +32,6 @@ public class DhcpMessageDecoder {
         return message;
     }
 
-    /**
-     * @param buffer
-     * @param len
-     * @return
-     */
     @Nonnull
     private static byte[] decodeBytes(@Nonnull ByteBuffer buffer, @Nonnegative int len) {
         byte[] bytes = new byte[len];

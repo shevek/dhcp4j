@@ -25,7 +25,6 @@ import org.anarres.dhcp.common.address.Subnet;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.MessageType;
-import org.apache.directory.server.dhcp.service.AbstractDhcpService;
 
 /**
  *
@@ -162,7 +161,7 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
      * Leases an InetAddress for the given HardwareAddress.
      * 
      * Lock, retrieve current mapping from store.
-     * Call {@link #leaseMac(InterfaceAddress, InetAddress, HardwareAddress, InetAddress, InetAddress, int)}
+     * Call {@link #leaseMac(InterfaceAddress, InetAddress, HardwareAddress, InetAddress, InetAddress, long)}
      * with the current mapping.
      * Store the returned address (if given) as the new current mapping and release the lock.
      */

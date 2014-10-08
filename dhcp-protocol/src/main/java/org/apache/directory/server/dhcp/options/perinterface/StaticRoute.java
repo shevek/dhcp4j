@@ -40,9 +40,6 @@ import org.apache.directory.server.dhcp.options.DhcpOption;
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
 public class StaticRoute extends DhcpOption {
-    /*
-     * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
-     */
 
     @Override
     public byte getTag() {
