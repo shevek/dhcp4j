@@ -4,12 +4,13 @@
  */
 package org.apache.directory.server.dhcp.address;
 
+import com.google.common.primitives.Bytes;
 import org.anarres.dhcp.common.address.AddressUtils;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
-import com.google.common.primitives.SignedBytes;
 import com.google.common.primitives.UnsignedBytes;
 import java.util.Arrays;
+import java.util.Random;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.apache.commons.logging.Log;
@@ -42,17 +43,17 @@ public class AddressUtilsTest {
         return "[" + UnsignedBytes.join(" ", s) + "]";
     }
 
+    @Nonnull
     public static byte[] C(byte[] c) {
         return Arrays.copyOf(c, c.length);
     }
 
-    public void test(byte[] expect, byte[] actual) {
-        assertEquals("Arrays are not same length", expect.length, actual.length);
-        for (int i = 0; i < expect.length; i++) {
-            if (expect[i] != actual[i]) {
-                fail("Mismatch at " + i + ": Expected " + (int) expect[i] + " but got " + (int) actual[i]);
-            }
-        }
+    @Nonnull
+    public static byte[] C(byte[] c, int len) {
+        byte[] t = new byte[len];
+        int min = Math.min(c.length, t.length);
+        System.arraycopy(c, c.length - min, t, t.length - min, min);
+        return t;
     }
 
     private void testIncrementNumeric(byte[] expect, byte[] input) {
@@ -105,16 +106,69 @@ public class AddressUtilsTest {
         }
     }
 
+    private void testAdd(byte[] expect, byte[] in, long value) {
+        byte[] out = AddressUtils.add(C(in), value);
+        LOG.info(S(in) + " + " + value + " = " + S(out) + " (expected " + S(expect) + ")");
+        assertArrayEquals(expect, out);
+
+        byte[] tmp = C(Longs.toByteArray(value), in.length);
+        LOG.info(S(in) + " + " + S(tmp) + " = " + S(out) + " (expected " + S(expect) + ")");
+        out = AddressUtils.add(in, tmp);
+        assertArrayEquals(expect, out);
+    }
+
     @Test
     public void testAdd() {
-        assertArrayEquals(A(1, 2), AddressUtils.add(A(0, 4), 0xFEL));
-        assertArrayEquals(A(0, 0), AddressUtils.add(A(UnsignedBytes.MAX_VALUE, UnsignedBytes.MAX_VALUE), 0x1L));
+        testAdd(A(1, 2), A(0, 4), 0xFEL);
+        testAdd(A(0, 0), A(UnsignedBytes.MAX_VALUE, UnsignedBytes.MAX_VALUE), 0x1L);
+
+        Random r = new Random();
+        for (int i = 0; i < 10; i++) {
+            int len = r.nextInt(4) + 2;
+            byte[] b = new byte[len];
+            r.nextBytes(b);
+            int value = r.nextInt(65532);
+            byte[] s = C(b);
+            for (int j = 0; j < value; j++)
+                AddressUtils.increment(s);
+            testAdd(s, b, value);
+        }
+    }
+
+    private void testSubtract(byte[] expect, byte[] in, long value) {
+        byte[] out = AddressUtils.subtract(C(in), value);
+        LOG.info(S(in) + " - " + value + " = " + S(out)
+                + " (expected " + S(expect) + ")");
+        assertArrayEquals(expect, out);
+
+        byte[] tmp = C(Longs.toByteArray(value), in.length);
+        LOG.info(S(in) + " - " + S(tmp) + " = " + S(out) + " (expected " + S(expect) + ")");
+        out = AddressUtils.subtract(in, tmp);
+        assertArrayEquals(expect, out);
+    }
+
+    @Test
+    public void testSubtract() {
+        testSubtract(A(0, 2), A(0, 4), 0x02);
+        testSubtract(A(UnsignedBytes.MAX_VALUE, UnsignedBytes.MAX_VALUE), A(0, 0), 0x1L);
+
+        Random r = new Random();
+        for (int i = 0; i < 10; i++) {
+            int len = r.nextInt(4) + 2;
+            byte[] b = new byte[len];
+            r.nextBytes(b);
+            int value = r.nextInt(65532);
+            byte[] s = C(b);
+            for (int j = 0; j < value; j++)
+                AddressUtils.decrement(s);
+            testSubtract(s, b, value);
+        }
     }
 
     private void testToNetworkAddress(@Nonnull byte[] expect, @Nonnull byte[] in, @Nonnegative int mask) {
         byte[] out = AddressUtils.toNetworkAddress(C(in), mask);
-        LOG.info(Arrays.toString(in) + "/" + mask + " -> " + Arrays.toString(out)
-                + " (expected " + Arrays.toString(expect) + ")");
+        LOG.info(S(in) + "/" + mask + " -> " + S(out)
+                + " (expected " + S(expect) + ")");
         assertArrayEquals(expect, out);
     }
 
@@ -138,8 +192,8 @@ public class AddressUtilsTest {
 
     public void testToBroadcastAddress(@Nonnull byte[] expect, @Nonnull byte[] in, @Nonnegative int mask) {
         byte[] out = AddressUtils.toBroadcastAddress(C(in), mask);
-        LOG.info(Arrays.toString(in) + "/" + mask + " -> " + Arrays.toString(out)
-                + " (expected " + Arrays.toString(expect) + ")");
+        LOG.info(S(in) + "/" + mask + " -> " + S(out)
+                + " (expected " + S(expect) + ")");
         assertArrayEquals(expect, out);
     }
 

@@ -7,6 +7,7 @@ package org.anarres.dhcp.common.address;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.net.InetAddresses;
 import com.google.common.primitives.UnsignedBytes;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -19,10 +20,12 @@ import javax.annotation.Nonnull;
 /**
  * All methods are big-endian (network-endian) and modify their arguments.
  *
+ * @see InetAddresses
  * @author shevek
  */
 public class AddressUtils {
 
+    @Nonnull
     public static byte[] increment(@Nonnull byte[] in) {
         for (int i = in.length - 1; i >= 0; i--) {
             if (UnsignedBytes.toInt(in[i]) < 255) {
@@ -40,6 +43,7 @@ public class AddressUtils {
         return toInetAddress(increment(in.getAddress()));
     }
 
+    @Nonnull
     public static byte[] decrement(@Nonnull byte[] in) {
         for (int i = in.length - 1; i >= 0; i--) {
             if (UnsignedBytes.toInt(in[i]) > 0) {
@@ -57,42 +61,65 @@ public class AddressUtils {
         return toInetAddress(decrement(in.getAddress()));
     }
 
-    /** Big-endian. */
-    public static byte[] add(@Nonnull byte[] in, long value) {
-        Preconditions.checkArgument(Long.SIZE - Long.numberOfLeadingZeros(value) <= in.length * Byte.SIZE,
-                "Illegal addend %s for array of length %s", value, in.length);
-
+    private static void _add(@Nonnull byte[] in, @Nonnegative long value) {
         for (int i = in.length - 1; i >= 0; i--) {
             if (value == 0)
                 break;
             value += UnsignedBytes.toInt(in[i]);
             in[i] = (byte) (value & 0xFF);
-            value >>>= Byte.SIZE;
+            value >>= Byte.SIZE;
         }
-
-        return in;
+        // Preconditions.checkArgument(value == 0, "Carry overflow after arithmetic.");
     }
 
     /** Big-endian. */
+    @Nonnull
+    public static byte[] add(@Nonnull byte[] in, @Nonnegative long value) {
+        Preconditions.checkArgument(Long.SIZE - Long.numberOfLeadingZeros(value) <= in.length * Byte.SIZE,
+                "Illegal addend %s for array of length %s", value, in.length);
+        _add(in, value);
+        return in;
+    }
+
+    @Nonnull
+    public static InetAddress add(@Nonnull InetAddress in, @Nonnegative long value) {
+        return toInetAddress(add(in.getAddress(), value));
+    }
+
+    /** Big-endian. */
+    @Nonnull
     public static byte[] add(@Nonnull byte[] in, @Nonnull byte[] value) {
         Preconditions.checkArgument(in.length == value.length,
                 "Illegal addend of length %s for array of length %s", value.length, in.length);
         // return new BigInteger(in).add(new BigInteger(Longs.toByteArray(value))).toByteArray();
         int carry = 0;
         for (int i = in.length - 1; i >= 0; i--) {
-            if (i >= value.length)
-                break;
             int sum = UnsignedBytes.toInt(in[i]) + UnsignedBytes.toInt(value[i]) + carry;
             in[i] = (byte) (sum & 0xFF);
             carry = sum >> Byte.SIZE;
         }
 
-        Preconditions.checkArgument(carry == 0, "Carry overflow after addition.");
+        // Preconditions.checkArgument(carry == 0, "Carry overflow after addition.");
 
         return in;
     }
 
     /** Big-endian. */
+    @Nonnull
+    public static byte[] subtract(@Nonnull byte[] in, @Nonnegative long value) {
+        Preconditions.checkArgument(Long.SIZE - Long.numberOfLeadingZeros(value) <= in.length * Byte.SIZE,
+                "Illegal subtrahend %s for array of length %s", value, in.length);
+        _add(in, -value);
+        return in;
+    }
+
+    @Nonnull
+    public static InetAddress subtract(@Nonnull InetAddress in, @Nonnegative long value) {
+        return toInetAddress(subtract(in.getAddress(), value));
+    }
+
+    /** Big-endian. */
+    @Nonnull
     public static byte[] subtract(@Nonnull byte[] in, @Nonnull byte[] value) {
         Preconditions.checkArgument(in.length == value.length,
                 "Illegal subtrahend of length %s for array of length %s", value.length, in.length);
@@ -104,7 +131,7 @@ public class AddressUtils {
             carry = sum >> Byte.SIZE;
         }
 
-        Preconditions.checkArgument(carry == 0, "Carry overflow after subtraction.");
+        // Preconditions.checkArgument(carry == 0, "Carry overflow after subtraction.");
 
         return in;
     }
