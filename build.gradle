@@ -39,7 +39,7 @@ project(':dhcp-protocol') {
 	dependencies {
 		compile 'com.google.guava:guava:18.0'
 		compile 'dnsjava:dnsjava:2.1.1'
-		compile "org.anarres.jallocator:jallocator:1.0.0"
+		compile "org.anarres.jallocator:jallocator:1.0.1"
 	}
 }
 

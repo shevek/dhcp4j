@@ -27,8 +27,6 @@ import java.util.Iterator;
 import javax.annotation.CheckForNull;
 import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnull;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.directory.server.dhcp.DhcpException;
 import org.anarres.dhcp.common.address.AddressUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
@@ -44,6 +42,8 @@ import org.apache.directory.server.dhcp.options.dhcp.ParameterRequestList;
 import org.apache.directory.server.dhcp.options.dhcp.RequestedIpAddress;
 import org.apache.directory.server.dhcp.options.dhcp.ServerIdentifier;
 import org.apache.directory.server.dhcp.options.dhcp.TftpServerName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract implementation of the server-side DHCP protocol. This class just
@@ -57,7 +57,7 @@ import org.apache.directory.server.dhcp.options.dhcp.TftpServerName;
  */
 public abstract class AbstractDhcpService implements DhcpService {
 
-    private static final Log LOG = LogFactory.getLog(AbstractDhcpService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractDhcpService.class);
 
     @Override
     public DhcpMessage getReplyFor(

@@ -12,13 +12,13 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.io.DhcpMessageDecoder;
 import org.apache.directory.server.dhcp.io.DhcpMessageEncoder;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.service.DhcpService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -26,7 +26,7 @@ import org.apache.directory.server.dhcp.service.DhcpService;
  */
 public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
-    private static final Log LOG = LogFactory.getLog(DhcpHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DhcpHandler.class);
     private final DhcpService dhcpService;
     private final DhcpMessageDecoder decoder = new DhcpMessageDecoder();
     private final DhcpMessageEncoder encoder = new DhcpMessageEncoder();

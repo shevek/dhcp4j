@@ -16,8 +16,6 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.jallocator.ResourceAllocator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.directory.server.dhcp.DhcpException;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.anarres.dhcp.common.address.NetworkAddress;
@@ -25,6 +23,8 @@ import org.anarres.dhcp.common.address.Subnet;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.MessageType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,7 +32,7 @@ import org.apache.directory.server.dhcp.messages.MessageType;
  */
 public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
 
-    private static final Log LOG = LogFactory.getLog(AbstractDynamicLeaseManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractDynamicLeaseManager.class);
     public static final int TTL_EXPIRE = 600;
     private final Cache<NetworkAddress, ResourceAllocator<InetAddress>> allocators = CacheBuilder.newBuilder()
             .expireAfterAccess(TTL_LEASE.maxLeaseTime * 4, TimeUnit.SECONDS)

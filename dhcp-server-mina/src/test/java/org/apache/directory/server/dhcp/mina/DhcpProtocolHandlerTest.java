@@ -7,8 +7,6 @@ package org.apache.directory.server.dhcp.mina;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import javax.annotation.Nonnull;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.HardwareAddressType;
@@ -25,6 +23,8 @@ import org.apache.mina.core.session.DummySession;
 import org.apache.mina.core.write.DefaultWriteRequest;
 import org.apache.mina.core.write.WriteRequest;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,7 +32,7 @@ import org.junit.Test;
  */
 public class DhcpProtocolHandlerTest {
 
-    private static final Log LOG = LogFactory.getLog(DhcpProtocolHandlerTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DhcpProtocolHandlerTest.class);
     private final HardwareAddress hardwareAddress = new HardwareAddress(HardwareAddressType.Ethernet, new byte[]{1, 2, 3, 4, 5, 6});
 
     @Nonnull

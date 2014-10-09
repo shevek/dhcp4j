@@ -9,11 +9,11 @@ import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Set;
 import org.anarres.jallocator.ResourceAllocator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.anarres.dhcp.common.address.NetworkAddress;
 import org.anarres.dhcp.common.address.Subnet;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
 
 /**
@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
  */
 public class DhcpAddressResourceProviderTest {
 
-    private static final Log LOG = LogFactory.getLog(DhcpAddressResourceProviderTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DhcpAddressResourceProviderTest.class);
 
     @Test
     public void testAllocator() {

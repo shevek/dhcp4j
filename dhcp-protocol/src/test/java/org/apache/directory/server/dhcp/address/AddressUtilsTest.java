@@ -4,7 +4,6 @@
  */
 package org.apache.directory.server.dhcp.address;
 
-import com.google.common.primitives.Bytes;
 import org.anarres.dhcp.common.address.AddressUtils;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
@@ -13,9 +12,9 @@ import java.util.Arrays;
 import java.util.Random;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
 
 /**
@@ -28,7 +27,7 @@ import static org.junit.Assert.*;
  */
 public class AddressUtilsTest {
 
-    private static final Log LOG = LogFactory.getLog(AddressUtilsTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AddressUtilsTest.class);
 
     @Nonnull
     public static byte[] A(int... c) {

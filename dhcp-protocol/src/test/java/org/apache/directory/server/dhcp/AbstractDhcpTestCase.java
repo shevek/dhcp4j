@@ -22,10 +22,8 @@ package org.apache.directory.server.dhcp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.logging.Logger;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
@@ -33,7 +31,7 @@ import org.apache.directory.server.dhcp.messages.DhcpMessage;
 public abstract class AbstractDhcpTestCase {
 
     protected static final int MINIMUM_DHCP_DATAGRAM_SIZE = 576;
-    private static final Log LOG = LogFactory.getLog(AbstractDhcpTestCase.class);
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(AbstractDhcpTestCase.class);
 
     protected void print(DhcpMessage message) {
         LOG.debug(String.valueOf(message.getMessageType()));
