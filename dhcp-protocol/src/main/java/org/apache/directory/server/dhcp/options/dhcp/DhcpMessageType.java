@@ -66,4 +66,9 @@ public class DhcpMessageType extends ByteOption {
     public void setMessageType(MessageType type) {
         setByteValue(type.getCode());
     }
+
+    @Override
+    public String toStringData() {
+        return String.valueOf(getMessageType());
+    }
 }
