@@ -48,7 +48,7 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
             buffer.flip();
             ByteBuf buf = Unpooled.wrappedBuffer(buffer);
             DatagramPacket packet = new DatagramPacket(buf, msg.sender());
-            ctx.write(packet);
+            ctx.write(packet, ctx.voidPromise());
         }
     }
 
@@ -60,7 +60,7 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         LOG.error("Error on channel: " + cause, cause);
-        ctx.close();
+        // ctx.close();
     }
 
 }
