@@ -7,6 +7,7 @@ package org.apache.directory.server.dhcp.service.manager;
 
 import java.net.InetAddress;
 import javax.annotation.CheckForNull;
+import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
@@ -23,8 +24,11 @@ public abstract class AbstractLeaseManager implements LeaseManager {
 
     public static class LeaseTimeRange {
 
+        @Nonnegative
         public long minLeaseTime = 60;
+        @Nonnegative
         public long defaultLeaseTime = 60;
+        @Nonnegative
         public long maxLeaseTime = 60;
 
         public LeaseTimeRange() {
@@ -39,7 +43,8 @@ public abstract class AbstractLeaseManager implements LeaseManager {
     public final LeaseTimeRange TTL_OFFER = new LeaseTimeRange(60, 600, 600);
     public final LeaseTimeRange TTL_LEASE = new LeaseTimeRange(60, 3600, 36000);
 
-    public static long getLeaseTime(@Nonnull LeaseTimeRange leaseTimeSecs, long requestedLeaseTimeSecs) {
+    @Nonnegative
+    public static long getLeaseTime(@Nonnull LeaseTimeRange leaseTimeSecs, @CheckForSigned long requestedLeaseTimeSecs) {
         if (requestedLeaseTimeSecs < 0)
             return leaseTimeSecs.defaultLeaseTime;
         if (requestedLeaseTimeSecs <= leaseTimeSecs.minLeaseTime)
