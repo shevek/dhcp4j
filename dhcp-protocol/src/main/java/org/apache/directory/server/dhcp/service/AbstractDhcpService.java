@@ -406,6 +406,8 @@ public abstract class AbstractDhcpService implements DhcpService {
             DhcpOption o = i.next();
             if (o instanceof ServerIdentifier)
                 continue;
+            if (o instanceof IpAddressLeaseTime)
+                continue;
             if (Arrays.binarySearch(tags, o.getTag()) >= 0)
                 continue;
             i.remove();
