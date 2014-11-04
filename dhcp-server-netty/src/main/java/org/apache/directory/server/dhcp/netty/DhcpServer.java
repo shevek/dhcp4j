@@ -36,6 +36,10 @@ public class DhcpServer {
         this.port = port;
     }
 
+    public DhcpServer(@Nonnull DhcpService service) {
+        this(service, DhcpService.SERVER_PORT);
+    }
+
     @PostConstruct
     public void start() throws IOException, InterruptedException {
         ThreadFactory factory = new DefaultThreadFactory("dhcp-server");

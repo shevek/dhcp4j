@@ -44,14 +44,6 @@ public class DhcpProtocolHandler extends IoHandlerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(DhcpProtocolHandler.class);
     /**
-     * Default DHCP client port
-     */
-    public static final int CLIENT_PORT = 68;
-    /**
-     * Default DHCP server port
-     */
-    public static final int SERVER_PORT = 67;
-    /**
      * The DHCP service implementation. The implementation is supposed to be
      * thread-safe.
      */
@@ -133,7 +125,7 @@ public class DhcpProtocolHandler extends IoHandlerAdapter {
             InterfaceAddress localAddress, int remotePort) {
         if (!AddressUtils.isZeroAddress(request.getRelayAgentAddress())) {
             // send to agent, if received via agent.
-            return new InetSocketAddress(request.getRelayAgentAddress(), SERVER_PORT);
+            return new InetSocketAddress(request.getRelayAgentAddress(), DhcpService.SERVER_PORT);
         } else if (reply.getMessageType() == MessageType.DHCPNAK) {
             // force broadcast for DHCPNAKs
             return new InetSocketAddress(localAddress.getBroadcastAddress(), remotePort);

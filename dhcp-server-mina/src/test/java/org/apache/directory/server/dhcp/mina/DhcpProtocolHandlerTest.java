@@ -50,8 +50,8 @@ public class DhcpProtocolHandlerTest {
         request.getOptions().setAddressOption(RequestedIpAddress.class, "0.0.0.0");
         DummySession session = new DummySession() {
             {
-                setLocalAddress(new InetSocketAddress("0.0.0.0", DhcpProtocolHandler.SERVER_PORT));
-                setRemoteAddress(new InetSocketAddress("0.0.0.0", DhcpProtocolHandler.CLIENT_PORT));
+                setLocalAddress(new InetSocketAddress("0.0.0.0", DhcpService.SERVER_PORT));
+                setRemoteAddress(new InetSocketAddress("0.0.0.0", DhcpService.CLIENT_PORT));
             }
 
             @Override

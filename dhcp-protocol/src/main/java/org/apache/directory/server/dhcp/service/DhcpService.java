@@ -35,6 +35,15 @@ import org.apache.directory.server.dhcp.messages.DhcpMessage;
 public interface DhcpService {
 
     /**
+     * Default DHCP client port
+     */
+    public static final int CLIENT_PORT = 68;
+    /**
+     * Default DHCP server port
+     */
+    public static final int SERVER_PORT = 67;
+
+    /**
      * Retrieve the reply to a given message. The reply may be zero, if the
      * message should be ignored.
      * @param localAddress TODO

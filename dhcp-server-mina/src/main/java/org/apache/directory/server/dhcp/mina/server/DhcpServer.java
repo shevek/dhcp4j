@@ -52,7 +52,7 @@ public class DhcpServer {
     }
 
     public DhcpServer(@Nonnull DhcpService service) {
-        this(service, DhcpProtocolHandler.SERVER_PORT, new Iterable<NetworkInterface>() {
+        this(service, DhcpService.SERVER_PORT, new Iterable<NetworkInterface>() {
             @Override
             public Iterator<NetworkInterface> iterator() {
                 try {
