@@ -6,7 +6,6 @@
 package org.apache.directory.server.dhcp.netty;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
@@ -43,10 +42,11 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
                 localAddress,
                 msg.sender(), request);
         if (reply != null) {
-            ByteBuffer buffer = ByteBuffer.allocate(1024);
+            ByteBuf buf = ctx.alloc().buffer(1024);
+            ByteBuffer buffer = buf.nioBuffer(buf.writerIndex(), buf.writableBytes());
             encoder.encode(buffer, reply);
             buffer.flip();
-            ByteBuf buf = Unpooled.wrappedBuffer(buffer);
+            buf.writerIndex(buf.writerIndex() + buffer.remaining());
             DatagramPacket packet = new DatagramPacket(buf, msg.sender());
             ctx.write(packet, ctx.voidPromise());
         }
