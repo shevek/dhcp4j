@@ -100,7 +100,6 @@ public class AddressUtils {
         }
 
         // Preconditions.checkArgument(carry == 0, "Carry overflow after addition.");
-
         return in;
     }
 
@@ -132,7 +131,6 @@ public class AddressUtils {
         }
 
         // Preconditions.checkArgument(carry == 0, "Carry overflow after subtraction.");
-
         return in;
     }
 
@@ -216,7 +214,7 @@ public class AddressUtils {
     }
 
     @Nonnull
-    public static byte[] toNetworkMask(@Nonnull int addressLength, @Nonnegative int netmask) {
+    public static byte[] toNetworkMask(@Nonnegative int addressLength, @Nonnegative int netmask) {
         byte[] out = new byte[addressLength];
         int idx = netmask / Byte.SIZE;
         if (idx < addressLength) {
@@ -226,6 +224,16 @@ public class AddressUtils {
             Arrays.fill(out, UnsignedBytes.MAX_VALUE);
         }
         return out;
+    }
+
+    @Nonnull
+    public static InetAddress toNetworkMaskAddress(@Nonnegative int addressLength, @Nonnegative int netmask) {
+        return toInetAddress(toNetworkMask(addressLength, netmask));
+    }
+
+    @Nonnull
+    public static InetAddress toNetworkMaskAddress(@Nonnull InetAddress in, @Nonnegative int netmask) {
+        return toNetworkMaskAddress(in.getAddress().length, netmask);
     }
 
     public static long toLong(@Nonnull byte[] data) {

@@ -36,8 +36,18 @@ public abstract class AbstractMaskedAddress {
     }
 
     @Nonnull
+    public InetAddress getNetworkAddress() {
+        return AddressUtils.toNetworkAddress(getAddress(), getNetmask());
+    }
+
+    @Nonnull
     public InetAddress getBroadcastAddress() {
         return AddressUtils.toBroadcastAddress(getAddress(), getNetmask());
+    }
+
+    @Nonnull
+    public InetAddress getNetmaskAddress() {
+        return AddressUtils.toNetworkMaskAddress(getAddress(), getNetmask());
     }
 
     @Override
