@@ -16,6 +16,7 @@ import java.util.Arrays;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import org.apache.directory.server.dhcp.messages.HardwareAddress;
 
 /**
  * All methods are big-endian (network-endian) and modify their arguments.
@@ -135,7 +136,7 @@ public class AddressUtils {
     }
 
     /**
-     * Determines whether the given address is actually the null address, or
+     * Determines whether the given address is null or
      * "0.0.0.0" (or the IPv6 equivalent).
      */
     public static boolean isZeroAddress(@CheckForNull byte[] address) {
@@ -148,7 +149,7 @@ public class AddressUtils {
     }
 
     /**
-     * Determines whether the given address is actually the null address, or
+     * Determines whether the given address is null or
      * "0.0.0.0" (or the IPv6 equivalent).
      */
     public static boolean isZeroAddress(@CheckForNull InetAddress address) {
@@ -157,7 +158,21 @@ public class AddressUtils {
         return isZeroAddress(address.getAddress());
     }
 
+    /**
+     * Determines whether the InetAddress contained within the given address is null or
+     * "0.0.0.0" (or the IPv6 equivalent).
+     */
     public static boolean isZeroAddress(@CheckForNull InetSocketAddress address) {
+        if (address == null)
+            return true;
+        return isZeroAddress(address.getAddress());
+    }
+
+    /**
+     * Determines whether the given address is null or
+     * 00:00:00:00:00:00.
+     */
+    public static boolean isZeroAddress(@CheckForNull HardwareAddress address) {
         if (address == null)
             return true;
         return isZeroAddress(address.getAddress());
