@@ -23,12 +23,18 @@ subprojects { project ->
 
 		testCompile 'junit:junit:4.11'
 
-		testRuntime 'org.slf4j:slf4j-jcl:1.7.7'
+		testRuntime 'org.slf4j:slf4j-simple:1.7.7'
+	}
+
+	tasks.withType(JavaCompile) {
+		options.incremental = true
 	}
 
 	test {
 		systemProperty 'org.apache.commons.logging.Log', 'org.apache.commons.logging.impl.SimpleLog'
 		systemProperty 'org.apache.commons.logging.simplelog.defaultlog', 'debug'
+		systemProperty 'org.slf4j.simpleLogger.logFile', 'System.out'
+		systemProperty 'org.slf4j.simpleLogger.defaultLogLevel', 'debug'
 		systemProperty 'jna.nosys', 'true'
 
 		testLogging {
@@ -52,5 +58,5 @@ subprojects { project ->
 
 // Generate wrapper, which is distributed as part of source to alleviate the need of installing gradle
 wrapper {
-	gradleVersion = '2.1'
+	gradleVersion = '2.2.1'
 }
