@@ -25,6 +25,9 @@ public abstract class AbstractMaskedAddress {
         this.netmask = netmask;
     }
 
+    /**
+     * Returns the fundamental address.
+     */
     @Nonnull
     public InetAddress getAddress() {
         return address;
@@ -35,16 +38,25 @@ public abstract class AbstractMaskedAddress {
         return netmask;
     }
 
+    /**
+     * Returns the first address in the network, something like x.y.z.0 for large enough netmasks.
+     */
     @Nonnull
     public InetAddress getNetworkAddress() {
         return AddressUtils.toNetworkAddress(getAddress(), getNetmask());
     }
 
+    /**
+     * Returns the last address in the network, something like x.y.z.255 for large enough netmasks.
+     */
     @Nonnull
     public InetAddress getBroadcastAddress() {
         return AddressUtils.toBroadcastAddress(getAddress(), getNetmask());
     }
 
+    /**
+     * Returns a netmask address, something like 255.255.v.w.
+     */
     @Nonnull
     public InetAddress getNetmaskAddress() {
         return AddressUtils.toNetworkMaskAddress(getAddress(), getNetmask());

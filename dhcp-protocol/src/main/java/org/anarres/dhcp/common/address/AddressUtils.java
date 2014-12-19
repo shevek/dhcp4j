@@ -26,6 +26,10 @@ import org.apache.directory.server.dhcp.messages.HardwareAddress;
  */
 public class AddressUtils {
 
+    /**
+     * @param in The array to increment.
+     * @return The same input array.
+     */
     @Nonnull
     public static byte[] increment(@Nonnull byte[] in) {
         for (int i = in.length - 1; i >= 0; i--) {
@@ -44,6 +48,10 @@ public class AddressUtils {
         return toInetAddress(increment(in.getAddress()));
     }
 
+    /**
+     * @param in The array to decrement.
+     * @return The same input array.
+     */
     @Nonnull
     public static byte[] decrement(@Nonnull byte[] in) {
         for (int i = in.length - 1; i >= 0; i--) {

@@ -10,6 +10,11 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
 /**
+ * An interface address: An address and a netmask.
+ * 
+ * The address may be any address, and the lowest and highest directly
+ * accessible addresses on the network may be retrieved.
+ *
  *
  * @author shevek
  */
@@ -21,5 +26,16 @@ public class InterfaceAddress extends AbstractMaskedAddress {
 
     public InterfaceAddress(@Nonnull java.net.InterfaceAddress address) {
         this(address.getAddress(), address.getNetworkPrefixLength());
+    }
+
+    /**
+     * Constructs a new {@link NetworkAddress} by canonicalizing the
+     * There isn't much computational reason to do this, as all of the
+     * properties of the returned {@link NetworkAddress} will agree with this
+     * InterfaceAddress except for the fundamental {@link #getAddress() address}.
+     */
+    @Nonnull
+    public NetworkAddress toNetworkAddress() {
+        return new NetworkAddress(getAddress(), getNetmask());
     }
 }
