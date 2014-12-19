@@ -21,6 +21,7 @@ package org.apache.directory.server.dhcp.mina.protocol;
 
 import java.net.InetSocketAddress;
 import javax.annotation.Nonnull;
+import org.anarres.dhcp.common.LogUtils;
 import org.anarres.dhcp.common.address.AddressUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
@@ -32,6 +33,7 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * Implementation of a DHCP protocol handler which delegates the work of
@@ -95,13 +97,18 @@ public class DhcpProtocolHandler extends IoHandlerAdapter {
         InetSocketAddress remoteAddress = (InetSocketAddress) session.getRemoteAddress();
 
         DhcpMessage request = (DhcpMessage) message;
-        DhcpMessage reply = dhcpService.getReplyFor(
-                localAddress, remoteAddress,
-                request);
+        MDC.put(LogUtils.MDC_DHCP_HARDWARE_ADDRESS, String.valueOf(request.getHardwareAddress()));
+        try {
+            DhcpMessage reply = dhcpService.getReplyFor(
+                    localAddress, remoteAddress,
+                    request);
 
-        if (reply != null) {
-            InetSocketAddress isa = determineMessageDestination(request, reply, localAddress, remoteAddress.getPort());
-            session.write(reply, isa);
+            if (reply != null) {
+                InetSocketAddress isa = determineMessageDestination(request, reply, localAddress, remoteAddress.getPort());
+                session.write(reply, isa);
+            }
+        } finally {
+            MDC.clear();
         }
     }
 

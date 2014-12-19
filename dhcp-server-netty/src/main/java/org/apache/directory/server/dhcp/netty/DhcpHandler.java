@@ -11,6 +11,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
+import org.anarres.dhcp.common.LogUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.io.DhcpMessageDecoder;
 import org.apache.directory.server.dhcp.io.DhcpMessageEncoder;
@@ -18,6 +19,7 @@ import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.service.DhcpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  *
@@ -38,17 +40,22 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
     protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {
         DhcpMessage request = decoder.decode(msg.content().nioBuffer());
         InterfaceAddress localAddress = new InterfaceAddress(msg.recipient().getAddress(), 0);
-        DhcpMessage reply = dhcpService.getReplyFor(
-                localAddress,
-                msg.sender(), request);
-        if (reply != null) {
-            ByteBuf buf = ctx.alloc().buffer(1024);
-            ByteBuffer buffer = buf.nioBuffer(buf.writerIndex(), buf.writableBytes());
-            encoder.encode(buffer, reply);
-            buffer.flip();
-            buf.writerIndex(buf.writerIndex() + buffer.remaining());
-            DatagramPacket packet = new DatagramPacket(buf, msg.sender());
-            ctx.write(packet, ctx.voidPromise());
+        MDC.put(LogUtils.MDC_DHCP_HARDWARE_ADDRESS, String.valueOf(request.getHardwareAddress()));
+        try {
+            DhcpMessage reply = dhcpService.getReplyFor(
+                    localAddress,
+                    msg.sender(), request);
+            if (reply != null) {
+                ByteBuf buf = ctx.alloc().buffer(1024);
+                ByteBuffer buffer = buf.nioBuffer(buf.writerIndex(), buf.writableBytes());
+                encoder.encode(buffer, reply);
+                buffer.flip();
+                buf.writerIndex(buf.writerIndex() + buffer.remaining());
+                DatagramPacket packet = new DatagramPacket(buf, msg.sender());
+                ctx.write(packet, ctx.voidPromise());
+            }
+        } finally {
+            MDC.clear();
         }
     }
 
@@ -62,5 +69,4 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
         LOG.error("Error on channel: " + cause, cause);
         // ctx.close();
     }
-
 }
