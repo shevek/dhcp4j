@@ -31,7 +31,7 @@ subprojects { project ->
 	}
 
 	javadoc {
-		options.links "http://docs.oracle.com/javase/6/docs/api/",
+		options.links "http://docs.oracle.com/javase/7/docs/api/",
 			"http://docs.oracle.com/javaee/7/api/",
 			"http://docs.guava-libraries.googlecode.com/git/javadoc/"
 	}
