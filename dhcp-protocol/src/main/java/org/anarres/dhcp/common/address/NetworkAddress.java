@@ -62,4 +62,9 @@ public class NetworkAddress extends AbstractMaskedAddress {
         byte[] network = AddressUtils.toNetworkAddress(address.getAddress(), getNetmask());
         return Arrays.equals(getAddress().getAddress(), network);
     }
+
+    @Nonnull
+    public InetAddressRange toRange() {
+        return new InetAddressRange(getNetworkAddress(), getBroadcastAddress());
+    }
 }

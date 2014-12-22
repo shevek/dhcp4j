@@ -21,6 +21,8 @@ public abstract class AbstractMaskedAddress {
     private final int netmask;
 
     public AbstractMaskedAddress(@Nonnull InetAddress address, @Nonnegative int netmask) {
+        if (netmask > address.getAddress().length * Byte.SIZE)
+            throw new IllegalArgumentException("Netmask too large: " + InetAddresses.toAddrString(address) + "/" + netmask);
         this.address = address;
         this.netmask = netmask;
     }
@@ -84,5 +86,4 @@ public abstract class AbstractMaskedAddress {
     public String toString() {
         return InetAddresses.toAddrString(getAddress()) + "/" + getNetmask();
     }
-
 }
