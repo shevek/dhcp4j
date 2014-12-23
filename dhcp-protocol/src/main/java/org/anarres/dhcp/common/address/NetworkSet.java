@@ -186,41 +186,26 @@ public class NetworkSet {
         // LOG.info("  +: Result is " + UnsignedBytes.join(" ", data));
     }
 
-    /** This returns a valid netmask, i.e. not +8 */
-    @CheckForSigned
-    private static int toLastSetBit(byte[] data) {
-        for (int i = data.length - 1; i > 0; i--) {
-            if (data[i] == 0)
-                continue;
-            // We have a nonzero byte. Compute real netmask, easier to debug here.
-            int indexOfLastSetBit = i * Byte.SIZE - Integer.numberOfTrailingZeros(UnsignedBytes.toInt(data[i])) - 1;
-            // LOG.info("Last set bit in " + UnsignedBytes.join(" ", data) + " is " + indexOfLastSetBit);
-            return indexOfLastSetBit;
-        }
-        return -1;  // One bit off the top.
-    }
-
+    /** endAddress is EXCLUSIVE. */
     private static void toNetworkList(@Nonnull List<NetworkAddress> out, @Nonnull Address startAddress, @Nonnull Address endAddress) {
-        // byte[] data = AddressUtils.decrement(address.getData());
-        // InetAddress end = InetAddress.getByAddress(data);
-
         while (startAddress.compareTo(endAddress) < 0) {
             // LOG.info("Reducing " + startAddress + " - " + endAddress);
             byte[] data = startAddress.getData();  // Remember, this is one byte overlength.
-            int indexOfLastSetBit = toLastSetBit(data);
+            int startNetmask = Math.max(AddressUtils.toNetmask(data) - 8, 0);
 
             byte[] tmp = new byte[data.length];
             // Search down from the first set bit for the highest bit we can add without overflowing endAddress.
             SEARCH:
             {
-                for (int netmask = indexOfLastSetBit + 1; netmask <= (data.length - 1) * Byte.SIZE; netmask++) {
+                // Subtract 1 to hit the first set bit.
+                for (int netmask = startNetmask - 1; netmask < (data.length - 1) * Byte.SIZE; netmask++) {
                     System.arraycopy(data, 0, tmp, 0, data.length);
-                    // Add Byte.SIZE to correct for the overlength; subtract 1 to hit the first set bit.
-                    _add_bit(tmp, netmask + Byte.SIZE - 1);
-                    // LOG.info("   Compare data=" + UnsignedBytes.join(" ", data) + " tmp=" + UnsignedBytes.join(" ", tmp));
+                    // Add Byte.SIZE to correct for the overlength
+                    _add_bit(tmp, netmask + Byte.SIZE);
+                    // LOG.info("   [" + netmask + "] Compare tmp=" + UnsignedBytes.join(" ", tmp) + " end=" + UnsignedBytes.join(" ", endAddress.getData()));
                     if (UnsignedBytes.lexicographicalComparator().compare(tmp, endAddress.getData()) <= 0) {
                         NetworkAddress networkAddress = new NetworkAddress(AddressUtils.toInetAddress(truncate(data)), netmask);
-                        // LOG.info("Adding " + networkAddress.toRangeString());
+                        // LOG.info("Adding " + networkAddress.toRange());
                         out.add(networkAddress);
                         break SEARCH;
                     }
@@ -252,7 +237,7 @@ public class NetworkSet {
 
     @Nonnull
     private static InetAddressRange toRange(@Nonnull Address start, @Nonnull Address end) {
-        InetAddress s = start.toInetAddress();
+        // This routine does two copies: One here and one in truncate().
         byte[] tmp = Arrays.copyOf(end.data, end.data.length);
         AddressUtils.decrement(tmp);
         return new InetAddressRange(start.toInetAddress(), AddressUtils.toInetAddress(truncate(tmp)));

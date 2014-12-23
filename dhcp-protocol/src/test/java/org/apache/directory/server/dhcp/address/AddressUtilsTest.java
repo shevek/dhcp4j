@@ -215,10 +215,21 @@ public class AddressUtilsTest {
     }
 
     public void testToNetworkMask(@Nonnull byte[] expect, @Nonnegative int mask) {
-        LOG.info(mask + " =? " + S(expect));
-        byte[] out = AddressUtils.toNetworkMask(4, mask);
-        LOG.info(mask + " == " + S(out));
-        assertArrayEquals(expect, out);
+        ADDR:
+        {
+            LOG.info(mask + " =? " + S(expect));
+            byte[] out = AddressUtils.toNetworkMask(4, mask);
+            LOG.info(mask + " == " + S(out));
+            assertArrayEquals(expect, out);
+        }
+
+        MASK:
+        {
+            LOG.info(S(expect) + " =? " + mask);
+            int out = AddressUtils.toNetmask(expect);
+            LOG.info(S(expect) + " == " + out);
+            assertEquals(mask, out);
+        }
     }
 
     @Test

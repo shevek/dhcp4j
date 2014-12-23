@@ -19,6 +19,8 @@ import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 
 /**
+ * General purpose address manipulation routines.
+ *
  * All methods are big-endian (network-endian) and modify their arguments.
  *
  * @see InetAddresses
@@ -27,6 +29,7 @@ import org.apache.directory.server.dhcp.messages.HardwareAddress;
 public class AddressUtils {
 
     /**
+     * Performs an arbitrary-precision increment of a byte array.
      * @param in The array to increment.
      * @return The same input array.
      */
@@ -43,12 +46,16 @@ public class AddressUtils {
         return in;
     }
 
+    /**
+     * Increments an InetAddress.
+     */
     @Nonnull
     public static InetAddress increment(@Nonnull InetAddress in) {
         return toInetAddress(increment(in.getAddress()));
     }
 
     /**
+     * Performs an arbitrary-precision decrement of a byte array.
      * @param in The array to decrement.
      * @return The same input array.
      */
@@ -65,6 +72,9 @@ public class AddressUtils {
         return in;
     }
 
+    /**
+     * Decrements an InetAddress.
+     */
     @Nonnull
     public static InetAddress decrement(@Nonnull InetAddress in) {
         return toInetAddress(decrement(in.getAddress()));
@@ -186,6 +196,12 @@ public class AddressUtils {
         return isZeroAddress(address.getAddress());
     }
 
+    /**
+     * Constructs an InetAddress from the given byte array.
+     * This is equivalent to {@link InetAddress#getByAddress(byte[])}
+     * but throws only unchecked exceptions.
+     * @throws RuntimeException if the underlying routine throws {@link UnknownHostException}.
+     */
     @Nonnull
     public static InetAddress toInetAddress(@Nonnull byte[] data) {
         try {
@@ -203,6 +219,11 @@ public class AddressUtils {
         return (-1 << (Byte.SIZE - (netmask % Byte.SIZE))) & 0xff;
     }
 
+    /**
+     * Zeros out all but the first <code>netmask</code> bits of
+     * <code>in</code>.
+     * This routine modifies its argument and returns it.
+     */
     @Nonnull
     public static byte[] toNetworkAddress(@Nonnull byte[] in, @Nonnegative int netmask) {
         int idx = netmask / Byte.SIZE;
@@ -236,6 +257,13 @@ public class AddressUtils {
         return toInetAddress(toBroadcastAddress(in.getAddress(), netmask));
     }
 
+    /**
+     * Constructs an address suitable for use as a mask.
+     *
+     * The return value is a big-endian byte array of the specified length.
+     * The high <code>netmask</code> bits will be 1 and the remaining low bits will be 0.
+     * For example, the address may be of the form 255.255.240.0 or ff:ff:fc:....
+     */
     @Nonnull
     public static byte[] toNetworkMask(@Nonnegative int addressLength, @Nonnegative int netmask) {
         byte[] out = new byte[addressLength];
@@ -254,9 +282,30 @@ public class AddressUtils {
         return toInetAddress(toNetworkMask(addressLength, netmask));
     }
 
+    /**
+     * Constructs a companion netmask address to the given InetAddress.
+     * @see #toNetworkMask(int, int)
+     */
     @Nonnull
     public static InetAddress toNetworkMaskAddress(@Nonnull InetAddress in, @Nonnegative int netmask) {
         return toNetworkMaskAddress(in.getAddress().length, netmask);
+    }
+
+    /**
+     * Converts an address of the form 255.255.240.0 into an CIDR netmask.
+     */
+    @Nonnegative
+    public static int toNetmask(@Nonnull byte[] netmaskAddress) {
+        for (int i = netmaskAddress.length - 1; i >= 0; i--) {
+            // Find the last nonzero byte.
+            if (netmaskAddress[i] == 0)
+                continue;
+            // We have a nonzero byte.
+            int byteValue = UnsignedBytes.toInt(netmaskAddress[i]);
+            int ntz = Integer.numberOfTrailingZeros(byteValue);
+            return (i + 1) * Byte.SIZE - ntz;
+        }
+        return 0;
     }
 
     public static long toLong(@Nonnull byte[] data) {

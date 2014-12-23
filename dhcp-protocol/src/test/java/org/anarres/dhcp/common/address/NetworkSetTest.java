@@ -21,9 +21,11 @@ public class NetworkSetTest {
     private static final Logger LOG = LoggerFactory.getLogger(NetworkSetTest.class);
 
     private static void addRange(@Nonnull NetworkSet set, @Nonnull String a, @Nonnull String b) {
-        set.addRange(
+        InetAddressRange range = new InetAddressRange(
                 InetAddresses.forString(a),
                 InetAddresses.forString(b));
+        LOG.info("Add (inclusive) " + range);
+        set.addRange(range);
     }
 
     private static void assertSize(@Nonnull NetworkSet set, int size) {
