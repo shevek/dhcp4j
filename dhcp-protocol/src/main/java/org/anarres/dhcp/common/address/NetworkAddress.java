@@ -12,12 +12,15 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
 /**
- * A network address: A base address and a netmask.
+ * A network address: A base address and a netmask representing a contiguous
+ * range of addresses.
  * 
  * The base address is canonicalized by the constructor to be the
  * first address in the permissible range. Thus {@link #getAddress()}
  * will NOT necessarily return the same {@link InetAddress} as was passed
  * to the constructor.
+ * 
+ * @see NetworkSet
  *
  * @author shevek
  */
@@ -56,6 +59,14 @@ public class NetworkAddress extends AbstractMaskedAddress {
         super(AddressUtils.toNetworkAddress(address, netmask), netmask);
     }
 
+    @Override
+    public InetAddress getNetworkAddress() {
+        return getAddress();
+    }
+
+    /**
+     * Returns true iff this network contains the given InetAddress.
+     */
     public boolean contains(@Nonnull InetAddress address) {
         if (!getAddress().getClass().equals(address.getClass()))
             return false;
@@ -63,6 +74,21 @@ public class NetworkAddress extends AbstractMaskedAddress {
         return Arrays.equals(getAddress().getAddress(), network);
     }
 
+    /**
+     * Returns true iff this network contains the whole of the given network.
+     * That is to say, the given network represents a sub-network of this network.
+     */
+    public boolean contains(@Nonnull NetworkAddress networkAddress) {
+        return contains(networkAddress.getNetworkAddress())
+                && contains(networkAddress.getBroadcastAddress());
+    }
+
+    /**
+     * Returns an InetAddressRange representation of this network's address range.
+     * 
+     * The InetAddressRange isn't as useful for computation, but can be
+     * useful for display or configuring other tools.
+     */
     @Nonnull
     public InetAddressRange toRange() {
         return new InetAddressRange(getNetworkAddress(), getBroadcastAddress());

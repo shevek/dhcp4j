@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * A NetworkSet: An optimal representation for a noncontiguous set of addresses.
  *
  * @author shevek
  */
