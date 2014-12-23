@@ -40,7 +40,8 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
     protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {
         DhcpMessage request = decoder.decode(msg.content().nioBuffer());
         InterfaceAddress localAddress = new InterfaceAddress(msg.recipient().getAddress(), 0);
-        MDC.put(LogUtils.MDC_DHCP_HARDWARE_ADDRESS, String.valueOf(request.getHardwareAddress()));
+        MDC.put(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS, String.valueOf(request.getHardwareAddress()));
+        MDC.put(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS, String.valueOf(localAddress));
         try {
             DhcpMessage reply = dhcpService.getReplyFor(
                     localAddress,
@@ -55,7 +56,8 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
                 ctx.write(packet, ctx.voidPromise());
             }
         } finally {
-            MDC.clear();
+            MDC.remove(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS);
+            MDC.remove(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS);
         }
     }
 

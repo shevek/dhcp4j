@@ -97,7 +97,8 @@ public class DhcpProtocolHandler extends IoHandlerAdapter {
         InetSocketAddress remoteAddress = (InetSocketAddress) session.getRemoteAddress();
 
         DhcpMessage request = (DhcpMessage) message;
-        MDC.put(LogUtils.MDC_DHCP_HARDWARE_ADDRESS, String.valueOf(request.getHardwareAddress()));
+        MDC.put(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS, String.valueOf(request.getHardwareAddress()));
+        MDC.put(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS, String.valueOf(localAddress));
         try {
             DhcpMessage reply = dhcpService.getReplyFor(
                     localAddress, remoteAddress,
@@ -108,7 +109,8 @@ public class DhcpProtocolHandler extends IoHandlerAdapter {
                 session.write(reply, isa);
             }
         } finally {
-            MDC.clear();
+            MDC.remove(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS);
+            MDC.remove(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS);
         }
     }
 
