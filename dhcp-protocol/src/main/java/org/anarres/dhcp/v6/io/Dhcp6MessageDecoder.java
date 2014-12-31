@@ -8,10 +8,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import org.anarres.dhcp.v6.messages.DhcpMessage;
+import org.anarres.dhcp.v6.messages.Dhcp6Message;
 import org.anarres.dhcp.v6.options.Dhcp6Option;
-import org.anarres.dhcp.v6.options.DhcpOptions;
-import org.anarres.dhcp.v6.options.DhcpOptionsRegistry;
+import org.anarres.dhcp.v6.options.Dhcp6Options;
+import org.anarres.dhcp.v6.options.Dhcp6OptionsRegistry;
 import org.anarres.dhcp.v6.options.UnrecognizedOption;
 import org.apache.directory.server.dhcp.DhcpException;
 
@@ -19,14 +19,14 @@ import org.apache.directory.server.dhcp.DhcpException;
  *
  * @author shevek
  */
-public class DhcpMessageDecoder {
+public class Dhcp6MessageDecoder {
 
-    private final DhcpOptionsRegistry registry = DhcpOptionsRegistry.getInstance();
+    private final Dhcp6OptionsRegistry registry = Dhcp6OptionsRegistry.getInstance();
 
-    public DhcpMessage decode(@Nonnull ByteBuffer buffer) throws DhcpException, IOException {
-        DhcpMessage message = new DhcpMessage();
+    public Dhcp6Message decode(@Nonnull ByteBuffer buffer) throws DhcpException, IOException {
+        Dhcp6Message message = new Dhcp6Message();
 
-        DhcpOptions options = decodeOptions(buffer);
+        Dhcp6Options options = decodeOptions(buffer);
         message.setOptions(options);
 
         return message;
@@ -40,8 +40,8 @@ public class DhcpMessageDecoder {
     }
 
     @Nonnull
-    private DhcpOptions decodeOptions(@Nonnull ByteBuffer message) throws DhcpException {
-        DhcpOptions options = new DhcpOptions();
+    public Dhcp6Options decodeOptions(@Nonnull ByteBuffer message) throws DhcpException {
+        Dhcp6Options options = new Dhcp6Options();
 
         while (message.hasRemaining()) {
             short tag = message.getShort();
@@ -56,7 +56,7 @@ public class DhcpMessageDecoder {
     @Nonnull
     private Dhcp6Option newOptionInstance(@Nonnegative short tag, @Nonnull byte[] value) throws DhcpException {
         Class<? extends Dhcp6Option> type = registry.getOptionType(tag);
-        Dhcp6Option option = (type != null) ? DhcpOptionsRegistry.newInstance(type) : new UnrecognizedOption(tag);
+        Dhcp6Option option = (type != null) ? Dhcp6OptionsRegistry.newInstance(type) : new UnrecognizedOption(tag);
         option.setData(value);
         return option;
     }

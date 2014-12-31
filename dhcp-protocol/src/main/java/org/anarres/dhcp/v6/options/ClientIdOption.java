@@ -5,6 +5,7 @@
 package org.anarres.dhcp.v6.options;
 
 /**
+ * http://tools.ietf.org/html/rfc3315#section-22.2
  *
  * @author shevek
  */

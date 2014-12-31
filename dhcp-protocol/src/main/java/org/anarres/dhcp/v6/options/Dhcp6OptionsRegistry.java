@@ -15,11 +15,11 @@ import javax.annotation.Nonnull;
  *
  * @author shevek
  */
-public class DhcpOptionsRegistry {
+public class Dhcp6OptionsRegistry {
 
     private static class Inner {
 
-        private static final DhcpOptionsRegistry INSTANCE = new DhcpOptionsRegistry();
+        private static final Dhcp6OptionsRegistry INSTANCE = new Dhcp6OptionsRegistry();
 
         private static final Class OPTION_CLASSES[] = {
 
@@ -34,7 +34,7 @@ public class DhcpOptionsRegistry {
     }
 
     @Nonnull
-    public static DhcpOptionsRegistry getInstance() {
+    public static Dhcp6OptionsRegistry getInstance() {
         return Inner.INSTANCE;
     }
 

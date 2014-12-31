@@ -5,8 +5,12 @@
 package org.anarres.dhcp.v6.options;
 
 import java.nio.ByteBuffer;
+import javax.annotation.Nonnull;
+import org.anarres.dhcp.v6.io.Dhcp6MessageDecoder;
+import org.apache.directory.server.dhcp.DhcpException;
 
 /**
+ * http://tools.ietf.org/html/rfc3315#section-22.4
  *
  * @author shevek
  */
@@ -42,5 +46,13 @@ public class IaNaOption extends Dhcp6Option {
     public int getT2() {
         ByteBuffer buf = ByteBuffer.wrap(getData());
         return buf.getInt(8);
+    }
+
+    @Nonnull
+    public Dhcp6Options getOptions() throws DhcpException {
+        byte[] data = getData();
+        ByteBuffer buf = ByteBuffer.wrap(data, 12, data.length - 12);
+        Dhcp6MessageDecoder decoder = new Dhcp6MessageDecoder();
+        return decoder.decodeOptions(buf);
     }
 }

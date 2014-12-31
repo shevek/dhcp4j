@@ -5,24 +5,24 @@
 package org.anarres.dhcp.v6.messages;
 
 import javax.annotation.Nonnull;
-import org.anarres.dhcp.v6.options.DhcpOptions;
+import org.anarres.dhcp.v6.options.Dhcp6Options;
 
 /**
  *
  * @author shevek
  */
-public class DhcpMessage {
+public class Dhcp6Message {
 
-    private DhcpMessageType messageType;
+    private Dhcp6MessageType messageType;
     private int transactionId;
-    private DhcpOptions options = new DhcpOptions();
+    private Dhcp6Options options = new Dhcp6Options();
 
     @Nonnull
-    public DhcpMessageType getMessageType() {
+    public Dhcp6MessageType getMessageType() {
         return messageType;
     }
 
-    public void setMessageType(@Nonnull DhcpMessageType messageType) {
+    public void setMessageType(@Nonnull Dhcp6MessageType messageType) {
         this.messageType = messageType;
     }
 
@@ -35,11 +35,11 @@ public class DhcpMessage {
     }
 
     @Nonnull
-    public DhcpOptions getOptions() {
+    public Dhcp6Options getOptions() {
         return options;
     }
 
-    public void setOptions(@Nonnull DhcpOptions options) {
+    public void setOptions(@Nonnull Dhcp6Options options) {
         this.options = options;
     }
 

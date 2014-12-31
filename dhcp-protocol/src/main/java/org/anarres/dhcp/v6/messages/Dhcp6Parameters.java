@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author shevek
  */
-public enum DhcpParameters6 {
+public enum Dhcp6Parameters {
 
     SOL_MAX_DELAY(1, TimeUnit.SECONDS, "Max delay of first Solicit"),
     SOL_TIMEOUT(1, TimeUnit.SECONDS, "Initial Solicit timeout"),
@@ -39,11 +39,11 @@ public enum DhcpParameters6 {
     private final long value;
     private final String description;
 
-    private DhcpParameters6(int value, TimeUnit unit, String description) {
+    private Dhcp6Parameters(int value, TimeUnit unit, String description) {
         this(unit.toMillis(value), description);
     }
 
-    private DhcpParameters6(long value, String description) {
+    private Dhcp6Parameters(long value, String description) {
         this.value = value;
         this.description = description;
     }

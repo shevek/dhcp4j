@@ -25,7 +25,7 @@ import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
-public class DhcpOptions implements Iterable<Dhcp6Option> {
+public class Dhcp6Options implements Iterable<Dhcp6Option> {
 
     private final Map<Short, Dhcp6Option> options = new HashMap<Short, Dhcp6Option>();
 
@@ -40,13 +40,13 @@ public class DhcpOptions implements Iterable<Dhcp6Option> {
 
     @CheckForNull
     public <T extends Dhcp6Option> T get(@Nonnull Class<T> type) {
-        DhcpOptionsRegistry registry = DhcpOptionsRegistry.getInstance();
+        Dhcp6OptionsRegistry registry = Dhcp6OptionsRegistry.getInstance();
         Dhcp6Option option = get(registry.getOptionTag(type));
         if (option == null)
             return null;
         if (type.isInstance(option))
             return type.cast(option);
-        T impl = DhcpOptionsRegistry.newInstance(type);
+        T impl = Dhcp6OptionsRegistry.newInstance(type);
         impl.setData(option.getData());
         return impl;
     }
@@ -73,7 +73,7 @@ public class DhcpOptions implements Iterable<Dhcp6Option> {
      * @param type
      */
     public void remove(@Nonnull Class<? extends Dhcp6Option> type) {
-        DhcpOptionsRegistry registry = DhcpOptionsRegistry.getInstance();
+        Dhcp6OptionsRegistry registry = Dhcp6OptionsRegistry.getInstance();
         remove(registry.getOptionTag(type));
     }
 
