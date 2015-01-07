@@ -86,7 +86,7 @@ public class AddressUtils {
                 break;
             value += UnsignedBytes.toInt(in[i]);
             in[i] = (byte) (value & 0xFF);
-            value >>= Byte.SIZE;
+            value >>>= Byte.SIZE;
         }
         // Preconditions.checkArgument(value == 0, "Carry overflow after arithmetic.");
     }

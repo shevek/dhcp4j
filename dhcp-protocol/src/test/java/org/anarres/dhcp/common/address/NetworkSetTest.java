@@ -5,6 +5,7 @@
 package org.anarres.dhcp.common.address;
 
 import com.google.common.net.InetAddresses;
+import java.net.InetAddress;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.junit.Test;
@@ -29,12 +30,13 @@ public class NetworkSetTest {
     }
 
     private static void assertSize(@Nonnull NetworkSet set, int size) {
-        List<NetworkAddress> networks = set.toNetworkList();
-        LOG.info(String.valueOf(networks));
-        assertEquals(size, networks.size());
-
         List<InetAddressRange> ranges = set.toAddressRangeList();
         LOG.info(String.valueOf(ranges));
+
+        List<NetworkAddress> networks = set.toNetworkList();
+        for (NetworkAddress network : networks)
+            LOG.info(network.toString() + " = " + network.toRange());
+        assertEquals(size, networks.size());
     }
 
     @Test
@@ -48,8 +50,11 @@ public class NetworkSetTest {
     public void testNetworkSetRemove() throws Exception {
         NetworkSet set = new NetworkSet();
         addRange(set, "0.0.0.0", "255.255.255.255");
-        set.removeAddress(InetAddresses.forString("1.2.3.4"));
+        InetAddress address = InetAddresses.forString("1.2.3.4");
+        set.removeAddress(address);
         set.removeNetwork(NetworkAddress.forString("123.45.6.7/25"));
         assertSize(set, 54);
+        for (NetworkAddress network : set.toNetworkList())
+            assertFalse("Network " + network + " should not contain " + address, network.contains(address));
     }
 }

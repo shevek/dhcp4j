@@ -189,6 +189,7 @@ public class NetworkSet {
 
     /** endAddress is EXCLUSIVE. */
     private static void toNetworkList(@Nonnull List<NetworkAddress> out, @Nonnull Address startAddress, @Nonnull Address endAddress) {
+        // LOG.info("(root) Reducing " + startAddress + " - " + endAddress);
         while (startAddress.compareTo(endAddress) < 0) {
             // LOG.info("Reducing " + startAddress + " - " + endAddress);
             byte[] data = startAddress.getData();  // Remember, this is one byte overlength.
@@ -198,11 +199,11 @@ public class NetworkSet {
             // Search down from the first set bit for the highest bit we can add without overflowing endAddress.
             SEARCH:
             {
-                // Subtract 1 to hit the first set bit.
-                for (int netmask = startNetmask - 1; netmask < (data.length - 1) * Byte.SIZE; netmask++) {
+                for (int netmask = startNetmask; netmask < (data.length - 1) * Byte.SIZE + 1; netmask++) {
                     System.arraycopy(data, 0, tmp, 0, data.length);
                     // Add Byte.SIZE to correct for the overlength
-                    _add_bit(tmp, netmask + Byte.SIZE);
+                    // Subtract 1 to hit the set bit.
+                    _add_bit(tmp, netmask + Byte.SIZE - 1);
                     // LOG.info("   [" + netmask + "] Compare tmp=" + UnsignedBytes.join(" ", tmp) + " end=" + UnsignedBytes.join(" ", endAddress.getData()));
                     if (UnsignedBytes.lexicographicalComparator().compare(tmp, endAddress.getData()) <= 0) {
                         NetworkAddress networkAddress = new NetworkAddress(AddressUtils.toInetAddress(truncate(data)), netmask);
