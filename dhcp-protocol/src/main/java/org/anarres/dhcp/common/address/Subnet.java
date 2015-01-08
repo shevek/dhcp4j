@@ -5,6 +5,7 @@
 package org.anarres.dhcp.common.address;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedBytes;
 import java.net.InetAddress;
 import java.util.Comparator;
@@ -22,19 +23,18 @@ public class Subnet {
 
     private static final Logger LOG = LoggerFactory.getLogger(Subnet.class);
     @Nonnull
-    private NetworkAddress networkAddress;
+    private final NetworkAddress networkAddress;
     @Nonnull
     private InetAddress rangeStart;
     @Nonnull
     private InetAddress rangeEnd;
     @Nonnegative
-    private transient long rangeSize = -1;
-
-    public Subnet() {
-    }
+    private transient long rangeSize;
 
     public Subnet(@Nonnull NetworkAddress networkAddress, @CheckForNull InetAddress rangeStart, @CheckForNull InetAddress rangeEnd) {
         this.networkAddress = networkAddress;
+        Preconditions.checkArgument(networkAddress.contains(rangeStart), "Range start not contained within network.");
+        Preconditions.checkArgument(networkAddress.contains(rangeEnd), "Range end not contained within network.");
         _setRangeStart(rangeStart);
         _setRangeEnd(rangeEnd);
         setRangeSize();
@@ -51,7 +51,7 @@ public class Subnet {
     }
 
     // @Attribute
-    protected void _setRangeStart(InetAddress rangeStart) {
+    protected final void _setRangeStart(InetAddress rangeStart) {
         if (rangeStart == null)
             rangeStart = AddressUtils.increment(networkAddress.getAddress());
         if (!networkAddress.contains(rangeStart))
@@ -70,7 +70,7 @@ public class Subnet {
     }
 
     // @Attribute
-    protected void _setRangeEnd(InetAddress rangeEnd) {
+    protected final void _setRangeEnd(InetAddress rangeEnd) {
         if (rangeEnd == null)
             rangeEnd = AddressUtils.decrement(networkAddress.getBroadcastAddress());
         if (!networkAddress.contains(rangeEnd))
@@ -89,7 +89,7 @@ public class Subnet {
     }
 
     // @Commit
-    protected void setRangeSize() {
+    protected final void setRangeSize() {
         InetAddress start = getRangeStart();
         InetAddress end = getRangeEnd();
         byte[] range = AddressUtils.subtract(end.getAddress(), start.getAddress());

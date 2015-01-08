@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
  */
 public enum Dhcp6MessageType {
 
-    DHCP_UNRECOGNIZED(-1),
+    DHCP_UNRECOGNIZED(0),
     /** RFC3315 */
     DHCP_SOLICIT(1),
     /** RFC3315 */

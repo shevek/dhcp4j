@@ -87,11 +87,19 @@ public class Lease {
         return clientAddress;
     }
 
+    public void setClientAddress(InetAddress clientAddress) {
+        this.clientAddress = clientAddress;
+    }
+
     /**
      * @return InetAddress
      */
     public InetAddress getNextServerAddress() {
         return nextServerAddress;
+    }
+
+    public void setNextServerAddress(InetAddress nextServerAddress) {
+        this.nextServerAddress = nextServerAddress;
     }
 
     /**
@@ -137,10 +145,6 @@ public class Lease {
 
     public void setExpires(long expires) {
         this.expires = expires;
-    }
-
-    public void setClientAddress(InetAddress clientAddress) {
-        this.clientAddress = clientAddress;
     }
 
 }
