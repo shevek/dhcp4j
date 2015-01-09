@@ -33,8 +33,10 @@ public class Subnet {
 
     public Subnet(@Nonnull NetworkAddress networkAddress, @CheckForNull InetAddress rangeStart, @CheckForNull InetAddress rangeEnd) {
         this.networkAddress = networkAddress;
-        Preconditions.checkArgument(networkAddress.contains(rangeStart), "Range start not contained within network.");
-        Preconditions.checkArgument(networkAddress.contains(rangeEnd), "Range end not contained within network.");
+        if (rangeStart != null)
+            Preconditions.checkArgument(networkAddress.contains(rangeStart), "Range start not contained within network.");
+        if (rangeEnd != null)
+            Preconditions.checkArgument(networkAddress.contains(rangeEnd), "Range end not contained within network.");
         _setRangeStart(rangeStart);
         _setRangeEnd(rangeEnd);
         setRangeSize();
