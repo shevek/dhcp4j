@@ -22,6 +22,7 @@ package org.apache.directory.server.dhcp.messages;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+import java.beans.PropertyEditorSupport;
 import java.text.ParseException;
 import javax.annotation.Nonnull;
 
@@ -32,6 +33,25 @@ import javax.annotation.Nonnull;
  */
 public final class HardwareAddress {
 
+    public static class PropertyEditor extends PropertyEditorSupport {
+
+        @Override
+        public String getJavaInitializationString() {
+            String text = getAsText();
+            if (text == null)
+                return "null";
+            else
+                return "HardwareAddress.fromString(\"" + text + "\")";
+        }
+
+        @Override
+        public void setAsText(String text) {
+            if (text == null)
+                setValue(null);
+            else
+                setValue(HardwareAddress.fromString(text));
+        }
+    }
     /**
      * [htype] Hardware address type, see ARP section in "Assigned Numbers" RFC;
      * e.g., '1' = 10mb ethernet.
@@ -128,7 +148,7 @@ public final class HardwareAddress {
      * @see java.lang.Object#toString()
      */
     public String getNativeRepresentation() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         switch (type) {
             case 1:
@@ -166,7 +186,7 @@ public final class HardwareAddress {
      */
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(type);
         sb.append("/");
 
