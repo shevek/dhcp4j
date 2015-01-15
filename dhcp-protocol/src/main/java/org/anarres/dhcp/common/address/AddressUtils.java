@@ -91,7 +91,7 @@ public class AddressUtils {
         // Preconditions.checkArgument(value == 0, "Carry overflow after arithmetic.");
     }
 
-    /** Big-endian. */
+    /** Big-endian. Treats value as unsigned. */
     @Nonnull
     public static byte[] add(@Nonnull byte[] in, @Nonnegative long value) {
         Preconditions.checkArgument(Long.SIZE - Long.numberOfLeadingZeros(value) <= in.length * Byte.SIZE,
@@ -100,6 +100,7 @@ public class AddressUtils {
         return in;
     }
 
+    /** Treats value as unsigned. */
     @Nonnull
     public static InetAddress add(@Nonnull InetAddress in, @Nonnegative long value) {
         return toInetAddress(add(in.getAddress(), value));

@@ -65,6 +65,22 @@ public class NetworkAddress extends AbstractMaskedAddress {
     }
 
     /**
+     * Returns the <code>index</code>th machine address in this network.
+     *
+     * The 0th address is the network address. The first usable address is index 1.
+     * Treats index as unsigned.
+     * If your network is larger than 2^64 machines, you are out of luck
+     * with this method.
+     *
+     * @see AddressUtils#add(InetAddress, long)
+     */
+    @Nonnull
+    public InterfaceAddress getMachineAddress(long index) {
+        InetAddress address = AddressUtils.add(getNetworkAddress(), index);
+        return new InterfaceAddress(address, getNetmask());
+    }
+
+    /**
      * Returns true iff this network contains the given InetAddress.
      */
     public boolean contains(@Nonnull InetAddress address) {

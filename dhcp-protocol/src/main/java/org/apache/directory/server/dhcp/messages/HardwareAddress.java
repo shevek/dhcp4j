@@ -147,6 +147,7 @@ public final class HardwareAddress {
      * 
      * @see java.lang.Object#toString()
      */
+    @Nonnull
     public String getNativeRepresentation() {
         StringBuilder sb = new StringBuilder();
 
