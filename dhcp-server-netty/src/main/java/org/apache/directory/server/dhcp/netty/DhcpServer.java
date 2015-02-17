@@ -14,12 +14,15 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.concurrent.ThreadFactory;
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.apache.directory.server.dhcp.service.DhcpService;
+import org.apache.directory.server.dhcp.service.manager.LeaseManager;
+import org.apache.directory.server.dhcp.service.manager.LeaseManagerDhcpService;
 
 /**
  *
@@ -28,16 +31,24 @@ import org.apache.directory.server.dhcp.service.DhcpService;
 public class DhcpServer {
 
     private final DhcpService service;
-    private final int port;
+    private final SocketAddress address;
     private Channel channel;
 
-    public DhcpServer(@Nonnull DhcpService service, @Nonnegative int port) {
+    public DhcpServer(@Nonnull DhcpService service, @Nonnull SocketAddress address) {
         this.service = service;
-        this.port = port;
+        this.address = address;
     }
 
     public DhcpServer(@Nonnull DhcpService service) {
-        this(service, DhcpService.SERVER_PORT);
+        this(service, new InetSocketAddress(DhcpService.SERVER_PORT));
+    }
+
+    public DhcpServer(@Nonnull LeaseManager manager, @Nonnull SocketAddress address) {
+        this(new LeaseManagerDhcpService(manager), address);
+    }
+
+    public DhcpServer(@Nonnull LeaseManager manager) {
+        this(new LeaseManagerDhcpService(manager));
     }
 
     @PostConstruct
@@ -50,7 +61,7 @@ public class DhcpServer {
         b.channel(NioDatagramChannel.class);
         b.option(ChannelOption.SO_BROADCAST, true);
         b.handler(new DhcpHandler(service));
-        channel = b.bind(port).sync().channel();
+        channel = b.bind(address).sync().channel();
     }
 
     @PreDestroy

@@ -25,36 +25,25 @@ import org.apache.directory.server.dhcp.options.OptionsField;
 
 /**
  * Leases represent a temporary assignment of an IP address to a DHCP client.
- * 
+ *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
 public class Lease {
 
-    /** Lease state: newly created */
-    public static final int STATE_NEW = 1;
+    public static enum LeaseState {
 
-    /** Lease state: offered to client */
-    public static final int STATE_OFFERED = 2;
-
-    /** Lease state: active - assigned to client */
-    public static final int STATE_ACTIVE = 3;
-
-    /** Lease state: released by client */
-    public static final int STATE_RELEASED = 4;
-
-    /** Lease state: expired */
-    public static final int STATE_EXPIRED = 5;
-
-    /**
-     * The lease's state.
-     * 
-     * @see #STATE_NEW
-     * @see #STATE_OFFERED
-     * @see #STATE_ACTIVE
-     * @see #STATE_RELEASED
-     * @see #STATE_EXPIRED
-     */
-    private int state;
+        /** Lease state: newly created */
+        NEW,
+        /** Lease state: offered to client */
+        OFFERED,
+        /** Lease state: active - assigned to client */
+        ACTIVE,
+        /** Lease state: released by client */
+        RELEASED,
+        /** Lease state: expired */
+        EXPIRED;
+    }
+    private LeaseState state;
 
     /**
      * The assigned client address.
@@ -112,14 +101,14 @@ public class Lease {
     /**
      * @return int
      */
-    public int getState() {
+    public LeaseState getState() {
         return state;
     }
 
     /**
      * @param state
      */
-    public void setState(int state) {
+    public void setState(LeaseState state) {
         this.state = state;
     }
 

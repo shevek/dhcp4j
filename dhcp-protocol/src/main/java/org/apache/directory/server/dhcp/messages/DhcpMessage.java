@@ -20,6 +20,7 @@
 package org.apache.directory.server.dhcp.messages;
 
 import java.net.InetAddress;
+import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.options.OptionsField;
 
 /**
@@ -125,14 +126,14 @@ public class DhcpMessage {
     private HardwareAddress hardwareAddress;
 
     /**
-     * Create a default dhcp message.
+     * Creates a default dhcp message.
      */
     public DhcpMessage() {
 
     }
 
     /**
-     * Create a DHCP message based on the supplied values.
+     * Creates a DHCP message based on the supplied values.
      * 
      * @param messageType
      * @param op
@@ -275,11 +276,14 @@ public class DhcpMessage {
         this.op = op;
     }
 
+    /** Returns the {@link HardwareAddress} of the requesting client. */
+    @Nonnull
     public HardwareAddress getHardwareAddress() {
         return hardwareAddress;
     }
 
-    public void setHardwareAddress(HardwareAddress hardwareAddress) {
+    /** Sets the {@link HardwareAddress} of the requesting client. */
+    public void setHardwareAddress(@Nonnull HardwareAddress hardwareAddress) {
         this.hardwareAddress = hardwareAddress;
     }
 

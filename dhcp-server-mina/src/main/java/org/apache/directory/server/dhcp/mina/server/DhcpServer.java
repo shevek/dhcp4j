@@ -5,16 +5,14 @@
  */
 package org.apache.directory.server.dhcp.mina.server;
 
-import com.google.common.base.Throwables;
-import com.google.common.collect.Iterators;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -51,20 +49,11 @@ public class DhcpServer {
         this.handler = new DhcpProtocolHandler(service);
     }
 
-    public DhcpServer(@Nonnull DhcpService service) {
-        this(service, DhcpService.SERVER_PORT, new Iterable<NetworkInterface>() {
-            @Override
-            public Iterator<NetworkInterface> iterator() {
-                try {
-                    return Iterators.forEnumeration(NetworkInterface.getNetworkInterfaces());
-                } catch (SocketException e) {
-                    throw Throwables.propagate(e);
-                }
-            }
-        });
+    public DhcpServer(@Nonnull DhcpService service) throws SocketException {
+        this(service, DhcpService.SERVER_PORT, Collections.list(NetworkInterface.getNetworkInterfaces()));
     }
 
-    public DhcpServer(@Nonnull LeaseManager leaseManager) {
+    public DhcpServer(@Nonnull LeaseManager leaseManager) throws SocketException {
         this(new LeaseManagerDhcpService(leaseManager));
     }
 

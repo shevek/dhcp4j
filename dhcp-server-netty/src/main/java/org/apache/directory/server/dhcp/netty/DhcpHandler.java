@@ -38,7 +38,11 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {
+        if (LOG.isDebugEnabled())
+            LOG.debug("{} RECV {}", ctx.channel().localAddress(), msg);
         DhcpMessage request = decoder.decode(msg.content().nioBuffer());
+        if (LOG.isDebugEnabled())
+            LOG.debug("{} READ {}", ctx.channel().localAddress(), request);
         InterfaceAddress localAddress = new InterfaceAddress(msg.recipient().getAddress(), 0);
         MDC.put(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS, String.valueOf(request.getHardwareAddress()));
         MDC.put(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS, String.valueOf(localAddress));
@@ -47,12 +51,16 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
                     localAddress,
                     msg.sender(), request);
             if (reply != null) {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("{} WRITE {}", ctx.channel().localAddress(), reply);
                 ByteBuf buf = ctx.alloc().buffer(1024);
                 ByteBuffer buffer = buf.nioBuffer(buf.writerIndex(), buf.writableBytes());
                 encoder.encode(buffer, reply);
                 buffer.flip();
                 buf.writerIndex(buf.writerIndex() + buffer.remaining());
                 DatagramPacket packet = new DatagramPacket(buf, msg.sender());
+                if (LOG.isDebugEnabled())
+                    LOG.debug("{} SEND {}", ctx.channel().localAddress(), packet);
                 ctx.write(packet, ctx.voidPromise());
             }
         } finally {

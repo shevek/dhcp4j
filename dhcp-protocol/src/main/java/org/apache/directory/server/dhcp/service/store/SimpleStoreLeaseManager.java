@@ -74,7 +74,7 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
     }
 
     @Nonnull
-    protected DhcpMessage newReply(
+    public static DhcpMessage newReply(
             @Nonnull InterfaceAddress localAddress,
             @Nonnull DhcpMessage request,
             @Nonnull MessageType type,
@@ -102,7 +102,7 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
         // TODO: Allocate a new address.
         lease = new Lease();
         lease.setHardwareAddress(hardwareAddress);
-        lease.setState(Lease.STATE_OFFERED);
+        lease.setState(Lease.LeaseState.OFFERED);
         lease.setClientAddress(clientRequestedAddress);
         lease.setExpires(System.currentTimeMillis() / 1000 + leaseTimeSecs);
         lease.getOptions().setAddressOption(SubnetMask.class, subnet.getNetmask());
@@ -120,7 +120,7 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
         if (!Objects.equal(lease.getClientAddress(), clientRequestedAddress))
             return null;
 
-        lease.setState(Lease.STATE_ACTIVE);
+        lease.setState(Lease.LeaseState.ACTIVE);
         long leaseTimeSecs = getLeaseTime(TTL_LEASE, clientRequestedExpirySecs);
         lease.setExpires(System.currentTimeMillis() / 1000 + leaseTimeSecs);
 
