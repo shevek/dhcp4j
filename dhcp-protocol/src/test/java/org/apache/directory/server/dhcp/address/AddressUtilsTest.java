@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 
 /**
  * Byte array operations compatible with Cassandra.
- * 
+ *
  * Cassandra uses FastByteComparisons which is an adaptation of {@link UnsignedBytes}.
  * Therefore, this treats bytes as unsigned.
  *

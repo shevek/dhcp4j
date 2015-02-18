@@ -37,8 +37,17 @@ public class FixedStoreLeaseManager extends AbstractLeaseManager {
         return leases.get(hardwareAddress);
     }
 
-    public void addLease(@Nonnull HardwareAddress hardwareAddress, @Nonnull Lease lease) {
+    @Nonnull
+    public Lease addLease(@Nonnull HardwareAddress hardwareAddress, @Nonnull Lease lease) {
         leases.put(hardwareAddress, lease);
+        return lease;
+    }
+
+    @Nonnull
+    public Lease addLease(@Nonnull HardwareAddress hardwareAddress, @Nonnull InetAddress clientAddress) {
+        Lease lease = new Lease();
+        lease.setClientAddress(clientAddress);
+        return addLease(hardwareAddress, lease);
     }
 
     @Override
@@ -49,6 +58,7 @@ public class FixedStoreLeaseManager extends AbstractLeaseManager {
         if (lease == null)
             return null;
         lease.setState(Lease.LeaseState.OFFERED);
+        lease.setExpires(System.currentTimeMillis() / 1000 + 3600);
         return SimpleStoreLeaseManager.newReply(localAddress, request, MessageType.DHCPOFFER, lease);
     }
 
@@ -60,6 +70,7 @@ public class FixedStoreLeaseManager extends AbstractLeaseManager {
         if (lease == null)
             return null;
         lease.setState(Lease.LeaseState.ACTIVE);
+        lease.setExpires(System.currentTimeMillis() / 1000 + 3600);
         return SimpleStoreLeaseManager.newReply(localAddress, request, MessageType.DHCPACK, lease);
     }
 

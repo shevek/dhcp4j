@@ -4,9 +4,12 @@
  */
 package org.apache.directory.server.dhcp.mina;
 
+import com.google.common.net.InetAddresses;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import javax.annotation.Nonnull;
+import org.anarres.dhcp.common.address.InterfaceAddress;
+import org.apache.directory.server.dhcp.io.DhcpInterfaceResolver;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.HardwareAddressType;
@@ -62,7 +65,6 @@ public class DhcpProtocolHandlerTest {
 
                 // IoFilterChain filterChain = getFilterChain();
                 // filterChain.fireFilterWrite(request);
-
                 LOG.info("Message " + getWrittenMessages() + " is " + message);
                 return future;
             }
@@ -70,7 +72,8 @@ public class DhcpProtocolHandlerTest {
 
         LeaseManager manager = new SimpleStoreLeaseManager();
         DhcpService service = new LeaseManagerDhcpService(manager);
-        DhcpProtocolHandler protocolHandler = new DhcpProtocolHandler(service);
+        InterfaceAddress address = new InterfaceAddress(InetAddresses.forString("10.1.2.3"), 24);
+        DhcpProtocolHandler protocolHandler = new DhcpProtocolHandler(service, new DhcpInterfaceResolver());
         protocolHandler.messageReceived(session, request);
         // Right now, this isn't configured, so it doesn't respond.
         // assertEquals(1, session.getWrittenMessages());

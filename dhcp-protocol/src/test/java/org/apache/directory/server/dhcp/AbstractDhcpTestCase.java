@@ -19,10 +19,13 @@
  */
 package org.apache.directory.server.dhcp;
 
+import com.google.common.io.Resources;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URL;
 import java.nio.ByteBuffer;
+import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -30,10 +33,9 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractDhcpTestCase {
 
-    protected static final int MINIMUM_DHCP_DATAGRAM_SIZE = 576;
-    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(AbstractDhcpTestCase.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractDhcpTestCase.class);
 
-    protected void print(DhcpMessage message) {
+    protected void print(@Nonnull DhcpMessage message) {
         LOG.debug(String.valueOf(message.getMessageType()));
         LOG.debug(String.valueOf(message.getHardwareAddress()));
         LOG.debug(String.valueOf(message.getTransactionId()));
@@ -48,18 +50,10 @@ public abstract class AbstractDhcpTestCase {
         LOG.debug(String.valueOf(message.getOptions()));
     }
 
-    protected ByteBuffer getByteBufferFromFile(String file) throws IOException {
-        InputStream is = getClass().getResourceAsStream(file);
-
-        byte[] bytes = new byte[MINIMUM_DHCP_DATAGRAM_SIZE];
-
-        int offset = 0;
-        int numRead = 0;
-        while (offset < bytes.length && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
-            offset += numRead;
-        }
-
-        is.close();
-        return ByteBuffer.wrap(bytes);
+    @Nonnull
+    protected ByteBuffer getByteBufferFromFile(@Nonnull String file) throws IOException {
+        URL resource = Resources.getResource(getClass(), file);
+        byte[] data = Resources.toByteArray(resource);
+        return ByteBuffer.wrap(data);
     }
 }

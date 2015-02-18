@@ -17,9 +17,10 @@
  *  under the License. 
  *  
  */
-package org.apache.directory.server.dhcp;
+package org.apache.directory.server.dhcp.io;
 
 import java.nio.ByteBuffer;
+import org.apache.directory.server.dhcp.AbstractDhcpTestCase;
 import org.apache.directory.server.dhcp.io.DhcpMessageDecoder;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.junit.Test;

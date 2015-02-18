@@ -14,37 +14,41 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.concurrent.ThreadFactory;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import org.apache.directory.server.dhcp.io.DhcpInterfaceResolver;
 import org.apache.directory.server.dhcp.service.DhcpService;
 import org.apache.directory.server.dhcp.service.manager.LeaseManager;
 import org.apache.directory.server.dhcp.service.manager.LeaseManagerDhcpService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author shevek
  */
-public class DhcpServer {
+public class DhcpServer extends DhcpInterfaceResolver {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DhcpServer.class);
 
     private final DhcpService service;
-    private final SocketAddress address;
+    private final int port;
     private Channel channel;
 
-    public DhcpServer(@Nonnull DhcpService service, @Nonnull SocketAddress address) {
+    public DhcpServer(@Nonnull DhcpService service, @Nonnegative int port) {
         this.service = service;
-        this.address = address;
+        this.port = port;
     }
 
     public DhcpServer(@Nonnull DhcpService service) {
-        this(service, new InetSocketAddress(DhcpService.SERVER_PORT));
+        this(service, DhcpService.SERVER_PORT);
     }
 
-    public DhcpServer(@Nonnull LeaseManager manager, @Nonnull SocketAddress address) {
-        this(new LeaseManagerDhcpService(manager), address);
+    public DhcpServer(@Nonnull LeaseManager manager, @Nonnegative int port) {
+        this(new LeaseManagerDhcpService(manager), port);
     }
 
     public DhcpServer(@Nonnull LeaseManager manager) {
@@ -53,6 +57,8 @@ public class DhcpServer {
 
     @PostConstruct
     public void start() throws IOException, InterruptedException {
+        super.start();
+
         ThreadFactory factory = new DefaultThreadFactory("dhcp-server");
         EventLoopGroup group = new NioEventLoopGroup(0, factory);
 
@@ -60,14 +66,17 @@ public class DhcpServer {
         b.group(group);
         b.channel(NioDatagramChannel.class);
         b.option(ChannelOption.SO_BROADCAST, true);
-        b.handler(new DhcpHandler(service));
-        channel = b.bind(address).sync().channel();
+        b.handler(new DhcpHandler(service, this));
+        channel = b.bind(port).sync().channel();
     }
 
     @PreDestroy
     public void stop() throws IOException, InterruptedException {
         EventLoop loop = channel.eventLoop();
         channel.close().sync();
+        channel = null;
         loop.shutdownGracefully();
+
+        super.stop();
     }
 }

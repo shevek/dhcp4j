@@ -20,6 +20,7 @@
 package org.apache.directory.server.dhcp.service.store;
 
 import java.net.InetAddress;
+import java.util.concurrent.TimeUnit;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.options.OptionsField;
 

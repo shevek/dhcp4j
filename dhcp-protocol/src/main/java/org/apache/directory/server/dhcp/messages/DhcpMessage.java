@@ -20,6 +20,7 @@
 package org.apache.directory.server.dhcp.messages;
 
 import java.net.InetAddress;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.options.OptionsField;
 
@@ -71,14 +72,14 @@ public class DhcpMessage {
 
     /**
      * Operation constant: boot request (client to server).
-     * 
+     *
      * @see #op
      */
     public static final byte OP_BOOTREQUEST = 1;
 
     /**
      * Operation constant: boot reply (server to client).
-     * 
+     *
      * @see #op
      */
     public static final byte OP_BOOTREPLY = 2;
@@ -134,7 +135,7 @@ public class DhcpMessage {
 
     /**
      * Creates a DHCP message based on the supplied values.
-     * 
+     *
      * @param messageType
      * @param op
      * @param hardwareAddress
@@ -287,13 +288,20 @@ public class DhcpMessage {
         this.hardwareAddress = hardwareAddress;
     }
 
+    private static void append(@Nonnull StringBuilder buf, @Nonnull String name, @CheckForNull Object value) {
+        if (value == null)
+            return;
+        buf.append(", ").append(name).append("=").append(value);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(messageType).append(": hwAddress=").append(hardwareAddress)
-                .append(", tx=").append(transactionId).append(", options=").append(
-                        options);
-
+                .append(", tx=").append(transactionId);
+        append(sb, "currentClientAddress", getCurrentClientAddress());
+        append(sb, "assignedClientAddress", getAssignedClientAddress());
+        sb.append(", options=").append(options);
         return sb.toString();
     }
 }

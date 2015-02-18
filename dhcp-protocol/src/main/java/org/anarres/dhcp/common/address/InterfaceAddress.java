@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 
 /**
  * An interface address: An address and a netmask.
- * 
+ *
  * The address may be any address, and the lowest and highest directly
  * accessible addresses on the network may be retrieved.
  *
@@ -26,6 +26,16 @@ public class InterfaceAddress extends AbstractMaskedAddress {
 
     public InterfaceAddress(@Nonnull java.net.InterfaceAddress address) {
         this(address.getAddress(), address.getNetworkPrefixLength());
+    }
+
+    /**
+     * Returns true iff this interface address "should" be able to reach the given InetAddress.
+     *
+     * @see NetworkAddress#contains(InetAddress)
+     * @see AddressUtils#isLocal(AbstractMaskedAddress, InetAddress)
+     */
+    public boolean isLocal(@Nonnull InetAddress address) {
+        return AddressUtils.isLocal(this, address);
     }
 
     /**

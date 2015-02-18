@@ -7,19 +7,18 @@ package org.anarres.dhcp.common.address;
 
 import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
-import java.util.Arrays;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
 /**
  * A network address: A base address and a netmask representing a contiguous
  * range of addresses.
- * 
+ *
  * The base address is canonicalized by the constructor to be the
  * first address in the permissible range. Thus {@link #getAddress()}
  * will NOT necessarily return the same {@link InetAddress} as was passed
  * to the constructor.
- * 
+ *
  * @see NetworkSet
  *
  * @author shevek
@@ -28,6 +27,7 @@ public class NetworkAddress extends AbstractMaskedAddress {
 
     /**
      * Constructs a NetworkAddress from a String of the form 1.2.3.4/25.
+     *
      * @throws IllegalArgumentException if the argument was duff.
      */
     @Nonnull
@@ -99,12 +99,12 @@ public class NetworkAddress extends AbstractMaskedAddress {
 
     /**
      * Returns true iff this network contains the given InetAddress.
+     *
+     * @see InterfaceAddress#isLocal(InetAddress)
+     * @see AddressUtils#isLocal(AbstractMaskedAddress, InetAddress)
      */
     public boolean contains(@Nonnull InetAddress address) {
-        if (!getAddress().getClass().equals(address.getClass()))
-            return false;
-        byte[] network = AddressUtils.toNetworkAddress(address.getAddress(), getNetmask());
-        return Arrays.equals(getAddress().getAddress(), network);
+        return AddressUtils.isLocal(this, address);
     }
 
     /**
@@ -118,7 +118,7 @@ public class NetworkAddress extends AbstractMaskedAddress {
 
     /**
      * Returns an InetAddressRange representation of this network's address range.
-     * 
+     *
      * The InetAddressRange isn't as useful for computation, but can be
      * useful for display or configuring other tools.
      */

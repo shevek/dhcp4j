@@ -5,7 +5,6 @@
  */
 package org.anarres.dhcp.common.address;
 
-import com.google.common.base.Objects;
 import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import javax.annotation.Nonnegative;
@@ -66,7 +65,7 @@ public abstract class AbstractMaskedAddress {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getAddress()) ^ getNetmask();
+        return getAddress().hashCode() ^ getNetmask();
     }
 
     @Override
@@ -78,7 +77,7 @@ public abstract class AbstractMaskedAddress {
         if (!getClass().equals(obj.getClass()))
             return false;
         AbstractMaskedAddress other = (AbstractMaskedAddress) obj;
-        return Objects.equal(getAddress(), other.getAddress())
+        return getAddress().equals(other.getAddress())
                 && getNetmask() == other.getNetmask();
     }
 

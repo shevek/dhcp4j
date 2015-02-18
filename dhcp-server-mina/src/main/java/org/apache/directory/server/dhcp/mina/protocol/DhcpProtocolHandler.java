@@ -21,11 +21,11 @@ package org.apache.directory.server.dhcp.mina.protocol;
 
 import java.net.InetSocketAddress;
 import javax.annotation.Nonnull;
+import org.anarres.dhcp.common.DhcpUtils;
 import org.anarres.dhcp.common.LogUtils;
-import org.anarres.dhcp.common.address.AddressUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
+import org.apache.directory.server.dhcp.io.DhcpInterfaceResolver;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
-import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.service.DhcpService;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
@@ -38,43 +38,40 @@ import org.slf4j.MDC;
 /**
  * Implementation of a DHCP protocol handler which delegates the work of
  * generating replys to a DhcpService implementation.
- * 
+ *
  * @see org.apache.directory.server.dhcp.service.DhcpService
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
 public class DhcpProtocolHandler extends IoHandlerAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(DhcpProtocolHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DhcpProtocolHandler.class);
     /**
      * The DHCP service implementation. The implementation is supposed to be
      * thread-safe.
      */
     private final DhcpService dhcpService;
+    private final DhcpInterfaceResolver interfaceResolver;
 
-    /**
-     * 
-     */
-    public DhcpProtocolHandler(@Nonnull DhcpService service) {
+    public DhcpProtocolHandler(@Nonnull DhcpService service, @Nonnull DhcpInterfaceResolver resolver) {
         this.dhcpService = service;
+        this.interfaceResolver = resolver;
     }
 
     @Override
     public void sessionCreated(IoSession session) throws Exception {
-        logger.debug("{} CREATED", session.getLocalAddress());
+        LOG.debug("{} CREATED", session.getLocalAddress());
         session.getFilterChain().addFirst("codec",
                 new ProtocolCodecFilter(DhcpProtocolCodecFactory.getInstance()));
     }
 
     @Override
     public void sessionOpened(IoSession session) {
-        logger.debug("{} -> {} OPENED", session.getRemoteAddress(), session
-                .getLocalAddress());
+        LOG.debug("{} -> {} OPENED", session.getRemoteAddress(), session.getLocalAddress());
     }
 
     @Override
     public void sessionClosed(IoSession session) {
-        logger.debug("{} -> {} CLOSED", session.getRemoteAddress(), session
-                .getLocalAddress());
+        LOG.debug("{} -> {} CLOSED", session.getRemoteAddress(), session.getLocalAddress());
     }
 
     @Override
@@ -85,27 +82,43 @@ public class DhcpProtocolHandler extends IoHandlerAdapter {
     @Override
     public void messageReceived(IoSession session, Object message)
             throws Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug("{} -> {} RCVD: {} " + message, session.getRemoteAddress(),
-                    session.getLocalAddress());
-        }
-
-        // This doesn't work in practice. Pass the InterfaceAddress to the constructor.
-        InetSocketAddress localSocketAddress = (InetSocketAddress) session.getLocalAddress();
-        InterfaceAddress localAddress = new InterfaceAddress(localSocketAddress.getAddress(), 0);
-
+        if (LOG.isDebugEnabled())
+            LOG.debug("{} -> {} RCVD: {}", session.getRemoteAddress(), session.getLocalAddress(), message);
+        DhcpMessage request = (DhcpMessage) message;
         InetSocketAddress remoteAddress = (InetSocketAddress) session.getRemoteAddress();
 
-        DhcpMessage request = (DhcpMessage) message;
+        // This doesn't work in practice. Pass the InterfaceAddress to the constructor.
+        // InetSocketAddress localSocketAddress = (InetSocketAddress) session.getLocalAddress();
+        // InterfaceAddress localAddress = new InterfaceAddress(localSocketAddress.getAddress(), 0);
+        InterfaceAddress interfaceAddress = interfaceResolver.getQueryInterface(
+                session.getLocalAddress(),
+                session.getServiceAddress(),
+                request,
+                session.getRemoteAddress()
+        );
+        if (interfaceAddress == null)
+            return;
+
         MDC.put(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS, String.valueOf(request.getHardwareAddress()));
-        MDC.put(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS, String.valueOf(localAddress));
+        MDC.put(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS, String.valueOf(interfaceAddress));
         try {
             DhcpMessage reply = dhcpService.getReplyFor(
-                    localAddress, remoteAddress,
+                    interfaceAddress, remoteAddress,
                     request);
 
             if (reply != null) {
-                InetSocketAddress isa = determineMessageDestination(request, reply, localAddress, remoteAddress.getPort());
+                interfaceAddress = interfaceResolver.getResponseInterface(
+                        request.getRelayAgentAddress(),
+                        request.getCurrentClientAddress(),
+                        session.getRemoteAddress(),
+                        reply
+                );
+                if (interfaceAddress == null)
+                    return;
+
+                InetSocketAddress isa = DhcpUtils.determineMessageDestination(
+                        request, reply,
+                        interfaceAddress, remoteAddress.getPort());
                 session.write(reply, isa);
             }
         } finally {
@@ -114,50 +127,17 @@ public class DhcpProtocolHandler extends IoHandlerAdapter {
         }
     }
 
-    /**
-     * Determine where to send the message: <br>
-     * If the 'giaddr' field in a DHCP message from a client is non-zero, the
-     * server sends any return messages to the 'DHCP server' port on the BOOTP
-     * relay agent whose address appears in 'giaddr'. If the 'giaddr' field is
-     * zero and the 'ciaddr' field is nonzero, then the server unicasts DHCPOFFER
-     * and DHCPACK messages to the address in 'ciaddr'. If 'giaddr' is zero and
-     * 'ciaddr' is zero, and the broadcast bit is set, then the server broadcasts
-     * DHCPOFFER and DHCPACK messages to 0xffffffff. If the broadcast bit is not
-     * set and 'giaddr' is zero and 'ciaddr' is zero, then the server unicasts
-     * DHCPOFFER and DHCPACK messages to the client's hardware address and
-     * 'yiaddr' address. In all cases, when 'giaddr' is zero, the server
-     * broadcasts any DHCPNAK messages to 0xffffffff.
-     */
-    //This will suppress PMD.AvoidUsingHardCodedIP warnings in this class
-    @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
-    private InetSocketAddress determineMessageDestination(DhcpMessage request, DhcpMessage reply,
-            InterfaceAddress localAddress, int remotePort) {
-        if (!AddressUtils.isZeroAddress(request.getRelayAgentAddress())) {
-            // send to agent, if received via agent.
-            return new InetSocketAddress(request.getRelayAgentAddress(), DhcpService.SERVER_PORT);
-        } else if (reply.getMessageType() == MessageType.DHCPNAK) {
-            // force broadcast for DHCPNAKs
-            return new InetSocketAddress(localAddress.getBroadcastAddress(), remotePort);
-        } else if (!AddressUtils.isZeroAddress(request.getCurrentClientAddress())) {
-            // have a current address? unicast to it.
-            return new InetSocketAddress(request.getCurrentClientAddress(), remotePort);
-        } else {
-            // not a NAK...
-            return new InetSocketAddress(localAddress.getBroadcastAddress(), remotePort);
-        }
-    }
-
     @Override
     public void messageSent(IoSession session, Object message) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("{} -> {} SENT: " + message, session.getRemoteAddress(),
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("{} -> {} SENT: " + message, session.getRemoteAddress(),
                     session.getLocalAddress());
         }
     }
 
     @Override
     public void exceptionCaught(IoSession session, Throwable cause) {
-        logger.error("EXCEPTION CAUGHT ", cause);
+        LOG.error("EXCEPTION CAUGHT ", cause);
         cause.printStackTrace(System.out);
         session.close(true);
     }

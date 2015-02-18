@@ -30,6 +30,7 @@ public class AddressUtils {
 
     /**
      * Performs an arbitrary-precision increment of a byte array.
+     *
      * @param in The array to increment.
      * @return The same input array.
      */
@@ -56,6 +57,7 @@ public class AddressUtils {
 
     /**
      * Performs an arbitrary-precision decrement of a byte array.
+     *
      * @param in The array to decrement.
      * @return The same input array.
      */
@@ -198,9 +200,22 @@ public class AddressUtils {
     }
 
     /**
+     * Determines whether the given address is a "useful" unicast address.
+     *
+     * Site local is allowed. Loopback is not.
+     */
+    public static boolean isUnicastAddress(@CheckForNull InetAddress address) {
+        return (address != null)
+                && !address.isAnyLocalAddress()
+                && !address.isLoopbackAddress()
+                && !address.isMulticastAddress();
+    }
+
+    /**
      * Constructs an InetAddress from the given byte array.
      * This is equivalent to {@link InetAddress#getByAddress(byte[])}
      * but throws only unchecked exceptions.
+     *
      * @throws RuntimeException if the underlying routine throws {@link UnknownHostException}.
      */
     @Nonnull
@@ -285,6 +300,7 @@ public class AddressUtils {
 
     /**
      * Constructs a companion netmask address to the given InetAddress.
+     *
      * @see #toNetworkMask(int, int)
      */
     @Nonnull
@@ -314,5 +330,30 @@ public class AddressUtils {
         for (byte b : data)
             out = (out << Byte.SIZE) + UnsignedBytes.toInt(b);
         return out;
+    }
+
+    /**
+     * Returns whether a given target address is hypothetically reachable from the given AbstractMaskedAddress.
+     *
+     * @param self
+     * @param target
+     * @return
+     */
+    public static boolean isLocal(@Nonnull AbstractMaskedAddress self, @Nonnull InetAddress target) {
+        Preconditions.checkNotNull(self, "Self (AbstractMaskedAddress) was null.");
+        Preconditions.checkNotNull(target, "Target (InetAddress) was null.");
+        if (!self.getAddress().getClass().equals(target.getClass()))
+            return false;
+        byte[] selfBytes = toNetworkAddress(self.getAddress().getAddress(), self.getNetmask());
+        byte[] targetBytes = toNetworkAddress(target.getAddress(), self.getNetmask());
+        return Arrays.equals(selfBytes, targetBytes);
+    }
+
+    /** Like {@link InetAddresses#toAddrString(InetAddress)} but accepts nulls. */
+    @CheckForNull
+    public static String toAddrString(@CheckForNull InetAddress address) {
+        if (address == null)
+            return null;
+        return InetAddresses.toAddrString(address);
     }
 }

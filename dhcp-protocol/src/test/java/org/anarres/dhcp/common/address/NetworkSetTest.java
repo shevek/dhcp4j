@@ -55,6 +55,6 @@ public class NetworkSetTest {
         set.removeNetwork(NetworkAddress.forString("123.45.6.7/25"));
         assertSize(set, 54);
         for (NetworkAddress network : set.toNetworkList())
-            assertFalse("Network " + network + " should not contain " + address, network.contains(address));
+            assertFalse("Network " + network + " should not contain " + address, network.isLocal(address));
     }
 }
