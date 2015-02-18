@@ -5,7 +5,6 @@
  */
 package org.anarres.dhcp.common.address;
 
-import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -32,24 +31,7 @@ public class NetworkAddress extends AbstractMaskedAddress {
      */
     @Nonnull
     public static NetworkAddress forString(@Nonnull String addressString) {
-        String netmaskString = null;
-        int idx = addressString.indexOf('/');
-        if (idx != -1) {
-            netmaskString = addressString.substring(idx + 1);
-            addressString = addressString.substring(0, idx);
-        }
-        InetAddress address = InetAddresses.forString(addressString);
-        int netmask;
-        if (netmaskString != null) {
-            try {
-                netmask = Integer.parseInt(netmaskString);
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Cannot parse netmask from " + netmaskString, e);
-            }
-        } else {
-            netmask = address.getAddress().length * Byte.SIZE;
-        }
-        return new NetworkAddress(address, netmask);
+        return InterfaceAddress.forString(addressString).toNetworkAddress();
     }
 
     /**

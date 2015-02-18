@@ -5,6 +5,7 @@
  */
 package org.anarres.dhcp.common.address;
 
+import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -19,6 +20,33 @@ import javax.annotation.Nonnull;
  * @author shevek
  */
 public class InterfaceAddress extends AbstractMaskedAddress {
+
+    /**
+     * Constructs an InterfaceAddress from a String of the form 1.2.3.4/25.
+     *
+     * @throws IllegalArgumentException if the argument was duff.
+     */
+    @Nonnull
+    public static InterfaceAddress forString(@Nonnull String addressString) {
+        String netmaskString = null;
+        int idx = addressString.indexOf('/');
+        if (idx != -1) {
+            netmaskString = addressString.substring(idx + 1);
+            addressString = addressString.substring(0, idx);
+        }
+        InetAddress address = InetAddresses.forString(addressString);
+        int netmask;
+        if (netmaskString != null) {
+            try {
+                netmask = Integer.parseInt(netmaskString);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Cannot parse netmask from " + netmaskString, e);
+            }
+        } else {
+            netmask = address.getAddress().length * Byte.SIZE;
+        }
+        return new InterfaceAddress(address, netmask);
+    }
 
     public InterfaceAddress(@Nonnull InetAddress address, @Nonnegative int netmask) {
         super(address, netmask);
