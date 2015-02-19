@@ -75,7 +75,7 @@ public class NetworkAddress extends AbstractMaskedAddress {
      * @see AddressUtils#add(InetAddress, long)
      */
     @Nonnull
-    public InterfaceAddress getMachineInterfaceAddress(long index) {
+    public InterfaceAddress getMachineInterfaceAddress(@Nonnegative long index) {
         return new InterfaceAddress(getMachineAddress(index), getNetmask());
     }
 
