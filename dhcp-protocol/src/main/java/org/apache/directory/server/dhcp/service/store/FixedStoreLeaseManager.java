@@ -16,6 +16,9 @@ import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.MessageType;
+import org.apache.directory.server.dhcp.options.OptionsField;
+import org.apache.directory.server.dhcp.options.perinterface.BroadcastAddress;
+import org.apache.directory.server.dhcp.options.vendor.SubnetMask;
 import org.apache.directory.server.dhcp.service.manager.AbstractLeaseManager;
 
 /**
@@ -48,6 +51,15 @@ public class FixedStoreLeaseManager extends AbstractLeaseManager {
         Lease lease = new Lease();
         lease.setClientAddress(clientAddress);
         return addLease(hardwareAddress, lease);
+    }
+
+    @Nonnull
+    public Lease addLease(@Nonnull HardwareAddress hardwareAddress, @Nonnull InterfaceAddress interfaceAddress) {
+        Lease lease = addLease(hardwareAddress, interfaceAddress.getAddress());
+        OptionsField options = lease.getOptions();
+        options.setAddressOption(SubnetMask.class, interfaceAddress.getNetmaskAddress());
+        options.setAddressOption(BroadcastAddress.class, interfaceAddress.getBroadcastAddress());
+        return lease;
     }
 
     @Override
