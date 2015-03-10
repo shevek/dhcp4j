@@ -150,9 +150,6 @@ public class DhcpInterfaceResolver {
         return null;
     }
 
-    /**
-     * Override this to call {@link #addInterface(InterfaceAddress, Object)}.
-     */
     public void addInterface(@Nonnull InterfaceAddress address) throws IOException, InterruptedException {
         LOG.debug("Adding InterfaceAddress: {}", address);
         interfaces.put(address, Dummy.INSTANCE);

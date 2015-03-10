@@ -334,10 +334,6 @@ public class AddressUtils {
 
     /**
      * Returns whether a given target address is hypothetically reachable from the given AbstractMaskedAddress.
-     *
-     * @param self
-     * @param target
-     * @return
      */
     public static boolean isLocal(@Nonnull AbstractMaskedAddress self, @Nonnull InetAddress target) {
         Preconditions.checkNotNull(self, "Self (AbstractMaskedAddress) was null.");
