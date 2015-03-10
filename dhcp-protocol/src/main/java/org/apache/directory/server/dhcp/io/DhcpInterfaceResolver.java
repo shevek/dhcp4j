@@ -16,6 +16,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -86,7 +87,7 @@ public class DhcpInterfaceResolver {
         public boolean apply(NetworkInterface iface) {
             String name = iface.getName();
             if (!names.contains(name)) {
-                LOG.debug("Ignoring NetworkInterface: Not included by name: {}", iface);
+                LOG.debug("Ignoring NetworkInterface: Not included by name: {} in {}", name, names);
                 return false;
             }
             return super.apply(iface);
@@ -110,7 +111,9 @@ public class DhcpInterfaceResolver {
         return global;
     }
 
-    /** If this returns an address, it is NOT the global address. */
+    /**
+     * If this returns an address, it is NOT the global address.
+     */
     @CheckForNull
     public InterfaceAddress getResponseInterface(@Nonnull Object... objects) throws DhcpException {
         InetAddress address = DhcpInterfaceUtils.toInetAddress(objects);
@@ -147,7 +150,9 @@ public class DhcpInterfaceResolver {
         return null;
     }
 
-    /** Override this to call {@link #addInterface(InterfaceAddress, Object)}. */
+    /**
+     * Override this to call {@link #addInterface(InterfaceAddress, Object)}.
+     */
     public void addInterface(@Nonnull InterfaceAddress address) throws IOException, InterruptedException {
         LOG.debug("Adding InterfaceAddress: {}", address);
         interfaces.put(address, Dummy.INSTANCE);
@@ -168,13 +173,18 @@ public class DhcpInterfaceResolver {
         }
     }
 
-    public void addInterfaces(@Nonnull Predicate<NetworkInterface> predicate) throws IOException, InterruptedException {
-        for (NetworkInterface iface : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+    private void addInterfaces(@Nonnull Enumeration<? extends NetworkInterface> ifaces, @Nonnull Predicate<? super NetworkInterface> predicate) throws IOException, InterruptedException {
+        for (NetworkInterface iface : Collections.list(ifaces)) {
             if (predicate.apply(iface)) {
                 LOG.debug("Adding NetworkInterface: {}", iface);
                 addInterface(iface);
             }
+            addInterfaces(iface.getSubInterfaces(), predicate);
         }
+    }
+
+    public void addInterfaces(@Nonnull Predicate<? super NetworkInterface> predicate) throws IOException, InterruptedException {
+        addInterfaces(NetworkInterface.getNetworkInterfaces(), predicate);
     }
 
     public void addDefaultInterfaces() throws IOException, InterruptedException {
