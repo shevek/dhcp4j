@@ -5,13 +5,11 @@
  */
 package org.apache.directory.server.dhcp.netty;
 
-import com.google.common.base.MoreObjects;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -65,7 +63,7 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
             debug("IGNQUERY", msg.sender(), msg.recipient(), request);
             return;
         }
-        debug("READ", msg.sender(), msg.recipient(), request);
+        // debug("READ", msg.sender(), msg.recipient(), request);
 
         MDC.put(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS, String.valueOf(request.getHardwareAddress()));
         MDC.put(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS, String.valueOf(interfaceAddress));
@@ -73,32 +71,34 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
             DhcpMessage reply = dhcpService.getReplyFor(
                     interfaceAddress,
                     msg.sender(), request);
-            if (reply != null) {
-                ByteBuf buf = ctx.alloc().buffer(1024);
-                ByteBuffer buffer = buf.nioBuffer(buf.writerIndex(), buf.writableBytes());
-                encoder.encode(buffer, reply);
-                buffer.flip();
-                buf.writerIndex(buf.writerIndex() + buffer.remaining());
-
-                interfaceAddress = interfaceResolver.getResponseInterface(
-                        request.getRelayAgentAddress(),
-                        request.getCurrentClientAddress(),
-                        msg.sender().getAddress(),
-                        reply
-                );
-                if (interfaceAddress == null) {
-                    debug("IGNREPLY", msg.recipient(), msg.sender(), reply);
-                    return;
-                }
-                InetSocketAddress isa = DhcpUtils.determineMessageDestination(
-                        request, reply,
-                        interfaceAddress, msg.sender().getPort());
-                DatagramPacket packet = new DatagramPacket(buf, isa);
-                debug("WRITE", packet.sender(), packet.recipient(), reply);
-                ctx.write(packet, ctx.voidPromise());
-            } else {
+            if (reply == null) {
                 debug("NOREPLY", msg.sender(), msg.recipient(), request);
+                return;
             }
+
+            interfaceAddress = interfaceResolver.getResponseInterface(
+                    request.getRelayAgentAddress(),
+                    request.getCurrentClientAddress(),
+                    msg.sender().getAddress(),
+                    reply
+            );
+            if (interfaceAddress == null) {
+                debug("NOIFACE", msg.recipient(), msg.sender(), reply);
+                return;
+            }
+
+            InetSocketAddress isa = DhcpUtils.determineMessageDestination(
+                    request, reply,
+                    interfaceAddress, msg.sender().getPort());
+
+            ByteBuf buf = ctx.alloc().buffer(1024);
+            ByteBuffer buffer = buf.nioBuffer(buf.writerIndex(), buf.writableBytes());
+            encoder.encode(buffer, reply);
+            buffer.flip();
+            buf.writerIndex(buf.writerIndex() + buffer.remaining());
+            DatagramPacket packet = new DatagramPacket(buf, isa);
+            debug("WRITE", packet.sender(), packet.recipient(), reply);
+            ctx.write(packet, ctx.voidPromise());
         } finally {
             MDC.remove(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS);
             MDC.remove(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS);
