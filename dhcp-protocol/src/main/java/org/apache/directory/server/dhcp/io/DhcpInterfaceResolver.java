@@ -133,7 +133,7 @@ public class DhcpInterfaceResolver {
             if (iface != null)
                 return iface;
             // We know it's address but we don't think we can talk to it.
-            LOG.debug("No InterfaceAddress for InetAddress {}", address);
+            // LOG.debug("No InterfaceAddress for InetAddress {}", address);
             return null;
         }
         // We don't know it's address. Let's see if getting a lease helps us at all.
