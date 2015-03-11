@@ -325,6 +325,14 @@ public class AddressUtils {
         return 0;
     }
 
+    /**
+     * Converts an address of the form 255.255.240.0 into an CIDR netmask.
+     */
+    @Nonnegative
+    public static int toNetmask(@Nonnull InetAddress netmaskAddress) {
+        return toNetmask(netmaskAddress.getAddress());
+    }
+
     public static long toLong(@Nonnull byte[] data) {
         long out = 0;
         for (byte b : data)

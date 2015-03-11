@@ -35,3 +35,10 @@ project(':dhcp-server-netty') {
 		compile 'io.netty:netty-all:4.0.23.Final'
 	}
 }
+
+project(':dhcp-server-pcap') {
+	dependencies {
+		compile project(':dhcp-protocol')
+		compile 'org.pcap4j:pcap4j-packetfactory-static:1.3.0'
+	}
+}
