@@ -25,14 +25,15 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import javax.annotation.Nonnull;
+import org.anarres.dhcp.common.address.AddressUtils;
 import org.apache.directory.server.dhcp.DhcpException;
 
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework
- * for passing configuration information to hosts on a TCP/IP network.  
+ * for passing configuration information to hosts on a TCP/IP network.
  * Configuration parameters and other control information are carried in
  * tagged data items that are stored in the 'options' field of the DHCP
- * message.  The data items themselves are also called "options."
+ * message. The data items themselves are also called "options."
  *
  * This abstract base class is for options that carry a single IP address.
  *
@@ -62,12 +63,19 @@ public abstract class AddressOption extends DhcpOption {
         setAddress((Inet4Address) address);
     }
 
-    @Override
-    public void validate() throws DhcpException {
+    protected void validate(boolean allowZeroAddress) throws DhcpException {
         super.validate();
         if (getData().length != 4)
             throw new DhcpException("Expected exactly 4 data bytes in " + this);
-        getAddress();
+        InetAddress address = getAddress();
+        if (!allowZeroAddress)
+            if (AddressUtils.isZeroAddress(address))
+                throw new DhcpException("Zero address not allowed in " + this);
+    }
+
+    @Override
+    public void validate() throws DhcpException {
+        validate(true);
     }
 
     @Override

@@ -21,22 +21,24 @@ package org.apache.directory.server.dhcp.options.dhcp;
 
 import java.net.InetAddress;
 import javax.annotation.Nonnull;
+import org.anarres.dhcp.common.address.AddressUtils;
+import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.options.AddressOption;
 
 /**
  * This option is used in DHCPOFFER and DHCPREQUEST messages, and may
- * optionally be included in the DHCPACK and DHCPNAK messages.  DHCP
+ * optionally be included in the DHCPACK and DHCPNAK messages. DHCP
  * servers include this option in the DHCPOFFER in order to allow the
- * client to distinguish between lease offers.  DHCP clients use the
+ * client to distinguish between lease offers. DHCP clients use the
  * contents of the 'server identifier' field as the destination address
- * for any DHCP messages unicast to the DHCP server.  DHCP clients also
+ * for any DHCP messages unicast to the DHCP server. DHCP clients also
  * indicate which of several lease offers is being accepted by including
  * this option in a DHCPREQUEST message.
- * 
+ *
  * The identifier is the IP address of the selected server.
- * 
+ *
  * The code for this option is 54, and its length is 4.
- * 
+ *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
 public class ServerIdentifier extends AddressOption {
@@ -55,4 +57,10 @@ public class ServerIdentifier extends AddressOption {
     public byte getTag() {
         return 54;
     }
+
+    @Override
+    public void validate() throws DhcpException {
+        super.validate(false);
+    }
+
 }
