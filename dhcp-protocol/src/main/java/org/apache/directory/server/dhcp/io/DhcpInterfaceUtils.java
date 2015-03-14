@@ -15,6 +15,7 @@ import org.anarres.dhcp.common.address.AddressUtils;
 import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.options.dhcp.RequestedIpAddress;
+import org.apache.directory.server.dhcp.options.dhcp.ServerIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,9 @@ import org.slf4j.LoggerFactory;
         InetAddress requestedClientAddress = message.getOptions().getAddressOption(RequestedIpAddress.class);
         if (!AddressUtils.isZeroAddress(requestedClientAddress))
             return requestedClientAddress;
+        InetAddress serverAddress = message.getOptions().getAddressOption(ServerIdentifier.class);
+        if (!AddressUtils.isZeroAddress(serverAddress))
+            return serverAddress;
         InetAddress relayAgentAddress = message.getRelayAgentAddress();
         if (!AddressUtils.isZeroAddress(relayAgentAddress))
             return relayAgentAddress;

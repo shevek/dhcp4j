@@ -13,6 +13,7 @@ import io.netty.channel.socket.DatagramPacket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.common.DhcpUtils;
 import org.anarres.dhcp.common.LogUtils;
@@ -46,50 +47,53 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     private static void debug(@Nonnull String event, @Nonnull SocketAddress src, @Nonnull SocketAddress dst, @Nonnull DhcpMessage msg) {
         if (LOG.isDebugEnabled())
-            LOG.debug("{} -> {} {} {}", src, dst, event, msg);
+            LOG.debug("{} {} -> {} {}", event, src, dst, msg);
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {
         DhcpMessage request = decoder.decode(msg.content().nioBuffer());
 
-        InterfaceAddress interfaceAddress = interfaceResolver.getQueryInterface(
+        InterfaceAddress[] localAddresses = interfaceResolver.getQueryInterface(
                 msg.recipient().getAddress(),
                 ctx.channel().localAddress(),
                 request,
                 msg.sender().getAddress()
         );
-        if (interfaceAddress == null) {
+        if (localAddresses == null) {
             debug("IGNQUERY", msg.sender(), msg.recipient(), request);
             return;
         }
         // debug("READ", msg.sender(), msg.recipient(), request);
 
+        MDC.put(LogUtils.MDC_DHCP_MESSAGE_TYPE, String.valueOf(request.getMessageType()));
         MDC.put(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS, String.valueOf(request.getHardwareAddress()));
-        MDC.put(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS, String.valueOf(interfaceAddress));
+        MDC.put(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS, Arrays.toString(localAddresses));
         try {
             DhcpMessage reply = dhcpService.getReplyFor(
-                    interfaceAddress,
+                    localAddresses,
                     msg.sender(), request);
             if (reply == null) {
                 debug("NOREPLY", msg.sender(), msg.recipient(), request);
                 return;
             }
 
-            interfaceAddress = interfaceResolver.getResponseInterface(
+            InterfaceAddress localAddress = interfaceResolver.getResponseInterface(
                     request.getRelayAgentAddress(),
                     request.getCurrentClientAddress(),
                     msg.sender().getAddress(),
                     reply
             );
-            if (interfaceAddress == null) {
+            if (localAddress == null) {
                 debug("NOIFACE", msg.recipient(), msg.sender(), reply);
                 return;
             }
 
+            debug("READ", msg.sender(), msg.recipient(), request);
+
             InetSocketAddress isa = DhcpUtils.determineMessageDestination(
                     request, reply,
-                    interfaceAddress, msg.sender().getPort());
+                    localAddress, msg.sender().getPort());
 
             ByteBuf buf = ctx.alloc().buffer(1024);
             ByteBuffer buffer = buf.nioBuffer(buf.writerIndex(), buf.writableBytes());
@@ -102,6 +106,7 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
         } finally {
             MDC.remove(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS);
             MDC.remove(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS);
+            MDC.remove(LogUtils.MDC_DHCP_MESSAGE_TYPE);
         }
     }
 

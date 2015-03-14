@@ -5,19 +5,13 @@
  */
 package org.anarres.dhcp.common;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.Arrays;
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.common.address.AddressUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
-import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
-import org.apache.directory.server.dhcp.options.dhcp.RequestedIpAddress;
 import org.apache.directory.server.dhcp.service.DhcpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

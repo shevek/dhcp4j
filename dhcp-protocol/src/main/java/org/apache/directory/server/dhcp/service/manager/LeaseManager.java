@@ -42,23 +42,23 @@ public interface LeaseManager {
      * </ul>
      */
     @CheckForNull
-    public DhcpMessage leaseOffer(@Nonnull InterfaceAddress localAddress,
-            @Nonnull DhcpMessage request, @Nonnull InetAddress networkAddress,
+    public DhcpMessage leaseOffer(@Nonnull InterfaceAddress[] localAddresses,
+            @Nonnull DhcpMessage request,
             @CheckForNull InetAddress clientRequestedAddress, @CheckForSigned long clientRequestedExpirySecs)
             throws DhcpException;
 
     @CheckForNull
-    public DhcpMessage leaseRequest(@Nonnull InterfaceAddress localAddress,
+    public DhcpMessage leaseRequest(@Nonnull InterfaceAddress[] localAddresses,
             @Nonnull DhcpMessage request,
             @Nonnull InetAddress clientRequestedAddress, @CheckForSigned long clientRequestedExpirySecs)
             throws DhcpException;
 
-    public boolean leaseDecline(@Nonnull InterfaceAddress localAddress,
+    public boolean leaseDecline(@Nonnull InterfaceAddress[] localAddresses,
             @Nonnull DhcpMessage request,
             @Nonnull InetAddress clientAddress)
             throws DhcpException;
 
-    public boolean leaseRelease(@Nonnull InterfaceAddress localAddress,
+    public boolean leaseRelease(@Nonnull InterfaceAddress[] localAddresses,
             @Nonnull DhcpMessage request,
             @Nonnull InetAddress clientAddress)
             throws DhcpException;

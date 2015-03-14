@@ -20,6 +20,8 @@
 package org.apache.directory.server.dhcp.mina.protocol;
 
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Arrays;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.common.DhcpUtils;
 import org.anarres.dhcp.common.LogUtils;
@@ -79,6 +81,11 @@ public class DhcpProtocolHandler extends IoHandlerAdapter {
         // ignore
     }
 
+    private static void debug(@Nonnull String event, @Nonnull SocketAddress src, @Nonnull SocketAddress dst, @Nonnull DhcpMessage msg) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("{} {} -> {} {}", event, src, dst, msg);
+    }
+
     @Override
     public void messageReceived(IoSession session, Object message)
             throws Exception {
@@ -90,40 +97,49 @@ public class DhcpProtocolHandler extends IoHandlerAdapter {
         // This doesn't work in practice. Pass the InterfaceAddress to the constructor.
         // InetSocketAddress localSocketAddress = (InetSocketAddress) session.getLocalAddress();
         // InterfaceAddress localAddress = new InterfaceAddress(localSocketAddress.getAddress(), 0);
-        InterfaceAddress interfaceAddress = interfaceResolver.getQueryInterface(
+        InterfaceAddress[] localAddresses = interfaceResolver.getQueryInterface(
                 session.getLocalAddress(),
                 session.getServiceAddress(),
                 request,
                 session.getRemoteAddress()
         );
-        if (interfaceAddress == null)
+        if (localAddresses == null) {
+            debug("IGNQUERY", session.getRemoteAddress(), session.getLocalAddress(), request);
             return;
+        }
 
+        MDC.put(LogUtils.MDC_DHCP_MESSAGE_TYPE, String.valueOf(request.getMessageType()));
         MDC.put(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS, String.valueOf(request.getHardwareAddress()));
-        MDC.put(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS, String.valueOf(interfaceAddress));
+        MDC.put(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS, Arrays.toString(localAddresses));
         try {
             DhcpMessage reply = dhcpService.getReplyFor(
-                    interfaceAddress, remoteAddress,
+                    localAddresses, remoteAddress,
                     request);
 
-            if (reply != null) {
-                interfaceAddress = interfaceResolver.getResponseInterface(
-                        request.getRelayAgentAddress(),
-                        request.getCurrentClientAddress(),
-                        session.getRemoteAddress(),
-                        reply
-                );
-                if (interfaceAddress == null)
-                    return;
-
-                InetSocketAddress isa = DhcpUtils.determineMessageDestination(
-                        request, reply,
-                        interfaceAddress, remoteAddress.getPort());
-                session.write(reply, isa);
+            if (reply == null) {
+                debug("NOREPLY", session.getRemoteAddress(), session.getLocalAddress(), request);
+                return;
             }
+
+            InterfaceAddress localAddress = interfaceResolver.getResponseInterface(
+                    request.getRelayAgentAddress(),
+                    request.getCurrentClientAddress(),
+                    session.getRemoteAddress(),
+                    reply
+            );
+            if (localAddress == null) {
+                debug("NOIFACE", session.getRemoteAddress(), session.getLocalAddress(), reply);
+                return;
+            }
+
+            InetSocketAddress isa = DhcpUtils.determineMessageDestination(
+                    request, reply,
+                    localAddress, remoteAddress.getPort());
+            session.write(reply, isa);
         } finally {
             MDC.remove(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS);
             MDC.remove(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS);
+            MDC.remove(LogUtils.MDC_DHCP_MESSAGE_TYPE);
         }
     }
 

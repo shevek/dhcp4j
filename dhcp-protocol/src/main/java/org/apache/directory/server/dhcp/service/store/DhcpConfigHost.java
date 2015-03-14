@@ -32,7 +32,6 @@ import org.apache.directory.server.dhcp.messages.HardwareAddress;
 public class DhcpConfigHost extends DhcpConfigElement {
 
     private final String name;
-
     private final HardwareAddress hardwareAddress;
 
     /**
@@ -40,7 +39,7 @@ public class DhcpConfigHost extends DhcpConfigElement {
      */
     private final InetAddress clientAddress;
 
-    public DhcpConfigHost(String name, HardwareAddress hardwareAddress, InetAddress clientAddress) {
+    public DhcpConfigHost(@Nonnull String name, @Nonnull HardwareAddress hardwareAddress, @Nonnull InetAddress clientAddress) {
         this.name = name;
         this.hardwareAddress = hardwareAddress;
         this.clientAddress = clientAddress;
@@ -65,5 +64,4 @@ public class DhcpConfigHost extends DhcpConfigElement {
     public String toString() {
         return getName() + "(" + getHardwareAddress() + ": " + getClientAddress() + ")";
     }
-
 }

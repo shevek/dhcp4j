@@ -26,6 +26,8 @@ project(':dhcp-server-mina') {
 	dependencies {
 		compile project(':dhcp-protocol')
 		compile 'org.apache.mina:mina-core:2.0.8'
+
+		testCompile project(':dhcp-protocol').sourceSets.test.output
 	}
 }
 
@@ -33,6 +35,8 @@ project(':dhcp-server-netty') {
 	dependencies {
 		compile project(':dhcp-protocol')
 		compile 'io.netty:netty-all:4.0.23.Final'
+
+		testCompile project(':dhcp-protocol').sourceSets.test.output
 	}
 }
 
@@ -40,5 +44,7 @@ project(':dhcp-server-pcap') {
 	dependencies {
 		compile project(':dhcp-protocol')
 		compile 'org.pcap4j:pcap4j-packetfactory-static:1.3.0'
+
+		testCompile project(':dhcp-protocol').sourceSets.test.output
 	}
 }

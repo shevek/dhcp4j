@@ -10,8 +10,8 @@ import javax.annotation.CheckForNull;
 import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import org.apache.directory.server.dhcp.DhcpException;
 import org.anarres.dhcp.common.address.InterfaceAddress;
+import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.service.AbstractDhcpService;
@@ -56,20 +56,18 @@ public abstract class AbstractLeaseManager implements LeaseManager {
 
     @Nonnull
     public static DhcpMessage newReply(
-            @Nonnull InterfaceAddress localAddress,
             @Nonnull DhcpMessage request,
             @Nonnull MessageType type) {
-        return AbstractDhcpService.newReply(localAddress, request, type);
+        return AbstractDhcpService.newReply(request, type);
     }
 
     @Nonnull
     public static DhcpMessage newReplyAck(
-            @Nonnull InterfaceAddress localAddress,
             @Nonnull DhcpMessage request,
             @Nonnull MessageType type,
             @CheckForNull InetAddress assignedClientAddress,
             @Nonnegative long leaseTimeSecs) {
-        return AbstractDhcpService.newReplyAck(localAddress, request, type, assignedClientAddress, leaseTimeSecs);
+        return AbstractDhcpService.newReplyAck(request, type, assignedClientAddress, leaseTimeSecs);
     }
 
     public static void setBootParameters(
@@ -81,7 +79,7 @@ public abstract class AbstractLeaseManager implements LeaseManager {
 
     @Override
     public boolean leaseDecline(
-            InterfaceAddress localAddress,
+            InterfaceAddress[] localAddresses,
             DhcpMessage request,
             InetAddress clientAddress) throws DhcpException {
         return false;
@@ -89,7 +87,7 @@ public abstract class AbstractLeaseManager implements LeaseManager {
 
     @Override
     public boolean leaseRelease(
-            InterfaceAddress localAddress,
+            InterfaceAddress[] localAddresses,
             DhcpMessage request,
             InetAddress clientAddress) throws DhcpException {
         return false;

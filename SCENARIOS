@@ -1,0 +1,6 @@
+DISCOVER -> OFFER (valid)
+DISCOVER -> ignore (no interface, no mac, ...)
+REQUEST -> ACK (valid)
+REQUEST -> ignore (some other server, mismatch server id)
+REQUEST -> NAK (matched server id, invalid)
+

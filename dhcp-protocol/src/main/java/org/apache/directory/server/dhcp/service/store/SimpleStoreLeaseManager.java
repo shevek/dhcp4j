@@ -31,6 +31,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
 import org.anarres.dhcp.common.address.InterfaceAddress;
+import org.anarres.dhcp.common.address.NetworkAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.MessageType;
@@ -39,7 +40,7 @@ import org.apache.directory.server.dhcp.service.manager.AbstractLeaseManager;
 
 /**
  * Very simple dummy/proof-of-concept implementation of a DhcpStore.
- * 
+ *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
 public class SimpleStoreLeaseManager extends AbstractLeaseManager {
@@ -57,7 +58,7 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
     public SimpleStoreLeaseManager() {
         subnets.add(new DhcpConfigSubnet(
-                InetAddresses.forString("192.168.168.0"), InetAddresses.forString("255.255.255.0"),
+                NetworkAddress.forString("192.168.168.0/24"),
                 InetAddresses.forString("192.168.168.159"), InetAddresses.forString("192.168.168.179")));
     }
 
@@ -65,35 +66,40 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
      * Finds the subnet for the given client address.
      */
     @CheckForNull
-    protected DhcpConfigSubnet findSubnet(@Nonnull InetAddress remoteAddress) {
-        for (DhcpConfigSubnet subnet : subnets) {
-            if (subnet.contains(remoteAddress))
-                return subnet;
+    protected DhcpConfigSubnet findSubnet(@Nonnull InterfaceAddress[] localAddresses) {
+        for (InterfaceAddress localAddress : localAddresses) {
+            for (DhcpConfigSubnet subnet : subnets) {
+                if (subnet.contains(localAddress.getAddress()))
+                    return subnet;
+            }
         }
         return null;
     }
 
     @Nonnull
     public static DhcpMessage newReply(
-            @Nonnull InterfaceAddress localAddress,
             @Nonnull DhcpMessage request,
             @Nonnull MessageType type,
             @Nonnull Lease lease) {
         long leaseTimeSecs = lease.getExpires() - System.currentTimeMillis() / 1000;
-        DhcpMessage reply = newReplyAck(localAddress, request, type, lease.getClientAddress(), leaseTimeSecs);
+        DhcpMessage reply = newReplyAck(request, type, lease.getClientAddress(), leaseTimeSecs);
         setBootParameters(reply, lease.getNextServerAddress(), null);
         reply.getOptions().addAll(lease.getOptions());
         return reply;
     }
 
     @Override
-    public DhcpMessage leaseOffer(InterfaceAddress localAddress, DhcpMessage request, InetAddress remoteAddress, InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
+    public DhcpMessage leaseOffer(
+            InterfaceAddress[] localAddresses,
+            DhcpMessage request,
+            InetAddress clientRequestedAddress, long clientRequestedExpirySecs)
+            throws DhcpException {
         HardwareAddress hardwareAddress = request.getHardwareAddress();
         Lease lease = leases.getIfPresent(hardwareAddress);
         if (lease != null)
-            return newReply(localAddress, request, MessageType.DHCPOFFER, lease);
+            return newReply(request, MessageType.DHCPOFFER, lease);
 
-        DhcpConfigSubnet subnet = findSubnet(remoteAddress);
+        DhcpConfigSubnet subnet = findSubnet(localAddresses);
         if (subnet == null)
             return null;
 
@@ -105,14 +111,17 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
         lease.setState(Lease.LeaseState.OFFERED);
         lease.setClientAddress(clientRequestedAddress);
         lease.setExpires(System.currentTimeMillis() / 1000 + leaseTimeSecs);
-        lease.getOptions().setAddressOption(SubnetMask.class, subnet.getNetmask());
+        lease.getOptions().setAddressOption(SubnetMask.class, subnet.getNetwork().getNetmaskAddress());
         leases.put(hardwareAddress, lease);
 
-        return newReply(localAddress, request, MessageType.DHCPOFFER, lease);
+        return newReply(request, MessageType.DHCPOFFER, lease);
     }
 
     @Override
-    public DhcpMessage leaseRequest(InterfaceAddress localAddress, DhcpMessage request, InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
+    public DhcpMessage leaseRequest(
+            InterfaceAddress[] localAddresses,
+            DhcpMessage request,
+            InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
         HardwareAddress hardwareAddress = request.getHardwareAddress();
         Lease lease = leases.getIfPresent(hardwareAddress);
         if (lease == null)
@@ -124,17 +133,23 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
         long leaseTimeSecs = getLeaseTime(TTL_LEASE, clientRequestedExpirySecs);
         lease.setExpires(System.currentTimeMillis() / 1000 + leaseTimeSecs);
 
-        return newReply(localAddress, request, MessageType.DHCPACK, lease);
+        return newReply(request, MessageType.DHCPACK, lease);
     }
 
     @Override
-    public boolean leaseDecline(InterfaceAddress localAddress, DhcpMessage request, InetAddress clientAddress) throws DhcpException {
+    public boolean leaseDecline(
+            InterfaceAddress[] localAddresses,
+            DhcpMessage request,
+            InetAddress clientAddress) throws DhcpException {
         leases.invalidate(request.getHardwareAddress());
         return true;    // Should check if present.
     }
 
     @Override
-    public boolean leaseRelease(InterfaceAddress localAddress, DhcpMessage request, InetAddress clientAddress) throws DhcpException {
+    public boolean leaseRelease(
+            InterfaceAddress[] localAddresses,
+            DhcpMessage request,
+            InetAddress clientAddress) throws DhcpException {
         leases.invalidate(request.getHardwareAddress());
         return true;       // Should check if present.
     }

@@ -15,11 +15,11 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import org.anarres.jallocator.ResourceAllocator;
-import org.apache.directory.server.dhcp.DhcpException;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.anarres.dhcp.common.address.NetworkAddress;
 import org.anarres.dhcp.common.address.Subnet;
+import org.anarres.jallocator.ResourceAllocator;
+import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.MessageType;
@@ -80,7 +80,7 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
 
     @CheckForNull
     protected InetAddress leaseMac(
-            @Nonnull InterfaceAddress localAddress, @Nonnull InetAddress networkAddress,
+            @Nonnull InterfaceAddress[] localAddresses, @Nonnull InetAddress networkAddress,
             @Nonnull HardwareAddress hardwareAddress,
             @CheckForNull InetAddress currentAddress, @CheckForNull InetAddress requestedAddress,
             @Nonnegative long ttl)
@@ -167,23 +167,23 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
      */
     @CheckForNull
     protected abstract InetAddress leaseMac(
-            @Nonnull InterfaceAddress localAddress,
-            @Nonnull DhcpMessage request, @Nonnull InetAddress networkAddress,
+            @Nonnull InterfaceAddress[] localAddresses,
+            @Nonnull DhcpMessage request,
             @CheckForNull InetAddress clientRequestedAddress, @Nonnegative long ttl)
             throws Exception;
 
     @Override
-    public DhcpMessage leaseOffer(InterfaceAddress localAddress,
-            DhcpMessage request, InetAddress networkAddress,
+    public DhcpMessage leaseOffer(InterfaceAddress[] localAddresses,
+            DhcpMessage request,
             InetAddress clientRequestedAddress, long clientRequestedExpirySecs)
             throws DhcpException {
         // LOG.info("OFFER: interfaceAddress=" + interfaceAddress + ", networkAddress=" + networkAddress + ", request=" + request + ", hardwareAddress=" + hardwareAddress + ", requestedAddress=" + requestedAddress + ", requestedLeaseTimeSecs=" + requestedLeaseTimeSecs);
         try {
             long leaseTimeSecs = getLeaseTime(TTL_OFFER, clientRequestedExpirySecs);
-            InetAddress clientAddress = leaseMac(localAddress, request, networkAddress, clientRequestedAddress, leaseTimeSecs);
+            InetAddress clientAddress = leaseMac(localAddresses, request, clientRequestedAddress, leaseTimeSecs);
             if (clientAddress == null)
                 return null;
-            return newReplyAck(localAddress, request, MessageType.DHCPACK, clientAddress, leaseTimeSecs);
+            return newReplyAck(request, MessageType.DHCPACK, clientAddress, leaseTimeSecs);
         } catch (Exception e) {
             Throwables.propagateIfPossible(e, DhcpException.class);
             throw new DhcpException("Failed to lease for MAC " + request.getHardwareAddress() + ": " + e, e);
@@ -191,7 +191,7 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
     }
 
     @Override
-    public DhcpMessage leaseRequest(InterfaceAddress localAddress,
+    public DhcpMessage leaseRequest(InterfaceAddress[] localAddresses,
             DhcpMessage request,
             InetAddress clientRequestedAddress, long clientRequestedExpirySecs)
             throws DhcpException {
@@ -201,10 +201,10 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
                 LOG.warn("REQUEST from " + request.getHardwareAddress() + " did not request an address.");
                 return null;
             }
-            InetAddress clientAddress = leaseMac(localAddress, request, clientRequestedAddress, clientRequestedAddress, leaseTimeSecs);
+            InetAddress clientAddress = leaseMac(localAddresses, request, clientRequestedAddress, leaseTimeSecs);
             if (clientAddress == null)
                 return null;
-            return newReplyAck(localAddress, request, MessageType.DHCPACK, clientAddress, leaseTimeSecs);
+            return newReplyAck(request, MessageType.DHCPACK, clientAddress, leaseTimeSecs);
         } catch (Exception e) {
             Throwables.propagateIfPossible(e, DhcpException.class);
             throw new DhcpException("Failed to lease for MAC " + request.getHardwareAddress() + ": " + e, e);

@@ -24,13 +24,13 @@ import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.io.DhcpMessageDecoder;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.ProtocolDecoder;
+import org.apache.mina.filter.codec.ProtocolDecoderAdapter;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DhcpDecoder implements ProtocolDecoder {
+public class DhcpDecoder extends ProtocolDecoderAdapter {
 
     private final DhcpMessageDecoder decoder = new DhcpMessageDecoder();
 
@@ -38,17 +38,5 @@ public class DhcpDecoder implements ProtocolDecoder {
     public void decode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws DhcpException, IOException {
         out.write(decoder.decode(in.buf()));
         in.position(in.limit());    // Consume the remaining bytes, as they will be handed back to us.
-    }
-
-    /* 
-     * @see org.apache.mina.filter.codec.ProtocolDecoder#finishDecode(org.apache.mina.common.IoSession, org.apache.mina.filter.codec.ProtocolDecoderOutput)
-     */
-    @Override
-    public void finishDecode(IoSession session, ProtocolDecoderOutput out) throws Exception {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void dispose(IoSession arg0) throws Exception {
     }
 }

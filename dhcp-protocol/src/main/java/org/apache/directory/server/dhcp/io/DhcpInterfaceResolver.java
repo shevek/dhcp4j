@@ -8,7 +8,6 @@ package org.apache.directory.server.dhcp.io;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
-import com.google.common.net.InetAddresses;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -47,7 +46,8 @@ public class DhcpInterfaceResolver {
                     LOG.debug("Ignoring NetworkInterface: null!");
                     return false;
                 }
-                if (!iface.isUp()) {
+                // Bridges sometimes claim to be down when no attached interfaces are up. :-(
+                if (false && !iface.isUp()) {
                     LOG.debug("Ignoring NetworkInterface: Down: {}", iface);
                     return false;
                 }
@@ -94,21 +94,17 @@ public class DhcpInterfaceResolver {
         }
     }
 
+    private static final InterfaceAddress[] EMPTY_INTERFACE_ADDRESS_ARRAY = new InterfaceAddress[0];
+
     private static class Dummy {
 
         private static final Dummy INSTANCE = new Dummy();
     }
     private final ConcurrentMap<InterfaceAddress, Dummy> interfaces = new ConcurrentHashMap<InterfaceAddress, Dummy>();
-    private final InterfaceAddress global = new InterfaceAddress(InetAddresses.forString("0.0.0.0"), 0);
 
     @Nonnull
     public Set<? extends InterfaceAddress> getInterfaces() {
         return interfaces.keySet();
-    }
-
-    @Nonnull
-    public InterfaceAddress getGlobalInterface() {
-        return global;
     }
 
     /**
@@ -126,18 +122,18 @@ public class DhcpInterfaceResolver {
     }
 
     @CheckForNull
-    public InterfaceAddress getQueryInterface(@Nonnull Object... objects) throws DhcpException {
+    public InterfaceAddress[] getQueryInterface(@Nonnull Object... objects) throws DhcpException {
         InetAddress address = DhcpInterfaceUtils.toInetAddress(objects);
         if (address != null) {
             InterfaceAddress iface = getInterface(address);
             if (iface != null)
-                return iface;
+                return new InterfaceAddress[]{iface};
             // We know it's address but we don't think we can talk to it.
             // LOG.debug("No InterfaceAddress for InetAddress {}", address);
             return null;
         }
         // We don't know it's address. Let's see if getting a lease helps us at all.
-        return getGlobalInterface();
+        return interfaces.keySet().toArray(EMPTY_INTERFACE_ADDRESS_ARRAY);
     }
 
     @CheckForNull

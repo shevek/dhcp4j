@@ -41,6 +41,10 @@ public class NetworkAddress extends AbstractMaskedAddress {
         super(AddressUtils.toNetworkAddress(address, netmask), netmask);
     }
 
+    public NetworkAddress(@Nonnull java.net.InterfaceAddress address) {
+        this(address.getAddress(), address.getNetworkPrefixLength());
+    }
+
     @Override
     public InetAddress getNetworkAddress() {
         return getAddress();

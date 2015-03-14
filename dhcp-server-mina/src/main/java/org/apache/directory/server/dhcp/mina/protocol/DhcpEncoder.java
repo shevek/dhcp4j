@@ -24,13 +24,13 @@ import org.apache.directory.server.dhcp.io.DhcpMessageEncoder;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.ProtocolEncoder;
+import org.apache.mina.filter.codec.ProtocolEncoderAdapter;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 
 /**
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
-public class DhcpEncoder implements ProtocolEncoder {
+public class DhcpEncoder extends ProtocolEncoderAdapter {
 
     // FIXME: what's the point of splitting this class from the actual encoder?
     private final DhcpMessageEncoder encoder = new DhcpMessageEncoder();
@@ -42,9 +42,5 @@ public class DhcpEncoder implements ProtocolEncoder {
         encoder.encode(buf.buf(), (DhcpMessage) message);
         buf.flip();
         out.write(buf);
-    }
-
-    @Override
-    public void dispose(IoSession arg0) throws Exception {
     }
 }

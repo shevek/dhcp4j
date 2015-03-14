@@ -19,9 +19,9 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
-import org.apache.directory.server.dhcp.DhcpException;
 import org.anarres.dhcp.common.address.AddressUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
+import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.MessageType;
@@ -34,12 +34,10 @@ import org.apache.directory.server.dhcp.service.manager.AbstractLeaseManager;
  */
 public class LdapStoreLeaseManager extends AbstractLeaseManager {
 
-    private final LeaseTimeRange TTL_OFFER = new LeaseTimeRange(60, 600, 600);
-    private final LeaseTimeRange TTL_LEASE = new LeaseTimeRange(60, 3600, 36000);
     private final InitialDirContext context;
 
     public LdapStoreLeaseManager() throws NamingException {
-        Hashtable env = new Hashtable();
+        Hashtable<String, Object> env = new Hashtable<String, Object>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         // env.put(Context.INITIAL_CONTEXT_FACTORY, DEFAULT_INITIAL_CONTEXT_FACTORY);
         env.put(Context.PROVIDER_URL, "ldap://localhost:389/dc=tcat,dc=test");
@@ -86,48 +84,42 @@ public class LdapStoreLeaseManager extends AbstractLeaseManager {
 
     @Nonnull
     protected DhcpMessage newReply(
-            @Nonnull InterfaceAddress localAddress,
             @Nonnull DhcpMessage request,
             @Nonnull MessageType type,
             @Nonnull DhcpConfigHost host,
             @Nonnegative long leaseTimeSecs
     ) {
-        DhcpMessage reply = newReplyAck(localAddress, request, type, host.getClientAddress(), leaseTimeSecs);
+        DhcpMessage reply = newReplyAck(request, type, host.getClientAddress(), leaseTimeSecs);
         reply.getOptions().add(new HostName(host.getName()));
         reply.getOptions().addAll(host.getOptions());
         return reply;
     }
 
     @Override
-    public DhcpMessage leaseOffer(InterfaceAddress localAddress, DhcpMessage request, InetAddress remoteAddress, InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
+    public DhcpMessage leaseOffer(
+            InterfaceAddress[] localAddresses,
+            DhcpMessage request,
+            InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
         DhcpConfigHost host = getHost(request.getHardwareAddress());
         if (host == null)
             return null;
         if (AddressUtils.isZeroAddress(host.getClientAddress()))
             return null;
         long leaseTimeSecs = getLeaseTime(TTL_OFFER, clientRequestedExpirySecs);
-        return newReply(localAddress, request, MessageType.DHCPACK, host, leaseTimeSecs);
+        return newReply(request, MessageType.DHCPACK, host, leaseTimeSecs);
     }
 
     @Override
-    public DhcpMessage leaseRequest(InterfaceAddress localAddress, DhcpMessage request, InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
+    public DhcpMessage leaseRequest(
+            InterfaceAddress[] localAddresses,
+            DhcpMessage request,
+            InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
         DhcpConfigHost host = getHost(request.getHardwareAddress());
         if (host == null)
             return null;
         if (AddressUtils.isZeroAddress(host.getClientAddress()))
             return null;
         long leaseTimeSecs = getLeaseTime(TTL_LEASE, clientRequestedExpirySecs);
-        return newReply(localAddress, request, MessageType.DHCPACK, host, leaseTimeSecs);
+        return newReply(request, MessageType.DHCPACK, host, leaseTimeSecs);
     }
-
-    @Override
-    public boolean leaseDecline(InterfaceAddress localAddress, DhcpMessage request, InetAddress clientAddress) throws DhcpException {
-        return true;
-    }
-
-    @Override
-    public boolean leaseRelease(InterfaceAddress localAddress, DhcpMessage request, InetAddress clientAddress) throws DhcpException {
-        return false;
-    }
-
 }

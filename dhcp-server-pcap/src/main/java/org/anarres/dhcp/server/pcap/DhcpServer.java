@@ -5,16 +5,26 @@
  */
 package org.anarres.dhcp.server.pcap;
 
+import com.google.common.util.concurrent.MoreExecutors;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Executor;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import org.anarres.dhcp.common.address.AddressUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.io.DhcpMessageDecoder;
 import org.apache.directory.server.dhcp.io.DhcpMessageEncoder;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.service.DhcpService;
+import org.apache.directory.server.dhcp.service.manager.LeaseManager;
+import org.apache.directory.server.dhcp.service.manager.LeaseManagerDhcpService;
 import org.pcap4j.core.BpfProgram;
 import org.pcap4j.core.PcapAddress;
 import org.pcap4j.core.PcapHandle;
@@ -37,24 +47,55 @@ public class DhcpServer {
     private final DhcpMessageDecoder decoder = new DhcpMessageDecoder();
     private final DhcpMessageEncoder encoder = new DhcpMessageEncoder();
     private final DhcpService service;
+    private final int port;
+    private Executor executor = MoreExecutors.directExecutor();
 
     @Nonnull
-    private InterfaceAddress toInterfaceAddress(@Nonnull PcapAddress address) {
+    private static InterfaceAddress toInterfaceAddress(@Nonnull PcapAddress address) {
         int netmask = AddressUtils.toNetmask(address.getNetmask());
         return new InterfaceAddress(address.getAddress(), netmask);
     }
 
-    public DhcpServer(DhcpService service) {
+    @Nonnull
+    private static InterfaceAddress[] toInterfaceAddresses(@Nonnull PcapNetworkInterface iface) {
+        List<InterfaceAddress> out = new ArrayList<InterfaceAddress>();
+        for (PcapAddress address : iface.getAddresses())
+            out.add(toInterfaceAddress(address));
+        return out.toArray(new InterfaceAddress[out.size()]);
+    }
+
+    public DhcpServer(@Nonnull DhcpService service, @Nonnegative int port) {
         this.service = service;
+        this.port = port;
+    }
+
+    public DhcpServer(@Nonnull DhcpService service) {
+        this(service, DhcpService.SERVER_PORT);
+    }
+
+    public DhcpServer(@Nonnull LeaseManager manager, @Nonnegative int port) {
+        this(new LeaseManagerDhcpService(manager), port);
+    }
+
+    public DhcpServer(@Nonnull LeaseManager manager) {
+        this(new LeaseManagerDhcpService(manager));
+    }
+
+    @PostConstruct
+    public void start() throws IOException, InterruptedException {
+    }
+
+    @PreDestroy
+    public void stop() throws IOException, InterruptedException {
     }
 
     public void run() throws Exception {
         PcapNetworkInterface iface = null;
 
-        InterfaceAddress localAddress = toInterfaceAddress(iface.getAddresses().get(0));
+        InterfaceAddress[] localAddresses = toInterfaceAddresses(iface);
 
         PcapHandle handle = iface.openLive(4096, PcapNetworkInterface.PromiscuousMode.PROMISCUOUS, 1024);
-        handle.setFilter("udp port 67", BpfProgram.BpfCompileMode.OPTIMIZE);
+        handle.setFilter("udp port " + port, BpfProgram.BpfCompileMode.OPTIMIZE);
         for (;;) {
             Packet rawPacket = handle.getNextPacketEx();
             IpV4Packet ipPacket = rawPacket.get(IpV4Packet.class);
@@ -62,7 +103,7 @@ public class DhcpServer {
             byte[] dhcpData = udpPacket.getPayload().getRawData();
             DhcpMessage message = decoder.decode(ByteBuffer.wrap(dhcpData));
             InetSocketAddress remoteAddress = new InetSocketAddress(ipPacket.getHeader().getSrcAddr(), udpPacket.getHeader().getSrcPort().valueAsInt());
-            DhcpMessage reply = service.getReplyFor(localAddress, remoteAddress, message);
+            DhcpMessage reply = service.getReplyFor(localAddresses, remoteAddress, message);
             if (reply == null)
                 continue;
             byte[] replyData = new byte[1536];
@@ -79,8 +120,8 @@ public class DhcpServer {
                     .correctLengthAtBuild(true);
             IpV4Packet.Builder ipBuilder = new IpV4Packet.Builder()
                     .payloadBuilder(udpBuilder)
-                    .srcAddr(null)  // TODO
-                    .dstAddr(null)  // TODO
+                    .srcAddr(null) // TODO
+                    .dstAddr(null) // TODO
                     .protocol(IpNumber.UDP)
                     .correctChecksumAtBuild(true)
                     .correctLengthAtBuild(true)

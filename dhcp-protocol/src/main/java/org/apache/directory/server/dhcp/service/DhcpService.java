@@ -19,6 +19,7 @@
  */
 package org.apache.directory.server.dhcp.service;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -29,7 +30,7 @@ import org.apache.directory.server.dhcp.messages.DhcpMessage;
 /**
  * DHCP Protocol (RFC 2131, RFC 2132). Implementations of the DHCP service must
  * be thread-safe with respect to concurrent calls to getReplyFor().
- * 
+ *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
 public interface DhcpService {
@@ -46,16 +47,17 @@ public interface DhcpService {
     /**
      * Retrieve the reply to a given message. The reply may be zero, if the
      * message should be ignored.
-     * @param localAddress TODO
-     * @param clientAddress 
+     *
+     * @param localAddresses
+     * @param remoteAddress
      * @param request
      * @return DhcpMessage
-     * @throws DhcpException 
+     * @throws DhcpException
      */
     @CheckForNull
     public DhcpMessage getReplyFor(
-            @Nonnull InterfaceAddress localAddress,
-            @CheckForNull InetSocketAddress clientAddress,
+            @Nonnull InterfaceAddress[] localAddresses,
+            @CheckForNull InetSocketAddress remoteAddress,
             @Nonnull DhcpMessage request)
             throws DhcpException;
 }

@@ -63,19 +63,19 @@ public class FixedStoreLeaseManager extends AbstractLeaseManager {
     }
 
     @Override
-    public DhcpMessage leaseOffer(InterfaceAddress localAddress,
-            DhcpMessage request, InetAddress networkAddress,
+    public DhcpMessage leaseOffer(InterfaceAddress[] localAddresses,
+            DhcpMessage request,
             InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
         Lease lease = getLease(request.getHardwareAddress());
         if (lease == null)
             return null;
         lease.setState(Lease.LeaseState.OFFERED);
         lease.setExpires(System.currentTimeMillis() / 1000 + 3600);
-        return SimpleStoreLeaseManager.newReply(localAddress, request, MessageType.DHCPOFFER, lease);
+        return SimpleStoreLeaseManager.newReply(request, MessageType.DHCPOFFER, lease);
     }
 
     @Override
-    public DhcpMessage leaseRequest(InterfaceAddress localAddress,
+    public DhcpMessage leaseRequest(InterfaceAddress[] localAddresses,
             DhcpMessage request,
             InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
         Lease lease = getLease(request.getHardwareAddress());
@@ -83,7 +83,7 @@ public class FixedStoreLeaseManager extends AbstractLeaseManager {
             return null;
         lease.setState(Lease.LeaseState.ACTIVE);
         lease.setExpires(System.currentTimeMillis() / 1000 + 3600);
-        return SimpleStoreLeaseManager.newReply(localAddress, request, MessageType.DHCPACK, lease);
+        return SimpleStoreLeaseManager.newReply(request, MessageType.DHCPACK, lease);
     }
 
 }
