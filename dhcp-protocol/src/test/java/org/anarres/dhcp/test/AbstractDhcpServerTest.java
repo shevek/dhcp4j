@@ -34,6 +34,7 @@ public abstract class AbstractDhcpServerTest {
     @Nonnull
     public FixedStoreLeaseManager newLeaseManager(@Nonnull String interfaceName) throws Exception {
         NetworkInterface iface = NetworkInterface.getByName(interfaceName);
+        assertNotNull("No such interface " + interfaceName, iface);
         InterfaceAddress address = Iterables.find(iface.getInterfaceAddresses(), new Predicate<InterfaceAddress>() {
             public boolean apply(InterfaceAddress input) {
                 return input.getAddress() instanceof Inet4Address;
