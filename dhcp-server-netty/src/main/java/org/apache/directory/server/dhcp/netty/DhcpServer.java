@@ -19,7 +19,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import org.apache.directory.server.dhcp.io.DhcpInterfaceResolver;
+import org.apache.directory.server.dhcp.io.DhcpInterfaceManager;
 import org.apache.directory.server.dhcp.service.DhcpService;
 import org.apache.directory.server.dhcp.service.manager.LeaseManager;
 import org.apache.directory.server.dhcp.service.manager.LeaseManagerDhcpService;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author shevek
  */
-public class DhcpServer extends DhcpInterfaceResolver {
+public class DhcpServer extends DhcpInterfaceManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(DhcpServer.class);
 

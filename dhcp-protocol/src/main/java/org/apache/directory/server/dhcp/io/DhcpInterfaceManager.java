@@ -33,11 +33,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author shevek
  */
-public class DhcpInterfaceResolver {
+public class DhcpInterfaceManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DhcpInterfaceResolver.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DhcpInterfaceManager.class);
 
-    public static class BroadcastPredicate implements Predicate<NetworkInterface> {
+    public static class ValidPredicate implements Predicate<NetworkInterface> {
 
         @Override
         public boolean apply(NetworkInterface iface) {
@@ -46,7 +46,7 @@ public class DhcpInterfaceResolver {
                     LOG.debug("Ignoring NetworkInterface: null!");
                     return false;
                 }
-                // Bridges sometimes claim to be down when no attached interfaces are up. :-(
+                // Bridges claim to be down when no attached interfaces are up. :-(
                 if (false && !iface.isUp()) {
                     LOG.debug("Ignoring NetworkInterface: Down: {}", iface);
                     return false;
@@ -67,15 +67,15 @@ public class DhcpInterfaceResolver {
         }
     }
 
-    public static class NamedPredicate extends BroadcastPredicate {
+    public static class NamedPredicate extends ValidPredicate {
 
-        private final List<String> names;
+        private final List<? extends String> names;
 
-        public NamedPredicate(@Nonnull List<String> names) {
+        public NamedPredicate(@Nonnull List<? extends String> names) {
             this.names = names;
         }
 
-        public NamedPredicate(@Nonnull Iterable<String> names) {
+        public NamedPredicate(@Nonnull Iterable<? extends String> names) {
             this(Lists.newArrayList(names));
         }
 
@@ -99,6 +99,9 @@ public class DhcpInterfaceResolver {
     private static class Dummy {
 
         private static final Dummy INSTANCE = new Dummy();
+
+        private Dummy() {
+        }
     }
     private final ConcurrentMap<InterfaceAddress, Dummy> interfaces = new ConcurrentHashMap<InterfaceAddress, Dummy>();
 
@@ -122,7 +125,7 @@ public class DhcpInterfaceResolver {
     }
 
     @CheckForNull
-    public InterfaceAddress[] getQueryInterface(@Nonnull Object... objects) throws DhcpException {
+    public InterfaceAddress[] getRequestInterface(@Nonnull Object... objects) throws DhcpException {
         InetAddress address = DhcpInterfaceUtils.toInetAddress(objects);
         if (address != null) {
             InterfaceAddress iface = getInterface(address);
@@ -181,7 +184,7 @@ public class DhcpInterfaceResolver {
     }
 
     public void addDefaultInterfaces() throws IOException, InterruptedException {
-        addInterfaces(new BroadcastPredicate());
+        addInterfaces(new ValidPredicate());
     }
 
     public void start() throws IOException, InterruptedException {

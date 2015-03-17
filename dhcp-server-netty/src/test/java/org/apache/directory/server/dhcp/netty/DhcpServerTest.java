@@ -6,7 +6,7 @@
 package org.apache.directory.server.dhcp.netty;
 
 import org.anarres.dhcp.test.AbstractDhcpServerTest;
-import org.apache.directory.server.dhcp.io.DhcpInterfaceResolver;
+import org.apache.directory.server.dhcp.io.DhcpInterfaceManager;
 import org.apache.directory.server.dhcp.service.store.FixedStoreLeaseManager;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -22,7 +22,7 @@ public class DhcpServerTest extends AbstractDhcpServerTest {
     public void testServer() throws Exception {
         FixedStoreLeaseManager manager = newLeaseManager(INTERFACE_NAME);
         DhcpServer server = new DhcpServer(manager);
-        server.addInterfaces(new DhcpInterfaceResolver.NamedPredicate(INTERFACE_NAME));
+        server.addInterfaces(new DhcpInterfaceManager.NamedPredicate(INTERFACE_NAME));
         assertKosher(server);
 
         server.start();

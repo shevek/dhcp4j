@@ -9,7 +9,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.common.address.InterfaceAddress;
-import org.apache.directory.server.dhcp.io.DhcpInterfaceResolver;
+import org.apache.directory.server.dhcp.io.DhcpInterfaceManager;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.HardwareAddressType;
@@ -73,7 +73,7 @@ public class DhcpProtocolHandlerTest {
         LeaseManager manager = new SimpleStoreLeaseManager();
         DhcpService service = new LeaseManagerDhcpService(manager);
         InterfaceAddress address = new InterfaceAddress(InetAddresses.forString("10.1.2.3"), 24);
-        DhcpProtocolHandler protocolHandler = new DhcpProtocolHandler(service, new DhcpInterfaceResolver());
+        DhcpProtocolHandler protocolHandler = new DhcpProtocolHandler(service, new DhcpInterfaceManager());
         protocolHandler.messageReceived(session, request);
         // Right now, this isn't configured, so it doesn't respond.
         // assertEquals(1, session.getWrittenMessages());

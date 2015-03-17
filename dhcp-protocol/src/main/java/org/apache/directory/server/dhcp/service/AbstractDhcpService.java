@@ -19,7 +19,6 @@ package org.apache.directory.server.dhcp.service;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
@@ -34,14 +33,12 @@ import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.options.DhcpOption;
 import org.apache.directory.server.dhcp.options.OptionsField;
-import org.apache.directory.server.dhcp.options.dhcp.BootfileName;
 import org.apache.directory.server.dhcp.options.dhcp.ClientIdentifier;
 import org.apache.directory.server.dhcp.options.dhcp.IpAddressLeaseTime;
 import org.apache.directory.server.dhcp.options.dhcp.MaximumDhcpMessageSize;
 import org.apache.directory.server.dhcp.options.dhcp.ParameterRequestList;
 import org.apache.directory.server.dhcp.options.dhcp.RequestedIpAddress;
 import org.apache.directory.server.dhcp.options.dhcp.ServerIdentifier;
-import org.apache.directory.server.dhcp.options.dhcp.TftpServerName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +52,7 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  *
  */
-public abstract class AbstractDhcpService implements DhcpService {
+public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory implements DhcpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDhcpService.class);
 
@@ -296,97 +293,6 @@ public abstract class AbstractDhcpService implements DhcpService {
         if (remoteAddress != null)
             return remoteAddress.getAddress();
         return localAddress.getAddress();
-    }
-
-    /**
-     * Initialize a general DHCP reply message. Sets:
-     * <ul>
-     * <li>op=BOOTREPLY
-     * <li>htype, hlen, xid, flags, giaddr, chaddr like in request message
-     * <li>hops, secs to 0.
-     * <li>server hostname to the hostname appropriate for the interface the
-     * request was received on
-     * <li>the server identifier set to the address of the interface the request
-     * was received on
-     * </ul>
-     *
-     * @param localAddress
-     * @param request
-     * @return DhcpMessage
-     */
-    @Nonnull
-    public static DhcpMessage newReply(
-            @Nonnull DhcpMessage request,
-            @Nonnull MessageType type) {
-        DhcpMessage reply = new DhcpMessage();
-
-        reply.setOp(DhcpMessage.OP_BOOTREPLY);
-        reply.setMessageType(type);
-
-        reply.setHardwareAddress(request.getHardwareAddress());
-        reply.setTransactionId(request.getTransactionId());
-        reply.setFlags(request.getFlags());
-        reply.setRelayAgentAddress(request.getRelayAgentAddress());
-
-        /* I think these are forbidden in a reply, which seems odd, as they
-         * are useful for disambiguation.
-
-         byte[] clientIdentifier = request.getOptions().getOption(ClientIdentifier.class);
-         if (clientIdentifier != null)
-         reply.getOptions().setOption(ClientIdentifier.class, clientIdentifier);
-         byte[] uuidClientIdentifier = request.getOptions().getOption(UUIDClientIdentifier.class);
-         if (uuidClientIdentifier != null)
-         reply.getOptions().setOption(UUIDClientIdentifier.class, uuidClientIdentifier);
-         */
-        return reply;
-    }
-
-    @Nonnull
-    public static DhcpMessage newReplyNak(
-            @Nonnull DhcpMessage request) {
-        DhcpMessage reply = newReply(request, MessageType.DHCPNAK);
-        reply.setMessageType(MessageType.DHCPNAK);
-        reply.setCurrentClientAddress(null);
-        reply.setAssignedClientAddress(null);
-        reply.setNextServerAddress(null);
-        return reply;
-    }
-
-    @Nonnull
-    public static DhcpMessage newReplyAck(
-            @Nonnull DhcpMessage request,
-            @Nonnull MessageType type,
-            @CheckForNull InetAddress assignedClientAddress,
-            @CheckForSigned long leaseTimeSecs) {
-        DhcpMessage reply = newReply(request, type);
-        if (leaseTimeSecs > 0)
-            reply.getOptions().setIntOption(IpAddressLeaseTime.class, leaseTimeSecs);
-        if (assignedClientAddress != null)
-            reply.setAssignedClientAddress(assignedClientAddress);
-        return reply;
-    }
-
-    public static void setServerIdentifier(
-            @Nonnull DhcpMessage reply,
-            @Nonnull InetAddress localAddress) {
-        if (!AddressUtils.isZeroAddress(localAddress)) {
-            reply.setServerHostname(InetAddresses.toAddrString(localAddress));
-            reply.getOptions().add(new ServerIdentifier(localAddress));
-        }
-    }
-
-    public static void setBootParameters(
-            @Nonnull DhcpMessage reply,
-            @CheckForNull InetAddress nextServerAddress,
-            @CheckForNull String bootFileName) {
-        if (nextServerAddress != null) {
-            reply.setNextServerAddress(nextServerAddress);
-            reply.getOptions().setStringOption(TftpServerName.class, InetAddresses.toAddrString(nextServerAddress));
-        }
-        if (bootFileName != null) {
-            reply.setBootFileName(bootFileName);
-            reply.getOptions().setStringOption(BootfileName.class, bootFileName);
-        }
     }
 
     /**

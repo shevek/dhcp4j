@@ -5,14 +5,15 @@
  */
 package org.anarres.dhcp.common;
 
-import java.net.InetSocketAddress;
-import javax.annotation.Nonnegative;
+import com.google.common.net.InetAddresses;
+import java.net.InetAddress;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.common.address.AddressUtils;
-import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
-import org.apache.directory.server.dhcp.messages.MessageType;
-import org.apache.directory.server.dhcp.service.DhcpService;
+import org.apache.directory.server.dhcp.options.dhcp.BootfileName;
+import org.apache.directory.server.dhcp.options.dhcp.ServerIdentifier;
+import org.apache.directory.server.dhcp.options.dhcp.TftpServerName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,41 +25,26 @@ public class DhcpUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(DhcpUtils.class);
 
-    /**
-     * Determine where to send the message: <br>
-     * If the 'giaddr' field in a DHCP message from a client is non-zero, the
-     * server sends any return messages to the 'DHCP server' port on the BOOTP
-     * relay agent whose address appears in 'giaddr'. If the 'giaddr' field is
-     * zero and the 'ciaddr' field is nonzero, then the server unicasts DHCPOFFER
-     * and DHCPACK messages to the address in 'ciaddr'. If 'giaddr' is zero and
-     * 'ciaddr' is zero, and the broadcast bit is set, then the server broadcasts
-     * DHCPOFFER and DHCPACK messages to 0xffffffff. If the broadcast bit is not
-     * set and 'giaddr' is zero and 'ciaddr' is zero, then the server unicasts
-     * DHCPOFFER and DHCPACK messages to the client's hardware address and
-     * 'yiaddr' address. In all cases, when 'giaddr' is zero, the server
-     * broadcasts any DHCPNAK messages to 0xffffffff.
-     */
-    @Nonnull
-    //This will suppress PMD.AvoidUsingHardCodedIP warnings in this class
-    @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
-    public static InetSocketAddress determineMessageDestination(
-            @Nonnull DhcpMessage request,
+    public static void setServerIdentifier(
             @Nonnull DhcpMessage reply,
-            @Nonnull InterfaceAddress localAddress,
-            @Nonnegative int remotePort
-    ) {
-        if (!AddressUtils.isZeroAddress(request.getRelayAgentAddress())) {
-            // send to agent, if received via agent.
-            return new InetSocketAddress(request.getRelayAgentAddress(), DhcpService.SERVER_PORT);
-        } else if (reply.getMessageType() == MessageType.DHCPNAK) {
-            // force broadcast for DHCPNAKs
-            return new InetSocketAddress(localAddress.getBroadcastAddress(), remotePort);
-        } else if (!AddressUtils.isZeroAddress(request.getCurrentClientAddress())) {
-            // have a current address? unicast to it.
-            return new InetSocketAddress(request.getCurrentClientAddress(), remotePort);
-        } else {
-            // not a NAK...
-            return new InetSocketAddress(localAddress.getBroadcastAddress(), remotePort);
+            @Nonnull InetAddress localAddress) {
+        if (!AddressUtils.isZeroAddress(localAddress)) {
+            reply.setServerHostname(InetAddresses.toAddrString(localAddress));
+            reply.getOptions().add(new ServerIdentifier(localAddress));
+        }
+    }
+
+    public static void setBootParameters(
+            @Nonnull DhcpMessage reply,
+            @CheckForNull InetAddress nextServerAddress,
+            @CheckForNull String bootFileName) {
+        if (nextServerAddress != null) {
+            reply.setNextServerAddress(nextServerAddress);
+            reply.getOptions().setStringOption(TftpServerName.class, InetAddresses.toAddrString(nextServerAddress));
+        }
+        if (bootFileName != null) {
+            reply.setBootFileName(bootFileName);
+            reply.getOptions().setStringOption(BootfileName.class, bootFileName);
         }
     }
 }

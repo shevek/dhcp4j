@@ -12,7 +12,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import org.apache.directory.server.dhcp.io.DhcpInterfaceResolver;
+import org.apache.directory.server.dhcp.io.DhcpInterfaceManager;
 import org.apache.directory.server.dhcp.mina.protocol.DhcpProtocolCodecFactory;
 import org.apache.directory.server.dhcp.mina.protocol.DhcpProtocolHandler;
 import org.apache.directory.server.dhcp.service.DhcpService;
@@ -26,7 +26,7 @@ import org.apache.mina.transport.socket.nio.NioDatagramAcceptor;
  *
  * @author shevek
  */
-public class DhcpServer extends DhcpInterfaceResolver {
+public class DhcpServer extends DhcpInterfaceManager {
 
     private final LoggingFilter logger_wire = new LoggingFilter("dhcp-wire");
     private final ProtocolCodecFilter codec = new ProtocolCodecFilter(DhcpProtocolCodecFactory.getInstance());

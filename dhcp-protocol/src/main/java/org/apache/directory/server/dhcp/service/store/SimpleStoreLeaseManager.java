@@ -29,9 +29,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import org.apache.directory.server.dhcp.DhcpException;
+import org.anarres.dhcp.common.DhcpUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.anarres.dhcp.common.address.NetworkAddress;
+import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.MessageType;
@@ -50,7 +51,7 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
     // a map of current leases
     private final List<DhcpConfigSubnet> subnets = new ArrayList<DhcpConfigSubnet>();
     private final Cache<HardwareAddress, Lease> leases = CacheBuilder.newBuilder()
-            .expireAfterAccess((long) (TTL_LEASE.maxLeaseTime * 2), TimeUnit.SECONDS)
+            .expireAfterAccess(TTL_LEASE.maxLeaseTime * 2, TimeUnit.SECONDS)
             .recordStats()
             .build();
 
@@ -83,7 +84,7 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
             @Nonnull Lease lease) {
         long leaseTimeSecs = lease.getExpires() - System.currentTimeMillis() / 1000;
         DhcpMessage reply = newReplyAck(request, type, lease.getClientAddress(), leaseTimeSecs);
-        setBootParameters(reply, lease.getNextServerAddress(), null);
+        DhcpUtils.setBootParameters(reply, lease.getNextServerAddress(), null);
         reply.getOptions().addAll(lease.getOptions());
         return reply;
     }

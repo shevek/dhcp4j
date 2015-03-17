@@ -15,10 +15,10 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import javax.annotation.Nonnull;
-import org.anarres.dhcp.common.DhcpUtils;
 import org.anarres.dhcp.common.LogUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
-import org.apache.directory.server.dhcp.io.DhcpInterfaceResolver;
+import org.apache.directory.server.dhcp.io.DhcpInterfaceManager;
+import org.apache.directory.server.dhcp.io.DhcpInterfaceUtils;
 import org.apache.directory.server.dhcp.io.DhcpMessageDecoder;
 import org.apache.directory.server.dhcp.io.DhcpMessageEncoder;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
@@ -36,11 +36,11 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DhcpHandler.class);
     private final DhcpService dhcpService;
-    private final DhcpInterfaceResolver interfaceResolver;
+    private final DhcpInterfaceManager interfaceResolver;
     private final DhcpMessageDecoder decoder = new DhcpMessageDecoder();
     private final DhcpMessageEncoder encoder = new DhcpMessageEncoder();
 
-    public DhcpHandler(@Nonnull DhcpService dhcpService, @Nonnull DhcpInterfaceResolver resolver) {
+    public DhcpHandler(@Nonnull DhcpService dhcpService, @Nonnull DhcpInterfaceManager resolver) {
         this.dhcpService = dhcpService;
         this.interfaceResolver = resolver;
     }
@@ -54,7 +54,7 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
     protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {
         DhcpMessage request = decoder.decode(msg.content().nioBuffer());
 
-        InterfaceAddress[] localAddresses = interfaceResolver.getQueryInterface(
+        InterfaceAddress[] localAddresses = interfaceResolver.getRequestInterface(
                 msg.recipient().getAddress(),
                 ctx.channel().localAddress(),
                 request,
@@ -91,7 +91,7 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
             debug("READ", msg.sender(), msg.recipient(), request);
 
-            InetSocketAddress isa = DhcpUtils.determineMessageDestination(
+            InetSocketAddress isa = DhcpInterfaceUtils.determineMessageDestination(
                     request, reply,
                     localAddress, msg.sender().getPort());
 

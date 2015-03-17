@@ -16,7 +16,7 @@ public class DhcpInterfaceResolverTest {
     // Test requires human inspection to determine whether it detected eth0:0.
     @Test
     public void testInterfaceName() throws Exception{
-        DhcpInterfaceResolver resolver = new DhcpInterfaceResolver();
-        resolver.addInterfaces(new DhcpInterfaceResolver.NamedPredicate("eth0:0"));
+        DhcpInterfaceManager resolver = new DhcpInterfaceManager();
+        resolver.addInterfaces(new DhcpInterfaceManager.NamedPredicate("eth0:0"));
     }
 }

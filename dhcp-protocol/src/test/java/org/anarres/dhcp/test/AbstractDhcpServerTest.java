@@ -12,7 +12,7 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.common.address.NetworkAddress;
-import org.apache.directory.server.dhcp.io.DhcpInterfaceResolver;
+import org.apache.directory.server.dhcp.io.DhcpInterfaceManager;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.service.store.FixedStoreLeaseManager;
 import static org.junit.Assert.*;
@@ -46,7 +46,7 @@ public abstract class AbstractDhcpServerTest {
         return manager;
     }
 
-    public void assertKosher(@Nonnull DhcpInterfaceResolver resolver) {
+    public void assertKosher(@Nonnull DhcpInterfaceManager resolver) {
         assertFalse(resolver.getInterfaces().isEmpty());
     }
 }

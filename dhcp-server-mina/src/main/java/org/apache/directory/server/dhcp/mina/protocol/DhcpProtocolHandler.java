@@ -23,10 +23,10 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Arrays;
 import javax.annotation.Nonnull;
-import org.anarres.dhcp.common.DhcpUtils;
 import org.anarres.dhcp.common.LogUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
-import org.apache.directory.server.dhcp.io.DhcpInterfaceResolver;
+import org.apache.directory.server.dhcp.io.DhcpInterfaceManager;
+import org.apache.directory.server.dhcp.io.DhcpInterfaceUtils;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.service.DhcpService;
 import org.apache.mina.core.service.IoHandlerAdapter;
@@ -52,9 +52,9 @@ public class DhcpProtocolHandler extends IoHandlerAdapter {
      * thread-safe.
      */
     private final DhcpService dhcpService;
-    private final DhcpInterfaceResolver interfaceResolver;
+    private final DhcpInterfaceManager interfaceResolver;
 
-    public DhcpProtocolHandler(@Nonnull DhcpService service, @Nonnull DhcpInterfaceResolver resolver) {
+    public DhcpProtocolHandler(@Nonnull DhcpService service, @Nonnull DhcpInterfaceManager resolver) {
         this.dhcpService = service;
         this.interfaceResolver = resolver;
     }
@@ -97,7 +97,7 @@ public class DhcpProtocolHandler extends IoHandlerAdapter {
         // This doesn't work in practice. Pass the InterfaceAddress to the constructor.
         // InetSocketAddress localSocketAddress = (InetSocketAddress) session.getLocalAddress();
         // InterfaceAddress localAddress = new InterfaceAddress(localSocketAddress.getAddress(), 0);
-        InterfaceAddress[] localAddresses = interfaceResolver.getQueryInterface(
+        InterfaceAddress[] localAddresses = interfaceResolver.getRequestInterface(
                 session.getLocalAddress(),
                 session.getServiceAddress(),
                 request,
@@ -132,7 +132,7 @@ public class DhcpProtocolHandler extends IoHandlerAdapter {
                 return;
             }
 
-            InetSocketAddress isa = DhcpUtils.determineMessageDestination(
+            InetSocketAddress isa = DhcpInterfaceUtils.determineMessageDestination(
                     request, reply,
                     localAddress, remoteAddress.getPort());
             session.write(reply, isa);
