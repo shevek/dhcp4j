@@ -20,8 +20,8 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import org.anarres.dhcp.common.address.AddressUtils;
-import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.DhcpException;
+import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.MessageType;
@@ -97,7 +97,7 @@ public class LdapStoreLeaseManager extends AbstractLeaseManager {
 
     @Override
     public DhcpMessage leaseOffer(
-            InterfaceAddress[] localAddresses,
+            DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
         DhcpConfigHost host = getHost(request.getHardwareAddress());
@@ -111,7 +111,7 @@ public class LdapStoreLeaseManager extends AbstractLeaseManager {
 
     @Override
     public DhcpMessage leaseRequest(
-            InterfaceAddress[] localAddresses,
+            DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
         DhcpConfigHost host = getHost(request.getHardwareAddress());

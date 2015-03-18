@@ -6,8 +6,8 @@
 package org.apache.directory.server.dhcp.service.manager;
 
 import java.net.InetAddress;
-import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.DhcpException;
+import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.service.AbstractDhcpReplyFactory;
 
@@ -19,7 +19,7 @@ public abstract class AbstractLeaseManager extends AbstractDhcpReplyFactory impl
 
     @Override
     public boolean leaseDecline(
-            InterfaceAddress[] localAddresses,
+            DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientAddress) throws DhcpException {
         return false;
@@ -27,7 +27,7 @@ public abstract class AbstractLeaseManager extends AbstractDhcpReplyFactory impl
 
     @Override
     public boolean leaseRelease(
-            InterfaceAddress[] localAddresses,
+            DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientAddress) throws DhcpException {
         return false;

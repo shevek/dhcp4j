@@ -25,6 +25,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
 import org.anarres.dhcp.common.address.InterfaceAddress;
+import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 
 /**
@@ -47,17 +48,10 @@ public interface DhcpService {
     /**
      * Retrieve the reply to a given message. The reply may be zero, if the
      * message should be ignored.
-     *
-     * @param localAddresses
-     * @param remoteAddress
-     * @param request
-     * @return DhcpMessage
-     * @throws DhcpException
      */
     @CheckForNull
     public DhcpMessage getReplyFor(
-            @Nonnull InterfaceAddress[] localAddresses,
-            @CheckForNull InetSocketAddress remoteAddress,
+            @Nonnull DhcpRequestContext context,
             @Nonnull DhcpMessage request)
             throws DhcpException;
 }

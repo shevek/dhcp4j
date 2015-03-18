@@ -13,6 +13,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.DhcpException;
+import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.MessageType;
@@ -63,7 +64,8 @@ public class FixedStoreLeaseManager extends AbstractLeaseManager {
     }
 
     @Override
-    public DhcpMessage leaseOffer(InterfaceAddress[] localAddresses,
+    public DhcpMessage leaseOffer(
+            DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
         Lease lease = getLease(request.getHardwareAddress());
@@ -75,7 +77,8 @@ public class FixedStoreLeaseManager extends AbstractLeaseManager {
     }
 
     @Override
-    public DhcpMessage leaseRequest(InterfaceAddress[] localAddresses,
+    public DhcpMessage leaseRequest(
+            DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
         Lease lease = getLease(request.getHardwareAddress());

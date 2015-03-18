@@ -10,7 +10,7 @@ import java.net.InetSocketAddress;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
 import org.anarres.dhcp.common.address.AddressUtils;
-import org.anarres.dhcp.common.address.InterfaceAddress;
+import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.options.dhcp.IpAddressLeaseTime;
@@ -43,57 +43,61 @@ public class LeaseManagerDhcpService extends AbstractDhcpService {
     }
 
     @Override
-    protected DhcpMessage handleDISCOVER(InterfaceAddress[] localAddresses, InetSocketAddress remoteAddress, DhcpMessage request) throws DhcpException {
+    protected DhcpMessage handleDISCOVER(DhcpRequestContext context, DhcpMessage request) throws DhcpException {
         // InetAddress networkAddress = getRemoteAddress(localAddresses, request, remoteAddress);
         InetAddress requestedAddress = request.getOptions().getAddressOption(RequestedIpAddress.class);
         long requestedExpirySecs = request.getOptions().getIntOption(IpAddressLeaseTime.class);
-        DhcpMessage reply = getLeaseManager().leaseOffer(localAddresses, request, requestedAddress, requestedExpirySecs);
+        DhcpMessage reply = getLeaseManager().leaseOffer(context, request, requestedAddress, requestedExpirySecs);
         if (reply == null)
             return null;
         checkReplyType(request, reply, MessageType.DHCPOFFER, MessageType.DHCPNAK);
+        setServerIdentifier(reply, context.getInterfaceAddress());
         stripOptions(request, reply.getOptions());
         return reply;
     }
 
     @Override
-    protected DhcpMessage handleREQUEST(InterfaceAddress[] localAddresses, InetSocketAddress remoteAddress, DhcpMessage request) throws DhcpException {
+    protected DhcpMessage handleREQUEST(DhcpRequestContext context, DhcpMessage request) throws DhcpException {
         InetAddress requestedAddress = request.getOptions().getAddressOption(RequestedIpAddress.class);
         if (requestedAddress == null)
             return newReplyNak(request);
         long requestedExpirySecs = request.getOptions().getIntOption(IpAddressLeaseTime.class);
-        DhcpMessage reply = getLeaseManager().leaseRequest(localAddresses, request, requestedAddress, requestedExpirySecs);
+        DhcpMessage reply = getLeaseManager().leaseRequest(context, request, requestedAddress, requestedExpirySecs);
         if (reply == null)
             return newReplyNak(request);
         checkReplyType(request, reply, MessageType.DHCPACK, MessageType.DHCPNAK);
+        setServerIdentifier(reply, context.getInterfaceAddress());
         stripOptions(request, reply.getOptions());
         return reply;
     }
 
     @Override
-    protected DhcpMessage handleDECLINE(InterfaceAddress[] localAddresses, InetSocketAddress clientAddress, DhcpMessage request) throws DhcpException {
+    protected DhcpMessage handleDECLINE(DhcpRequestContext context, DhcpMessage request) throws DhcpException {
         InetAddress declinedAddress = request.getOptions().getAddressOption(RequestedIpAddress.class);
         if (declinedAddress == null)
             return newReplyNak(request);
-        boolean result = getLeaseManager().leaseDecline(localAddresses, request, declinedAddress);
+        boolean result = getLeaseManager().leaseDecline(context, request, declinedAddress);
         if (!result)
             return newReplyNak(request);
         DhcpMessage reply = newReplyAck(request, MessageType.DHCPACK, declinedAddress, -1);
+        setServerIdentifier(reply, context.getInterfaceAddress());
         stripOptions(request, reply.getOptions());
         return reply;
     }
 
     @Override
-    protected DhcpMessage handleRELEASE(InterfaceAddress[] localAddresses, InetSocketAddress clientAddress, DhcpMessage request) throws DhcpException {
+    protected DhcpMessage handleRELEASE(DhcpRequestContext context, DhcpMessage request) throws DhcpException {
         InetAddress releasedAddress = request.getOptions().getAddressOption(RequestedIpAddress.class);
         if (AddressUtils.isZeroAddress(releasedAddress))
-            releasedAddress = clientAddress.getAddress();
-        if (releasedAddress == null)
+            releasedAddress = context.getRemoteAddress();
+        if (AddressUtils.isZeroAddress(releasedAddress))
             return newReplyNak(request);
 
-        boolean result = getLeaseManager().leaseRelease(localAddresses, request, releasedAddress);
+        boolean result = getLeaseManager().leaseRelease(context, request, releasedAddress);
         if (!result)
             return newReplyNak(request);
         DhcpMessage reply = newReplyAck(request, MessageType.DHCPACK, releasedAddress, -1);
+        setServerIdentifier(reply, context.getInterfaceAddress());
         stripOptions(request, reply.getOptions());
         return reply;
     }

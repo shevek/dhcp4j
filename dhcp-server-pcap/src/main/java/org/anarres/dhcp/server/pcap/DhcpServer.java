@@ -21,6 +21,7 @@ import org.anarres.dhcp.common.address.AddressUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.io.DhcpMessageDecoder;
 import org.apache.directory.server.dhcp.io.DhcpMessageEncoder;
+import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.service.DhcpService;
 import org.apache.directory.server.dhcp.service.manager.LeaseManager;
@@ -101,9 +102,11 @@ public class DhcpServer {
             IpV4Packet ipPacket = rawPacket.get(IpV4Packet.class);
             UdpPacket udpPacket = rawPacket.get(UdpPacket.class);
             byte[] dhcpData = udpPacket.getPayload().getRawData();
-            DhcpMessage message = decoder.decode(ByteBuffer.wrap(dhcpData));
             InetSocketAddress remoteAddress = new InetSocketAddress(ipPacket.getHeader().getSrcAddr(), udpPacket.getHeader().getSrcPort().valueAsInt());
-            DhcpMessage reply = service.getReplyFor(localAddresses, remoteAddress, message);
+            InetSocketAddress localAddress = new InetSocketAddress(ipPacket.getHeader().getDstAddr(), udpPacket.getHeader().getDstPort().valueAsInt());
+            DhcpRequestContext context = new DhcpRequestContext(localAddresses, remoteAddress, localAddress);
+            DhcpMessage request = decoder.decode(ByteBuffer.wrap(dhcpData));
+            DhcpMessage reply = service.getReplyFor(context, request);
             if (reply == null)
                 continue;
             byte[] replyData = new byte[1536];

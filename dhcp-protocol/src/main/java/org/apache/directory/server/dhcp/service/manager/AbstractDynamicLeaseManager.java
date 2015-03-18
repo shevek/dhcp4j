@@ -20,6 +20,7 @@ import org.anarres.dhcp.common.address.NetworkAddress;
 import org.anarres.dhcp.common.address.Subnet;
 import org.anarres.jallocator.ResourceAllocator;
 import org.apache.directory.server.dhcp.DhcpException;
+import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.MessageType;
@@ -70,17 +71,21 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
 
     /**
      * Leases an InetAddress for the given HardwareAddress.
-     * 
+     *
      * Lock, retrieve current mapping from store.
      * If the InetAddress is unallocated OR allocated to the given HardwareAddress, return it.
      * Else return null.
      */
     @CheckForNull
-    protected abstract boolean leaseIp(@Nonnull InetAddress address, @Nonnull HardwareAddress hardwareAddress, long ttl) throws Exception;
+    protected abstract boolean leaseIp(
+            @Nonnull InetAddress address,
+            @Nonnull HardwareAddress hardwareAddress,
+            @Nonnegative long ttl) throws Exception;
 
     @CheckForNull
     protected InetAddress leaseMac(
-            @Nonnull InterfaceAddress[] localAddresses, @Nonnull InetAddress networkAddress,
+            @Nonnull DhcpRequestContext context,
+            @Nonnull InetAddress networkAddress,
             @Nonnull HardwareAddress hardwareAddress,
             @CheckForNull InetAddress currentAddress, @CheckForNull InetAddress requestedAddress,
             @Nonnegative long ttl)
@@ -92,7 +97,6 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
         // String hardwareId = InventoryUtils.hardwareAddress(hardwareAddress);
         // UUID systemId = new InventoryManager.GetSystemIdCommand(inventoryManager, hardwareId).execute();
         // BareMetalBootParameters bootParameters = new BareMetalManager.GetBootParametersCommand(bareMetalManager, systemId).execute();
-
         // Fixed address from configuration.
         FIXED:
         {
@@ -159,7 +163,7 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
 
     /**
      * Leases an InetAddress for the given HardwareAddress.
-     * 
+     *
      * Lock, retrieve current mapping from store.
      * Call {@link #leaseMac(InterfaceAddress, InetAddress, HardwareAddress, InetAddress, InetAddress, long)}
      * with the current mapping.
@@ -167,20 +171,21 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
      */
     @CheckForNull
     protected abstract InetAddress leaseMac(
-            @Nonnull InterfaceAddress[] localAddresses,
+            @Nonnull DhcpRequestContext context,
             @Nonnull DhcpMessage request,
             @CheckForNull InetAddress clientRequestedAddress, @Nonnegative long ttl)
             throws Exception;
 
     @Override
-    public DhcpMessage leaseOffer(InterfaceAddress[] localAddresses,
+    public DhcpMessage leaseOffer(
+            DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientRequestedAddress, long clientRequestedExpirySecs)
             throws DhcpException {
         // LOG.info("OFFER: interfaceAddress=" + interfaceAddress + ", networkAddress=" + networkAddress + ", request=" + request + ", hardwareAddress=" + hardwareAddress + ", requestedAddress=" + requestedAddress + ", requestedLeaseTimeSecs=" + requestedLeaseTimeSecs);
         try {
             long leaseTimeSecs = getLeaseTime(TTL_OFFER, clientRequestedExpirySecs);
-            InetAddress clientAddress = leaseMac(localAddresses, request, clientRequestedAddress, leaseTimeSecs);
+            InetAddress clientAddress = leaseMac(context, request, clientRequestedAddress, leaseTimeSecs);
             if (clientAddress == null)
                 return null;
             return newReplyAck(request, MessageType.DHCPACK, clientAddress, leaseTimeSecs);
@@ -191,7 +196,8 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
     }
 
     @Override
-    public DhcpMessage leaseRequest(InterfaceAddress[] localAddresses,
+    public DhcpMessage leaseRequest(
+            DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientRequestedAddress, long clientRequestedExpirySecs)
             throws DhcpException {
@@ -201,7 +207,7 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
                 LOG.warn("REQUEST from " + request.getHardwareAddress() + " did not request an address.");
                 return null;
             }
-            InetAddress clientAddress = leaseMac(localAddresses, request, clientRequestedAddress, leaseTimeSecs);
+            InetAddress clientAddress = leaseMac(context, request, clientRequestedAddress, leaseTimeSecs);
             if (clientAddress == null)
                 return null;
             return newReplyAck(request, MessageType.DHCPACK, clientAddress, leaseTimeSecs);

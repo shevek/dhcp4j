@@ -24,13 +24,12 @@ import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Iterator;
 import javax.annotation.CheckForNull;
-import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnull;
-import org.apache.directory.server.dhcp.DhcpException;
 import org.anarres.dhcp.common.address.AddressUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
+import org.apache.directory.server.dhcp.DhcpException;
+import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
-import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.options.DhcpOption;
 import org.apache.directory.server.dhcp.options.OptionsField;
 import org.apache.directory.server.dhcp.options.dhcp.ClientIdentifier;
@@ -58,14 +57,10 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
 
     @Override
     public DhcpMessage getReplyFor(
-            InterfaceAddress[] localAddresses,
-            InetSocketAddress remoteAddress,
+            DhcpRequestContext context,
             DhcpMessage request)
             throws DhcpException {
-        Preconditions.checkNotNull(localAddresses, "LocalAddress was null.");
-        for (InterfaceAddress localAddress : localAddresses)
-            if (AddressUtils.isZeroAddress(localAddress.getAddress()))
-                throw new IllegalArgumentException("Illegal InterfaceAddress " + localAddress);
+        Preconditions.checkNotNull(context, "DhcpRequestContext was null.");
 
         // ignore messages with an op != REQUEST/REPLY
         if ((request.getOp() != DhcpMessage.OP_BOOTREQUEST)
@@ -90,10 +85,10 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
         if (!AddressUtils.isZeroAddress(serverAddress)) {
             FIND:
             {
-                for (InterfaceAddress localAddress : localAddresses)
+                for (InterfaceAddress localAddress : context.getInterfaceAddresses())
                     if (Objects.equal(localAddress.getAddress(), serverAddress))
                         break FIND;
-                LOG.debug("Request is not to this server: " + request);
+                LOG.debug("Request directed to " + serverAddress + ", not to this server: " + request);
                 return null;
             }
         }
@@ -101,29 +96,29 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
         // dispatch based on the message type
         switch (request.getMessageType()) {
             case DHCPDISCOVER:
-                return handleDISCOVER(localAddresses, remoteAddress, request);
+                return handleDISCOVER(context, request);
 
             case DHCPOFFER:
-                return handleOFFER(localAddresses, remoteAddress, request);
+                return handleOFFER(context, request);
 
             case DHCPREQUEST:
-                return handleREQUEST(localAddresses, remoteAddress, request);
+                return handleREQUEST(context, request);
 
             case DHCPDECLINE:
-                return handleDECLINE(localAddresses, remoteAddress, request);
+                return handleDECLINE(context, request);
 
             case DHCPRELEASE:
-                return handleRELEASE(localAddresses, remoteAddress, request);
+                return handleRELEASE(context, request);
 
             case DHCPINFORM:
-                return handleINFORM(localAddresses, remoteAddress, request);
+                return handleINFORM(context, request);
 
             case DHCPACK:
             case DHCPNAK:
                 return null; // just ignore them
 
             default:
-                return handleUnknownMessage(localAddresses, remoteAddress, request);
+                return handleUnknownMessage(context, request);
         }
     }
 
@@ -138,11 +133,10 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
      * @throws DhcpException
      */
     @CheckForNull
-    protected DhcpMessage handleDISCOVER(@Nonnull InterfaceAddress[] localAddresses,
-            @CheckForNull InetSocketAddress remoteAddress, @Nonnull DhcpMessage request)
+    protected DhcpMessage handleDISCOVER(@Nonnull DhcpRequestContext context, @Nonnull DhcpMessage request)
             throws DhcpException {
         if (LOG.isDebugEnabled())
-            LOG.debug("Got DISCOVER message: " + request + " from " + remoteAddress);
+            LOG.debug("Got DISCOVER message: " + request + " in " + context);
         return null;
     }
 
@@ -157,83 +151,78 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
      * @throws DhcpException
      */
     @CheckForNull
-    protected DhcpMessage handleOFFER(@Nonnull InterfaceAddress[] localAddresses,
-            @CheckForNull InetSocketAddress remoteAddress, @Nonnull DhcpMessage request)
+    protected DhcpMessage handleOFFER(@Nonnull DhcpRequestContext context, @Nonnull DhcpMessage request)
             throws DhcpException {
         if (LOG.isDebugEnabled())
-            LOG.debug("Got OFFER message: " + request + " from " + remoteAddress);
+            LOG.debug("Got OFFER message: " + request + " in " + context);
         return null;
     }
 
     /**
      * Handle DHCPREQUEST message. The default implementation just ignores it.
      *
-     * @param localAddresses
+     * @param context
      * @param remoteAddress
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      * it.
      */
     @CheckForNull
-    protected DhcpMessage handleREQUEST(@Nonnull InterfaceAddress[] localAddresses,
-            @CheckForNull InetSocketAddress remoteAddress, @Nonnull DhcpMessage request)
+    protected DhcpMessage handleREQUEST(@Nonnull DhcpRequestContext context, @Nonnull DhcpMessage request)
             throws DhcpException {
         if (LOG.isDebugEnabled())
-            LOG.debug("Got REQUEST message: " + request + " from " + remoteAddress);
+            LOG.debug("Got REQUEST message: " + request + " in " + context);
         return null;
     }
 
     /**
      * Handle DHCPDECLINE message. The default implementation just ignores it.
      *
-     * @param localAddresses
+     * @param context
      * @param remoteAddress
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      * it.
      */
     @CheckForNull
-    protected DhcpMessage handleDECLINE(@Nonnull InterfaceAddress[] localAddresses,
-            @CheckForNull InetSocketAddress remoteAddress, @Nonnull DhcpMessage request)
+    protected DhcpMessage handleDECLINE(@Nonnull DhcpRequestContext context, @Nonnull DhcpMessage request)
             throws DhcpException {
         if (LOG.isDebugEnabled())
-            LOG.debug("Got DECLINE message: " + request + " from " + remoteAddress);
+            LOG.debug("Got DECLINE message: " + request + " in " + context);
         return null;
     }
 
     /**
      * Handle DHCPRELEASE message. The default implementation just ignores it.
      *
-     * @param localAddresses
+     * @param context
      * @param remoteAddress
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      * it.
      */
     @CheckForNull
-    protected DhcpMessage handleRELEASE(@Nonnull InterfaceAddress[] localAddresses,
-            @CheckForNull InetSocketAddress remoteAddress, @Nonnull DhcpMessage request)
+    protected DhcpMessage handleRELEASE(@Nonnull DhcpRequestContext context, @Nonnull DhcpMessage request)
             throws DhcpException {
         if (LOG.isDebugEnabled())
-            LOG.debug("Got RELEASE message: " + request + " from " + remoteAddress);
+            LOG.debug("Got RELEASE message: " + request + " in " + context);
         return null;
     }
 
     /**
      * Handle DHCPINFORM message. The default implementation just ignores it.
      *
-     * @param localAddresses
+     * @param context
      * @param remoteAddress
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      * it.
      */
     @CheckForNull
-    protected DhcpMessage handleINFORM(@Nonnull InterfaceAddress[] localAddresses,
-            @CheckForNull InetSocketAddress remoteAddress, @Nonnull DhcpMessage request)
+    protected DhcpMessage handleINFORM(@Nonnull DhcpRequestContext context, @Nonnull DhcpMessage request)
             throws DhcpException {
         if (LOG.isDebugEnabled())
-            LOG.debug("Got INFORM message: " + request + " from " + remoteAddress);
+            LOG.debug("Got INFORM message: " + request + " in " + context);
         return null;
     }
 
@@ -241,17 +230,16 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
      * Handle unknown DHCP message. The default implementation just logs and
      * ignores it.
      *
-     * @param localAddresses
+     * @param context
      * @param remoteAddress
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      * it.
      */
     @CheckForNull
-    protected DhcpMessage handleUnknownMessage(@Nonnull InterfaceAddress[] localAddresses,
-            @CheckForNull InetSocketAddress remoteAddress, @Nonnull DhcpMessage request) {
+    protected DhcpMessage handleUnknownMessage(@Nonnull DhcpRequestContext context, @Nonnull DhcpMessage request) {
         if (LOG.isWarnEnabled())
-            LOG.warn("Got unknkown DHCP message: " + request + " from " + remoteAddress);
+            LOG.warn("Got unknkown DHCP message: " + request + " in " + context);
         return null;
     }
 
@@ -260,9 +248,6 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
      * set, we use the relay agent's address, otherwise we use the address we
      * received the request from.
      *
-     * @param localAddresses
-     * @param remoteAddress The remote address of the socket the request came in over.
-     * @param request
      * @return InetAddress
      */
     @Nonnull

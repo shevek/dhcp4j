@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import javax.annotation.Nonnull;
 import org.anarres.dhcp.common.address.AddressUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.DhcpException;
+import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,10 +49,7 @@ public class DhcpInterfaceManager {
                     return false;
                 }
                 // Bridges claim to be down when no attached interfaces are up. :-(
-                if (false && !iface.isUp()) {
-                    LOG.debug("Ignoring NetworkInterface: Down: {}", iface);
-                    return false;
-                }
+                // if (false && !iface.isUp()) { LOG.debug("Ignoring NetworkInterface: Down: {}", iface); return false; }
                 if (iface.isLoopback()) {
                     LOG.debug("Ignoring NetworkInterface: Loopback: {}", iface);
                     return false;
@@ -104,6 +103,7 @@ public class DhcpInterfaceManager {
         }
     }
     private final ConcurrentMap<InterfaceAddress, Dummy> interfaces = new ConcurrentHashMap<InterfaceAddress, Dummy>();
+    // private final Multimap<NetworkInterface, InterfaceAddress> interfaces = Multimaps.synchronizedSetMultimap(HashMultimap.create());
 
     @Nonnull
     public Set<? extends InterfaceAddress> getInterfaces() {
@@ -124,19 +124,25 @@ public class DhcpInterfaceManager {
         return null;
     }
 
+    /**
+     * Returns an object which may be used to later decide on a specific server interface.
+     */
     @CheckForNull
-    public InterfaceAddress[] getRequestInterface(@Nonnull Object... objects) throws DhcpException {
-        InetAddress address = DhcpInterfaceUtils.toInetAddress(objects);
-        if (address != null) {
-            InterfaceAddress iface = getInterface(address);
-            if (iface != null)
-                return new InterfaceAddress[]{iface};
-            // We know it's address but we don't think we can talk to it.
-            // LOG.debug("No InterfaceAddress for InetAddress {}", address);
+    public DhcpRequestContext newRequestContext(
+            @Nonnull InetSocketAddress serviceAddress,
+            @Nonnull InetSocketAddress remoteAddress,
+            @Nonnull InetSocketAddress localAddress,
+            @Nonnull DhcpMessage request) throws DhcpException {
+        InetAddress address = DhcpInterfaceUtils.toInetAddress(request.getRelayAgentAddress(), localAddress, serviceAddress, remoteAddress, request);
+        if (address == null)
+            // We don't know the remote system's address. Let's see if getting a lease helps us at all.
+            return new DhcpRequestContext(interfaces.keySet(), remoteAddress, localAddress);
+        InterfaceAddress interfaceAddress = getInterface(address);
+        if (interfaceAddress == null)
+            // We know the remote system's address but we don't think we can talk to it.
             return null;
-        }
-        // We don't know it's address. Let's see if getting a lease helps us at all.
-        return interfaces.keySet().toArray(EMPTY_INTERFACE_ADDRESS_ARRAY);
+        // We know the remote system's address. The lease had better match.
+        return new DhcpRequestContext(interfaceAddress, remoteAddress, localAddress);
     }
 
     @CheckForNull

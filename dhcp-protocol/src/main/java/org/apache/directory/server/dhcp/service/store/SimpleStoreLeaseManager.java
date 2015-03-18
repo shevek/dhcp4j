@@ -29,10 +29,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import org.anarres.dhcp.common.DhcpUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.anarres.dhcp.common.address.NetworkAddress;
 import org.apache.directory.server.dhcp.DhcpException;
+import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.HardwareAddress;
 import org.apache.directory.server.dhcp.messages.MessageType;
@@ -67,8 +67,8 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
      * Finds the subnet for the given client address.
      */
     @CheckForNull
-    protected DhcpConfigSubnet findSubnet(@Nonnull InterfaceAddress[] localAddresses) {
-        for (InterfaceAddress localAddress : localAddresses) {
+    protected DhcpConfigSubnet findSubnet(@Nonnull DhcpRequestContext context) {
+        for (InterfaceAddress localAddress : context.getInterfaceAddresses()) {
             for (DhcpConfigSubnet subnet : subnets) {
                 if (subnet.contains(localAddress.getAddress()))
                     return subnet;
@@ -84,14 +84,14 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
             @Nonnull Lease lease) {
         long leaseTimeSecs = lease.getExpires() - System.currentTimeMillis() / 1000;
         DhcpMessage reply = newReplyAck(request, type, lease.getClientAddress(), leaseTimeSecs);
-        DhcpUtils.setBootParameters(reply, lease.getNextServerAddress(), null);
+        setBootParameters(reply, lease.getNextServerAddress(), null);
         reply.getOptions().addAll(lease.getOptions());
         return reply;
     }
 
     @Override
     public DhcpMessage leaseOffer(
-            InterfaceAddress[] localAddresses,
+            DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientRequestedAddress, long clientRequestedExpirySecs)
             throws DhcpException {
@@ -100,7 +100,7 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
         if (lease != null)
             return newReply(request, MessageType.DHCPOFFER, lease);
 
-        DhcpConfigSubnet subnet = findSubnet(localAddresses);
+        DhcpConfigSubnet subnet = findSubnet(context);
         if (subnet == null)
             return null;
 
@@ -120,7 +120,7 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
 
     @Override
     public DhcpMessage leaseRequest(
-            InterfaceAddress[] localAddresses,
+            DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientRequestedAddress, long clientRequestedExpirySecs) throws DhcpException {
         HardwareAddress hardwareAddress = request.getHardwareAddress();
@@ -139,7 +139,7 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
 
     @Override
     public boolean leaseDecline(
-            InterfaceAddress[] localAddresses,
+            DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientAddress) throws DhcpException {
         leases.invalidate(request.getHardwareAddress());
@@ -148,7 +148,7 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
 
     @Override
     public boolean leaseRelease(
-            InterfaceAddress[] localAddresses,
+            DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientAddress) throws DhcpException {
         leases.invalidate(request.getHardwareAddress());

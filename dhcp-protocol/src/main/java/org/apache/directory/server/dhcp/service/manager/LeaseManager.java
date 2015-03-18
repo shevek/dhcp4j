@@ -9,8 +9,8 @@ import java.net.InetAddress;
 import javax.annotation.CheckForNull;
 import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnull;
-import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.DhcpException;
+import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 
 /**
@@ -42,23 +42,23 @@ public interface LeaseManager {
      * </ul>
      */
     @CheckForNull
-    public DhcpMessage leaseOffer(@Nonnull InterfaceAddress[] localAddresses,
+    public DhcpMessage leaseOffer(@Nonnull DhcpRequestContext context,
             @Nonnull DhcpMessage request,
             @CheckForNull InetAddress clientRequestedAddress, @CheckForSigned long clientRequestedExpirySecs)
             throws DhcpException;
 
     @CheckForNull
-    public DhcpMessage leaseRequest(@Nonnull InterfaceAddress[] localAddresses,
+    public DhcpMessage leaseRequest(@Nonnull DhcpRequestContext context,
             @Nonnull DhcpMessage request,
             @Nonnull InetAddress clientRequestedAddress, @CheckForSigned long clientRequestedExpirySecs)
             throws DhcpException;
 
-    public boolean leaseDecline(@Nonnull InterfaceAddress[] localAddresses,
+    public boolean leaseDecline(@Nonnull DhcpRequestContext context,
             @Nonnull DhcpMessage request,
             @Nonnull InetAddress clientAddress)
             throws DhcpException;
 
-    public boolean leaseRelease(@Nonnull InterfaceAddress[] localAddresses,
+    public boolean leaseRelease(@Nonnull DhcpRequestContext context,
             @Nonnull DhcpMessage request,
             @Nonnull InetAddress clientAddress)
             throws DhcpException;

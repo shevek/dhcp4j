@@ -13,14 +13,14 @@ import io.netty.channel.socket.DatagramPacket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import javax.annotation.Nonnull;
-import org.anarres.dhcp.common.LogUtils;
+import org.anarres.dhcp.common.MDCUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.io.DhcpInterfaceManager;
 import org.apache.directory.server.dhcp.io.DhcpInterfaceUtils;
 import org.apache.directory.server.dhcp.io.DhcpMessageDecoder;
 import org.apache.directory.server.dhcp.io.DhcpMessageEncoder;
+import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.service.DhcpService;
 import org.slf4j.Logger;
@@ -36,13 +36,13 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DhcpHandler.class);
     private final DhcpService dhcpService;
-    private final DhcpInterfaceManager interfaceResolver;
+    private final DhcpInterfaceManager interfaceManager;
     private final DhcpMessageDecoder decoder = new DhcpMessageDecoder();
     private final DhcpMessageEncoder encoder = new DhcpMessageEncoder();
 
-    public DhcpHandler(@Nonnull DhcpService dhcpService, @Nonnull DhcpInterfaceManager resolver) {
+    public DhcpHandler(@Nonnull DhcpService dhcpService, @Nonnull DhcpInterfaceManager interfaceManager) {
         this.dhcpService = dhcpService;
-        this.interfaceResolver = resolver;
+        this.interfaceManager = interfaceManager;
     }
 
     private static void debug(@Nonnull String event, @Nonnull SocketAddress src, @Nonnull SocketAddress dst, @Nonnull DhcpMessage msg) {
@@ -54,31 +54,27 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
     protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {
         DhcpMessage request = decoder.decode(msg.content().nioBuffer());
 
-        InterfaceAddress[] localAddresses = interfaceResolver.getRequestInterface(
-                msg.recipient().getAddress(),
-                ctx.channel().localAddress(),
-                request,
-                msg.sender().getAddress()
+        DhcpRequestContext context = interfaceManager.newRequestContext(
+                (InetSocketAddress) ctx.channel().localAddress(),
+                msg.sender(),
+                msg.recipient(),
+                request
         );
-        if (localAddresses == null) {
+        if (context == null) {
             debug("IGNQUERY", msg.sender(), msg.recipient(), request);
             return;
         }
         // debug("READ", msg.sender(), msg.recipient(), request);
 
-        MDC.put(LogUtils.MDC_DHCP_MESSAGE_TYPE, String.valueOf(request.getMessageType()));
-        MDC.put(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS, String.valueOf(request.getHardwareAddress()));
-        MDC.put(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS, Arrays.toString(localAddresses));
+        MDCUtils.init(context, request);
         try {
-            DhcpMessage reply = dhcpService.getReplyFor(
-                    localAddresses,
-                    msg.sender(), request);
+            DhcpMessage reply = dhcpService.getReplyFor(context, request);
             if (reply == null) {
                 debug("NOREPLY", msg.sender(), msg.recipient(), request);
                 return;
             }
 
-            InterfaceAddress localAddress = interfaceResolver.getResponseInterface(
+            InterfaceAddress localAddress = interfaceManager.getResponseInterface(
                     request.getRelayAgentAddress(),
                     request.getCurrentClientAddress(),
                     msg.sender().getAddress(),
@@ -104,9 +100,7 @@ public class DhcpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
             debug("WRITE", packet.sender(), packet.recipient(), reply);
             ctx.write(packet, ctx.voidPromise());
         } finally {
-            MDC.remove(LogUtils.MDC_DHCP_SERVER_INTERFACE_ADDRESS);
-            MDC.remove(LogUtils.MDC_DHCP_CLIENT_HARDWARE_ADDRESS);
-            MDC.remove(LogUtils.MDC_DHCP_MESSAGE_TYPE);
+            MDCUtils.fini();
         }
     }
 

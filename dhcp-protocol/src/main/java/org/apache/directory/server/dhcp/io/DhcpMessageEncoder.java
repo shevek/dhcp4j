@@ -41,14 +41,16 @@ import org.slf4j.LoggerFactory;
 public class DhcpMessageEncoder {
 
     private static final Logger LOG = LoggerFactory.getLogger(DhcpMessageEncoder.class);
+    private static final byte EMPTY_HARDWARE_ADDRESS[] = {};
+    private static final byte EMPTY_INET_ADDRESS[] = {0, 0, 0, 0};
 
     /**
      * Converts a DhcpMessage object into a byte buffer.
-     * 
+     *
      * @param byteBuffer ByteBuffer to put DhcpMessage into
      * @param message DhcpMessage to encode into ByteBuffer
      */
-    public void encode(ByteBuffer byteBuffer, DhcpMessage message)
+    public void encode(@Nonnull ByteBuffer byteBuffer, @Nonnull DhcpMessage message)
             throws IOException {
         try {
             byteBuffer.put(message.getOp());
@@ -67,7 +69,7 @@ public class DhcpMessageEncoder {
             writeAddress(byteBuffer, message.getNextServerAddress());
             writeAddress(byteBuffer, message.getRelayAgentAddress());
 
-            writeBytes(byteBuffer, (null != hardwareAddress ? hardwareAddress.getAddress() : new byte[]{}), 16);
+            writeBytes(byteBuffer, (null != hardwareAddress ? hardwareAddress.getAddress() : EMPTY_HARDWARE_ADDRESS), 16);
 
             writeString(byteBuffer, message.getServerHostname(), 64);
             writeString(byteBuffer, message.getBootFileName(), 128);
@@ -89,7 +91,7 @@ public class DhcpMessageEncoder {
 
     /**
      * Write a string to a field of len bytes.
-     * 
+     *
      * @param byteBuffer
      * @param serverHostname
      * @param i
@@ -102,18 +104,15 @@ public class DhcpMessageEncoder {
         writeBytes(byteBuffer, sbytes, len);
     }
 
+
     /**
      * Write an InetAddress to the byte buffer.
-     * 
-     * @param byteBuffer
-     * @param currentClientAddress
      */
-    private void writeAddress(ByteBuffer byteBuffer, InetAddress currentClientAddress) {
-        if (null == currentClientAddress) {
-            byte emptyAddress[] = {0, 0, 0, 0};
-            byteBuffer.put(emptyAddress);
+    private void writeAddress(@Nonnull ByteBuffer byteBuffer, @Nonnull InetAddress address) {
+        if (null == address) {
+            byteBuffer.put(EMPTY_INET_ADDRESS);
         } else {
-            byte[] addressBytes = currentClientAddress.getAddress();
+            byte[] addressBytes = address.getAddress();
             byteBuffer.put(addressBytes);
         }
     }
@@ -122,11 +121,8 @@ public class DhcpMessageEncoder {
      * Write an array of bytes to the buffer. Write exactly len bytes,
      * truncating if more than len, padding if less than len bytes are
      * available.
-     * 
-     * @param byteBuffer
-     * @param currentClientAddress
      */
-    private void writeBytes(@Nonnull ByteBuffer byteBuffer, @CheckForNull byte bytes[], int len) {
+    private void writeBytes(@Nonnull ByteBuffer byteBuffer, @CheckForNull byte bytes[], @Nonnegative int len) {
         if (bytes != null) {
             int blen = Math.min(len, bytes.length);
             byteBuffer.put(bytes, 0, blen);
@@ -138,7 +134,7 @@ public class DhcpMessageEncoder {
     }
     private static final byte[] VENDOR_MAGIC_COOKIE = {(byte) 99, (byte) 130, (byte) 83, (byte) 99};
 
-    public void encodeOptions(OptionsField options, ByteBuffer message) {
+    public void encodeOptions(@Nonnull OptionsField options, @Nonnull ByteBuffer message) {
         message.put(VENDOR_MAGIC_COOKIE);
 
         for (DhcpOption option : options) {

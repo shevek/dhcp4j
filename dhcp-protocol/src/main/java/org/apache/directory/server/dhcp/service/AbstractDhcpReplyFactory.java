@@ -5,14 +5,20 @@
  */
 package org.apache.directory.server.dhcp.service;
 
+import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import javax.annotation.CheckForNull;
 import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import org.anarres.dhcp.common.address.AddressUtils;
+import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
+import org.apache.directory.server.dhcp.options.dhcp.BootfileName;
 import org.apache.directory.server.dhcp.options.dhcp.IpAddressLeaseTime;
+import org.apache.directory.server.dhcp.options.dhcp.ServerIdentifier;
+import org.apache.directory.server.dhcp.options.dhcp.TftpServerName;
 
 /**
  *
@@ -120,4 +126,32 @@ public abstract class AbstractDhcpReplyFactory {
         return reply;
     }
 
+    public static void setServerIdentifier(
+            @Nonnull DhcpMessage reply,
+            @Nonnull InetAddress localAddress) {
+        if (!AddressUtils.isZeroAddress(localAddress)) {
+            reply.setServerHostname(InetAddresses.toAddrString(localAddress));
+            reply.getOptions().add(new ServerIdentifier(localAddress));
+        }
+    }
+
+    public static void setServerIdentifier(
+            @Nonnull DhcpMessage reply,
+            @Nonnull InterfaceAddress localAddress) {
+        setServerIdentifier(reply, localAddress.getAddress());
+    }
+
+    public static void setBootParameters(
+            @Nonnull DhcpMessage reply,
+            @CheckForNull InetAddress nextServerAddress,
+            @CheckForNull String bootFileName) {
+        if (nextServerAddress != null) {
+            reply.setNextServerAddress(nextServerAddress);
+            reply.getOptions().setStringOption(TftpServerName.class, InetAddresses.toAddrString(nextServerAddress));
+        }
+        if (bootFileName != null) {
+            reply.setBootFileName(bootFileName);
+            reply.getOptions().setStringOption(BootfileName.class, bootFileName);
+        }
+    }
 }

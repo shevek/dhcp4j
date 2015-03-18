@@ -130,4 +130,6 @@ public class DhcpInterfaceUtils {
         }
     }
 
+    private DhcpInterfaceUtils() {
+    }
 }
