@@ -161,7 +161,7 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
      * Leases an InetAddress for the given HardwareAddress.
      *
      * Lock, retrieve current mapping from store.
-     * Call {@link #leaseMac(InterfaceAddress, InetAddress, HardwareAddress, InetAddress, InetAddress, long)}
+     * Call {@link #leaseMac(DhcpRequestContext, HardwareAddress, InetAddress, InetAddress, long)}
      * with the current mapping.
      * Store the returned address (if given) as the new current mapping and release the lock.
      */

@@ -70,7 +70,6 @@ public abstract class AbstractDhcpReplyFactory {
      * was received on
      * </ul>
      *
-     * @param localAddress
      * @param request
      * @return DhcpMessage
      */

@@ -125,8 +125,7 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
     /**
      * Handle DHCPDISCOVER message. The default implementation just ignores it.
      *
-     * @param localAddress
-     * @param remoteAddress
+     * @param context
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      * it.
@@ -143,8 +142,7 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
     /**
      * Handle DHCPOFFER message. The default implementation just ignores it.
      *
-     * @param localAddress
-     * @param remoteAddress
+     * @param context
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      * it.
@@ -162,7 +160,6 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
      * Handle DHCPREQUEST message. The default implementation just ignores it.
      *
      * @param context
-     * @param remoteAddress
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      * it.
@@ -179,7 +176,6 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
      * Handle DHCPDECLINE message. The default implementation just ignores it.
      *
      * @param context
-     * @param remoteAddress
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      * it.
@@ -196,7 +192,6 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
      * Handle DHCPRELEASE message. The default implementation just ignores it.
      *
      * @param context
-     * @param remoteAddress
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      * it.
@@ -213,7 +208,6 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
      * Handle DHCPINFORM message. The default implementation just ignores it.
      *
      * @param context
-     * @param remoteAddress
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      * it.
@@ -231,7 +225,6 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
      * ignores it.
      *
      * @param context
-     * @param remoteAddress
      * @param request the request message
      * @return DhcpMessage response message or <code>null</code> to ignore (don't reply to)
      * it.
