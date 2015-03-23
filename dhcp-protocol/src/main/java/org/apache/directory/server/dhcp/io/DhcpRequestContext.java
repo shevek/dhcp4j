@@ -91,6 +91,8 @@ public class DhcpRequestContext {
     }
 
     public void setClientAddress(@Nonnull InetAddress clientAddress) {
+        Preconditions.checkArgument(!AddressUtils.isZeroAddress(clientAddress), "Client address was null or zero.");
+        Preconditions.checkState(this.clientAddress == null, "Already have a client address.");
         this.clientAddress = clientAddress;
         if (interfaceAddress == null) {
             for (InterfaceAddress interfaceAddress : getInterfaceAddresses()) {
