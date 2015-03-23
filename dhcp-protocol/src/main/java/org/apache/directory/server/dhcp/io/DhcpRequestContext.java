@@ -94,11 +94,12 @@ public class DhcpRequestContext {
         Preconditions.checkArgument(!AddressUtils.isZeroAddress(clientAddress), "Client address was null or zero.");
         Preconditions.checkState(this.clientAddress == null, "Already have a client address.");
         this.clientAddress = clientAddress;
+        IFACE:
         if (interfaceAddress == null) {
             for (InterfaceAddress interfaceAddress : getInterfaceAddresses()) {
                 if (interfaceAddress.isLocal(clientAddress)) {
                     this.interfaceAddress = interfaceAddress;
-                    break;
+                    break IFACE;
                 }
             }
             throw new IllegalArgumentException("No interface can reach client address " + clientAddress + ": " + getInterfaceAddresses());
