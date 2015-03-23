@@ -83,9 +83,20 @@ public abstract class BaseDhcpOption {
             throw new DhcpException("Expected exactly " + length + " data bytes in " + this + ", not " + b.length);
     }
 
+    /**
+     * The last-resort stringifier for DHCP Option data.
+     *
+     * This probably returns a base 16 representation of the data.
+     * Do not machine-parse this. Use {@link #getData()} instead for raw data.
+     */
+    @Nonnull
+    protected final String toStringDataFallback() {
+        return BaseEncoding.base16().withSeparator(" ", 8).encode(getData());
+    }
+
     @Nonnull
     protected String toStringData() throws DhcpException {
-        return BaseEncoding.base16().withSeparator(" ", 8).encode(getData());
+        return toStringDataFallback();
     }
 
     @Override
@@ -94,7 +105,7 @@ public abstract class BaseDhcpOption {
         try {
             text = toStringData();
         } catch (Exception e) {
-            text = Arrays.toString(getData());
+            text = toStringDataFallback();
         }
         return getClass().getSimpleName() + "[" + getTagAsInt() + "]: " + text;
     }
