@@ -16,6 +16,8 @@
  */
 package org.apache.directory.server.dhcp.options;
 
+import com.google.common.io.BaseEncoding;
+import com.google.common.primitives.UnsignedBytes;
 import java.util.Arrays;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -23,13 +25,13 @@ import org.apache.directory.server.dhcp.DhcpException;
 
 /**
  * The Dynamic Host Configuration Protocol (DHCP) provides a framework
- * for passing configuration information to hosts on a TCP/IP network.  
+ * for passing configuration information to hosts on a TCP/IP network.
  * Configuration parameters and other control information are carried in
  * tagged data items that are stored in the 'options' field of the DHCP
- * message.  The data items themselves are also called "options."
+ * message. The data items themselves are also called "options."
  *
  * https://www.iana.org/assignments/bootp-dhcp-parameters/bootp-dhcp-parameters.xhtml
- * 
+ *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
 public abstract class BaseDhcpOption {
@@ -41,7 +43,7 @@ public abstract class BaseDhcpOption {
 
     /**
      * Get the option's code tag.
-     * 
+     *
      * @return byte
      */
     protected abstract int getTagAsInt();
@@ -50,7 +52,7 @@ public abstract class BaseDhcpOption {
      * Get the data (wire format) into a byte array. Subclasses must provide an
      * implementation which serializes the parsed data back into a byte array if
      * they override {@link #setData(byte[])}.
-     * 
+     *
      * @return byte[]
      */
     @Nonnull
@@ -62,7 +64,7 @@ public abstract class BaseDhcpOption {
      * Set the data (wire format) from a byte array. The default implementation
      * just records the data as a byte array. Subclasses may parse the data into
      * something more meaningful.
-     * 
+     *
      * @param data
      */
     public final void setData(@Nonnull byte data[]) {
@@ -83,7 +85,7 @@ public abstract class BaseDhcpOption {
 
     @Nonnull
     protected String toStringData() throws DhcpException {
-        return Arrays.toString(getData());
+        return BaseEncoding.base16().withSeparator(" ", 8).encode(getData());
     }
 
     @Override
