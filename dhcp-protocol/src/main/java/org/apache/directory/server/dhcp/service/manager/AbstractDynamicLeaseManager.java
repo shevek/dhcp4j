@@ -7,7 +7,6 @@ package org.apache.directory.server.dhcp.service.manager;
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -44,10 +43,10 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
     protected abstract InetAddress getFixedAddressFor(@Nonnull HardwareAddress hardwareAddress) throws DhcpException;
 
     @CheckForNull
-    protected abstract Subnet getSubnetFor(@Nonnull InetAddress networkAddress) throws DhcpException;
+    protected abstract Subnet getSubnetFor(@Nonnull NetworkAddress networkAddress) throws DhcpException;
 
     @CheckForNull
-    private ResourceAllocator<InetAddress> getAllocatorFor(@Nonnull InetAddress networkAddress) throws DhcpException {
+    private ResourceAllocator<InetAddress> getAllocatorFor(@Nonnull NetworkAddress networkAddress) throws DhcpException {
         final Subnet subnet = getSubnetFor(networkAddress);
         if (subnet == null)
             return null;
@@ -85,7 +84,6 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
     @CheckForNull
     protected InetAddress leaseMac(
             @Nonnull DhcpRequestContext context,
-            @Nonnull InetAddress networkAddress,
             @Nonnull HardwareAddress hardwareAddress,
             @CheckForNull InetAddress currentAddress, @CheckForNull InetAddress requestedAddress,
             @Nonnegative long ttl)
@@ -131,33 +129,31 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
             if (requestedAddress != null) {
                 if (leaseIp(requestedAddress, hardwareAddress, ttl * 2)) {
                     if (LOG.isDebugEnabled())
-                        LOG.debug("Using client-requested address " + requestedAddress);
+                        LOG.debug("Using client-requested address {}", requestedAddress);
                     return requestedAddress;
                 }
             }
         }
 
         CREATED:
-        {
+        for (InterfaceAddress interfaceAddress : context.getInterfaceAddresses()) {
             // New address from the server's pool
-            ResourceAllocator<InetAddress> allocator = getAllocatorFor(networkAddress);
+            ResourceAllocator<InetAddress> allocator = getAllocatorFor(interfaceAddress.toNetworkAddress());
             if (allocator == null) {
-                LOG.warn("No address allocator for " + InetAddresses.toAddrString(networkAddress));
-                break CREATED;
+                if (LOG.isDebugEnabled())
+                    LOG.debug("No address allocator for {}", interfaceAddress);
+                continue CREATED;
             }
             for (InetAddress allocatedAddress : allocator) {
                 if (leaseIp(allocatedAddress, hardwareAddress, ttl * 2)) {
                     if (LOG.isDebugEnabled())
-                        LOG.debug("Using server-generated address " + allocatedAddress);
+                        LOG.debug("Using server-generated address {}", allocatedAddress);
                     return allocatedAddress;
                 }
             }
-            LOG.warn("Failed to generate a lease for " + hardwareAddress.getNativeRepresentation());
         }
+        LOG.warn("Failed to generate a lease for {}", hardwareAddress);
 
-        // TODO: Return something which the parent can deal with.
-        if (LOG.isDebugEnabled())
-            LOG.debug("No address generated for " + hardwareAddress);
         return null;
     }
 
