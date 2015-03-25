@@ -27,11 +27,24 @@ import org.anarres.dhcp.common.address.AddressUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
+import org.apache.directory.server.dhcp.service.manager.LeaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Works around the weakness with broadcast UDP in Java.
+ * A utility base class for DHCP server message handlers which identifies
+ * the interface on which a packet was received.
+ * 
+ * <ol>
+ * <li>Packet is received by the message handler and calls {@link #newRequestContext}.</li>
+ * <li>This class guesses which interface(s) the packet may have come on.</li>
+ * <li>This class constructs a {@link DhcpRequestContext} containing that information.</li>
+ * <li>The user's {@link LeaseManager} eventually calls {@link DhcpRequestContext#setClientAddress(InetAddress)}.</li>
+ * <li>The DhcpRequestContext class refines the interface guess and permits calls to {@link DhcpRequestContext#getInterfaceAddress()}.</li>
+ * <li>The message handler uses {@link DhcpRequestContext#getInterfaceAddress()} to update and send the new packet.</li>
+ * </ol>
+ *
+ * This base class helps to work around various weaknesses with broadcast UDP in Java.
  *
  * @author shevek
  */

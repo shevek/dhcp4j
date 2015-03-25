@@ -6,7 +6,6 @@
 package org.apache.directory.server.dhcp.service.manager;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
 import org.anarres.dhcp.common.address.AddressUtils;
@@ -16,8 +15,14 @@ import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.options.dhcp.IpAddressLeaseTime;
 import org.apache.directory.server.dhcp.options.dhcp.RequestedIpAddress;
 import org.apache.directory.server.dhcp.service.AbstractDhcpService;
+import org.apache.directory.server.dhcp.service.DhcpService;
 
 /**
+ * Wraps a {@link LeaseManager} as a {@link DhcpService}.
+ *
+ * This gives slightly more convenience and automatic options management at
+ * the expense of very little loss of flexibility. This approach is generally
+ * recommended.
  *
  * @author shevek
  */
@@ -35,7 +40,7 @@ public class LeaseManagerDhcpService extends AbstractDhcpService {
         return leaseManager;
     }
 
-    private static void checkReplyType(DhcpMessage request, DhcpMessage reply, MessageType...types) {
+    private static void checkReplyType(DhcpMessage request, DhcpMessage reply, MessageType... types) {
         for (MessageType type : types)
             if (type.equals(reply.getMessageType()))
                 return;
@@ -51,7 +56,7 @@ public class LeaseManagerDhcpService extends AbstractDhcpService {
         if (reply == null)
             return null;
         checkReplyType(request, reply, MessageType.DHCPOFFER, MessageType.DHCPNAK);
-        setServerIdentifier(reply, context.getInterfaceAddress());
+        setServerIdentifier(context, reply);
         stripOptions(request, reply.getOptions());
         return reply;
     }
@@ -66,7 +71,7 @@ public class LeaseManagerDhcpService extends AbstractDhcpService {
         if (reply == null)
             return newReplyNak(request);
         checkReplyType(request, reply, MessageType.DHCPACK, MessageType.DHCPNAK);
-        setServerIdentifier(reply, context.getInterfaceAddress());
+        setServerIdentifier(context, reply);
         stripOptions(request, reply.getOptions());
         return reply;
     }
@@ -80,7 +85,7 @@ public class LeaseManagerDhcpService extends AbstractDhcpService {
         if (!result)
             return newReplyNak(request);
         DhcpMessage reply = newReplyAck(request, MessageType.DHCPACK, declinedAddress, -1);
-        setServerIdentifier(reply, context.getInterfaceAddress());
+        setServerIdentifier(context, reply);
         stripOptions(request, reply.getOptions());
         return reply;
     }
@@ -97,7 +102,7 @@ public class LeaseManagerDhcpService extends AbstractDhcpService {
         if (!result)
             return newReplyNak(request);
         DhcpMessage reply = newReplyAck(request, MessageType.DHCPACK, releasedAddress, -1);
-        setServerIdentifier(reply, context.getInterfaceAddress());
+        setServerIdentifier(context, reply);
         stripOptions(request, reply.getOptions());
         return reply;
     }

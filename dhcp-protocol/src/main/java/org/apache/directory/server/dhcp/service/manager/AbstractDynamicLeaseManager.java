@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * A base class for lease managers which allocate addresses from a pool.
  *
  * @author shevek
  */

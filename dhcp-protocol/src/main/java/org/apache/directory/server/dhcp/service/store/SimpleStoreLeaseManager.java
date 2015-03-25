@@ -77,18 +77,6 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
         return null;
     }
 
-    @Nonnull
-    public static DhcpMessage newReply(
-            @Nonnull DhcpMessage request,
-            @Nonnull MessageType type,
-            @Nonnull Lease lease) {
-        long leaseTimeSecs = lease.getExpires() - System.currentTimeMillis() / 1000;
-        DhcpMessage reply = newReplyAck(request, type, lease.getClientAddress(), leaseTimeSecs);
-        setBootParameters(reply, lease.getNextServerAddress(), null);
-        reply.getOptions().addAll(lease.getOptions());
-        return reply;
-    }
-
     @Override
     public DhcpMessage leaseOffer(
             DhcpRequestContext context,

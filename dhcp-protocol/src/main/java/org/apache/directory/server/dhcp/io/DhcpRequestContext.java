@@ -17,6 +17,7 @@ import org.anarres.dhcp.common.address.AddressUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 
 /**
+ * This object is mutable and should not be reused.
  *
  * @author shevek
  */
@@ -90,10 +91,31 @@ public class DhcpRequestContext {
     public void setRelayAgentAddress(@CheckForNull InetAddress relayAgentAddress) {
     }
 
+    @Nonnull
+    public InetAddress getClientAddress() {
+        return clientAddress;
+    }
+
     public void setClientAddress(@Nonnull InetAddress clientAddress) {
         Preconditions.checkArgument(!AddressUtils.isZeroAddress(clientAddress), "Client address was null or zero.");
-        Preconditions.checkState(this.clientAddress == null, "Already have a client address.");
+        if (clientAddress.equals(this.clientAddress))
+            return;
+        Preconditions.checkState(this.clientAddress == null, "Already have a (different) client address.");
         this.clientAddress = clientAddress;
+        setInterfaceAddressFrom(clientAddress);
+    }
+
+    /**
+     * Returns the single InterfaceAddress on which this request will be transmitted.
+     *
+     * You may have to call {@link #setClientAddress(java.net.InetAddress)} before this is valid.
+     */
+    @Nonnull
+    public InterfaceAddress getInterfaceAddress() {
+        return Preconditions.checkNotNull(interfaceAddress, "InterfaceAddress not set - did you call setClientAddress()?");
+    }
+
+    private void setInterfaceAddressFrom(@Nonnull InetAddress address) {
         IFACE:
         if (interfaceAddress == null) {
             for (InterfaceAddress interfaceAddress : getInterfaceAddresses()) {
@@ -104,11 +126,6 @@ public class DhcpRequestContext {
             }
             throw new IllegalArgumentException("No interface can reach client address " + clientAddress + ": " + getInterfaceAddresses());
         }
-    }
-
-    @Nonnull
-    public InterfaceAddress getInterfaceAddress() {
-        return Preconditions.checkNotNull(interfaceAddress, "InterfaceAddress not set - did you call setClientAddress()?");
     }
 
 }

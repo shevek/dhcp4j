@@ -13,6 +13,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.common.address.AddressUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
+import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.messages.MessageType;
 import org.apache.directory.server.dhcp.options.dhcp.BootfileName;
@@ -48,7 +49,7 @@ public abstract class AbstractDhcpReplyFactory {
     public final LeaseTimeRange TTL_LEASE = new LeaseTimeRange(60, 3600, 36000);
 
     @Nonnegative
-    public static long getLeaseTime(@Nonnull LeaseTimeRange leaseTimeSecs, @CheckForSigned long requestedLeaseTimeSecs) {
+    protected static long getLeaseTime(@Nonnull LeaseTimeRange leaseTimeSecs, @CheckForSigned long requestedLeaseTimeSecs) {
         if (requestedLeaseTimeSecs < 0)
             return leaseTimeSecs.defaultLeaseTime;
         if (requestedLeaseTimeSecs <= leaseTimeSecs.minLeaseTime)
@@ -59,7 +60,9 @@ public abstract class AbstractDhcpReplyFactory {
     }
 
     /**
-     * Initialize a general DHCP reply message. Sets:
+     * Initializes a general DHCP reply message.
+     *
+     * Sets:
      * <ul>
      * <li>op=BOOTREPLY
      * <li>htype, hlen, xid, flags, giaddr, chaddr like in request message
@@ -74,7 +77,7 @@ public abstract class AbstractDhcpReplyFactory {
      * @return DhcpMessage
      */
     @Nonnull
-    public static DhcpMessage newReply(
+    protected static DhcpMessage newReply(
             @Nonnull DhcpMessage request,
             @Nonnull MessageType type) {
         DhcpMessage reply = new DhcpMessage();
@@ -100,8 +103,9 @@ public abstract class AbstractDhcpReplyFactory {
         return reply;
     }
 
+    /** Utility: Constructs a new NAK reply. */
     @Nonnull
-    public static DhcpMessage newReplyNak(
+    protected static DhcpMessage newReplyNak(
             @Nonnull DhcpMessage request) {
         DhcpMessage reply = newReply(request, MessageType.DHCPNAK);
         reply.setMessageType(MessageType.DHCPNAK);
@@ -111,8 +115,9 @@ public abstract class AbstractDhcpReplyFactory {
         return reply;
     }
 
+    /** Utility: Constructs a new ACK reply. */
     @Nonnull
-    public static DhcpMessage newReplyAck(
+    protected static DhcpMessage newReplyAck(
             @Nonnull DhcpMessage request,
             @Nonnull MessageType type,
             @CheckForNull InetAddress assignedClientAddress,
@@ -125,7 +130,8 @@ public abstract class AbstractDhcpReplyFactory {
         return reply;
     }
 
-    public static void setServerIdentifier(
+    /** Utility: Sets the ServerIdentifier option in the reply. */
+    protected static void setServerIdentifier(
             @Nonnull DhcpMessage reply,
             @Nonnull InetAddress localAddress) {
         if (!AddressUtils.isZeroAddress(localAddress)) {
@@ -134,13 +140,34 @@ public abstract class AbstractDhcpReplyFactory {
         }
     }
 
-    public static void setServerIdentifier(
+    /** Utility: Sets the ServerIdentifier option in the reply. */
+    protected static void setServerIdentifier(
             @Nonnull DhcpMessage reply,
             @Nonnull InterfaceAddress localAddress) {
         setServerIdentifier(reply, localAddress.getAddress());
     }
 
-    public static void setBootParameters(
+    /** Utility: calls {@link DhcpRequestContext#setClientAddress(InetAddress)} if required. */
+    protected static void setClientAddress(
+            @Nonnull DhcpRequestContext context,
+            @CheckForNull InetAddress address) {
+        if (!AddressUtils.isZeroAddress(context.getClientAddress()))
+            return;
+        if (AddressUtils.isZeroAddress(address))
+            return;
+        context.setClientAddress(address);
+    }
+
+    /** Utility: Makes best effort to set the ServerIdentifier option in the reply. */
+    protected static void setServerIdentifier(
+            @Nonnull DhcpRequestContext context,
+            @Nonnull DhcpMessage reply) {
+        setClientAddress(context, reply.getAssignedClientAddress());
+        setServerIdentifier(reply, context.getInterfaceAddress());
+    }
+
+    /** Utility: Sets the given boot parameter fields in the reply. */
+    protected static void setBootParameters(
             @Nonnull DhcpMessage reply,
             @CheckForNull InetAddress nextServerAddress,
             @CheckForNull String bootFileName) {

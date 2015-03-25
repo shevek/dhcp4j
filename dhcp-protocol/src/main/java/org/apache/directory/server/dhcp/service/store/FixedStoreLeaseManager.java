@@ -73,7 +73,7 @@ public class FixedStoreLeaseManager extends AbstractLeaseManager {
             return null;
         lease.setState(Lease.LeaseState.OFFERED);
         lease.setExpires(System.currentTimeMillis() / 1000 + 3600);
-        return SimpleStoreLeaseManager.newReply(request, MessageType.DHCPOFFER, lease);
+        return newReply(request, MessageType.DHCPOFFER, lease);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class FixedStoreLeaseManager extends AbstractLeaseManager {
             return null;
         lease.setState(Lease.LeaseState.ACTIVE);
         lease.setExpires(System.currentTimeMillis() / 1000 + 3600);
-        return SimpleStoreLeaseManager.newReply(request, MessageType.DHCPACK, lease);
+        return newReply(request, MessageType.DHCPACK, lease);
     }
 
 }

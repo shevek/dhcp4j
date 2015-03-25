@@ -93,33 +93,44 @@ public abstract class AbstractDhcpService extends AbstractDhcpReplyFactory imple
             }
         }
 
+        DhcpMessage reply;
         // dispatch based on the message type
         switch (request.getMessageType()) {
             case DHCPDISCOVER:
-                return handleDISCOVER(context, request);
+                reply = handleDISCOVER(context, request);
+                break;
 
             case DHCPOFFER:
-                return handleOFFER(context, request);
+                reply = handleOFFER(context, request);
+                break;
 
             case DHCPREQUEST:
-                return handleREQUEST(context, request);
+                reply = handleREQUEST(context, request);
+                break;
 
             case DHCPDECLINE:
-                return handleDECLINE(context, request);
+                reply = handleDECLINE(context, request);
+                break;
 
             case DHCPRELEASE:
-                return handleRELEASE(context, request);
+                reply = handleRELEASE(context, request);
+                break;
 
             case DHCPINFORM:
-                return handleINFORM(context, request);
+                reply = handleINFORM(context, request);
+                break;
 
             case DHCPACK:
             case DHCPNAK:
-                return null; // just ignore them
+                reply = null; // just ignore them
+                break;
 
             default:
-                return handleUnknownMessage(context, request);
+                reply = handleUnknownMessage(context, request);
+                break;
         }
+
+        return reply;
     }
 
     /**
