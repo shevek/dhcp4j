@@ -85,8 +85,10 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
             throws DhcpException {
         HardwareAddress hardwareAddress = request.getHardwareAddress();
         Lease lease = leases.getIfPresent(hardwareAddress);
-        if (lease != null)
+        if (lease != null) {
+            lease.setState(Lease.LeaseState.OFFERED);
             return newReply(request, MessageType.DHCPOFFER, lease);
+        }
 
         DhcpConfigSubnet subnet = findSubnet(context);
         if (subnet == null)
@@ -95,10 +97,8 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
         long leaseTimeSecs = getLeaseTime(TTL_OFFER, clientRequestedExpirySecs);
 
         // TODO: Allocate a new address.
-        lease = new Lease();
-        lease.setHardwareAddress(hardwareAddress);
+        lease = new Lease(hardwareAddress, clientRequestedAddress);
         lease.setState(Lease.LeaseState.OFFERED);
-        lease.setClientAddress(clientRequestedAddress);
         lease.setExpires(System.currentTimeMillis() / 1000 + leaseTimeSecs);
         lease.getOptions().setAddressOption(SubnetMask.class, subnet.getNetwork().getNetmaskAddress());
         leases.put(hardwareAddress, lease);
@@ -130,8 +130,9 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
             DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientAddress) throws DhcpException {
-        leases.invalidate(request.getHardwareAddress());
-        return true;    // Should check if present.
+        Lease lease = leases.asMap().remove(request.getHardwareAddress());
+        return lease != null
+                && Objects.equal(lease.getClientAddress(), clientAddress);
     }
 
     @Override
@@ -139,7 +140,8 @@ public class SimpleStoreLeaseManager extends AbstractLeaseManager {
             DhcpRequestContext context,
             DhcpMessage request,
             InetAddress clientAddress) throws DhcpException {
-        leases.invalidate(request.getHardwareAddress());
-        return true;       // Should check if present.
+        Lease lease = leases.asMap().remove(request.getHardwareAddress());
+        return lease != null
+                && Objects.equal(lease.getClientAddress(), clientAddress);
     }
 }

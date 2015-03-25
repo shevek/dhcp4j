@@ -42,16 +42,14 @@ public class FixedStoreLeaseManager extends AbstractLeaseManager {
     }
 
     @Nonnull
-    public Lease addLease(@Nonnull HardwareAddress hardwareAddress, @Nonnull Lease lease) {
-        leases.put(hardwareAddress, lease);
+    public Lease addLease(@Nonnull Lease lease) {
+        leases.put(lease.getHardwareAddress(), lease);
         return lease;
     }
 
     @Nonnull
     public Lease addLease(@Nonnull HardwareAddress hardwareAddress, @Nonnull InetAddress clientAddress) {
-        Lease lease = new Lease();
-        lease.setClientAddress(clientAddress);
-        return addLease(hardwareAddress, lease);
+        return addLease(new Lease(hardwareAddress, clientAddress));
     }
 
     @Nonnull

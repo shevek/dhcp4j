@@ -25,8 +25,8 @@ import javax.annotation.Nonnull;
 import org.anarres.dhcp.common.MDCUtils;
 import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.io.DhcpInterfaceManager;
-import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.io.DhcpInterfaceUtils;
+import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 import org.apache.directory.server.dhcp.service.DhcpService;
 import org.apache.mina.core.service.IoHandlerAdapter;
@@ -35,7 +35,6 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 /**
  * Implementation of a DHCP protocol handler which delegates the work of
