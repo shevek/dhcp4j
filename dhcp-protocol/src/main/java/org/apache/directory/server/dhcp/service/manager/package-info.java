@@ -18,9 +18,9 @@
  *  
  */
 /**
- * A {@link LeaseManager} is easier to write than a {@link DhcpService}.
+ * A {@link org.apache.directory.server.dhcp.service.manager.LeaseManager} is easier to write than a {@link org.apache.directory.server.dhcp.service.DhcpService}.
  * 
- * Using {@link LeaseManagerDhcpService} is probably a good idea.
+ * Using {@link org.apache.directory.server.dhcp.service.manager.LeaseManagerDhcpService} is probably a good idea.
  * However, the default implementations in this package are a bit of a shambles,
  * and you will be better off writing something simple and single-purpose
  * for your application. Most of the critical stuff is in LeaseManagerDhcpService.
