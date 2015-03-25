@@ -14,6 +14,10 @@ import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 
 /**
+ * A LeaseManager is easier to write than a full DhcpService.
+ * 
+ * When wrapped in a {@link LeaseManagerDhcpService}, a lot of the nasties
+ * of the DHCP protocol are taken care of.
  *
  * @author shevek
  */

@@ -4,10 +4,10 @@
  */
 package org.apache.directory.server.dhcp.address;
 
-import org.anarres.dhcp.common.address.NetworkAddress;
-import org.anarres.dhcp.common.address.Subnet;
 import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
+import org.anarres.dhcp.common.address.NetworkAddress;
+import org.anarres.dhcp.common.address.Subnet;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

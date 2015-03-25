@@ -360,4 +360,7 @@ public class AddressUtils {
             return null;
         return InetAddresses.toAddrString(address);
     }
+
+    private AddressUtils() {
+    }
 }

@@ -17,8 +17,6 @@
 package org.apache.directory.server.dhcp.options;
 
 import com.google.common.io.BaseEncoding;
-import com.google.common.primitives.UnsignedBytes;
-import java.util.Arrays;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;

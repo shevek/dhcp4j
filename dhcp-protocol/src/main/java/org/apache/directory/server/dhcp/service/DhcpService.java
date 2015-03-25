@@ -19,12 +19,9 @@
  */
 package org.apache.directory.server.dhcp.service;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
-import org.anarres.dhcp.common.address.InterfaceAddress;
 import org.apache.directory.server.dhcp.io.DhcpRequestContext;
 import org.apache.directory.server.dhcp.messages.DhcpMessage;
 

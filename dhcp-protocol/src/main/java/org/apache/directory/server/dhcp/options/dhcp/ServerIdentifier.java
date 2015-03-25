@@ -21,7 +21,6 @@ package org.apache.directory.server.dhcp.options.dhcp;
 
 import java.net.InetAddress;
 import javax.annotation.Nonnull;
-import org.anarres.dhcp.common.address.AddressUtils;
 import org.apache.directory.server.dhcp.DhcpException;
 import org.apache.directory.server.dhcp.options.AddressOption;
 

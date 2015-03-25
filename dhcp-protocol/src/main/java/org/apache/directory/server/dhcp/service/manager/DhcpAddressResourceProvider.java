@@ -10,9 +10,9 @@ import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import java.util.Arrays;
 import javax.annotation.Nonnull;
-import org.anarres.jallocator.ResourceProvider;
 import org.anarres.dhcp.common.address.AddressUtils;
 import org.anarres.dhcp.common.address.Subnet;
+import org.anarres.jallocator.ResourceProvider;
 
 /**
  *

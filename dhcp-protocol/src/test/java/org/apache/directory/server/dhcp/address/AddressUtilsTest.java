@@ -4,7 +4,6 @@
  */
 package org.apache.directory.server.dhcp.address;
 
-import org.anarres.dhcp.common.address.AddressUtils;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.UnsignedBytes;
@@ -12,6 +11,7 @@ import java.util.Arrays;
 import java.util.Random;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import org.anarres.dhcp.common.address.AddressUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

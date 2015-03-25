@@ -4,8 +4,8 @@
  */
 package org.apache.directory.server.dhcp.options.dhcp;
 
-import org.apache.directory.server.dhcp.messages.SystemArchitecture;
 import javax.annotation.Nonnull;
+import org.apache.directory.server.dhcp.messages.SystemArchitecture;
 import org.apache.directory.server.dhcp.options.ShortOption;
 
 /**
