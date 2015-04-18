@@ -1,0 +1,288 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * To change this template, choose Tools | Templates<a name="line.2"></a>
+<span class="sourceLineNo">003</span> * and open the template in the editor.<a name="line.3"></a>
+<span class="sourceLineNo">004</span> */<a name="line.4"></a>
+<span class="sourceLineNo">005</span>package org.apache.directory.server.dhcp.service.manager;<a name="line.5"></a>
+<span class="sourceLineNo">006</span><a name="line.6"></a>
+<span class="sourceLineNo">007</span>import com.google.common.base.Throwables;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import com.google.common.cache.Cache;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import com.google.common.cache.CacheBuilder;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import java.net.InetAddress;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import java.util.concurrent.Callable;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import java.util.concurrent.ExecutionException;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import java.util.concurrent.TimeUnit;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import javax.annotation.CheckForNull;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import javax.annotation.Nonnegative;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import javax.annotation.Nonnull;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>import org.anarres.dhcp.common.address.InterfaceAddress;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>import org.anarres.dhcp.common.address.NetworkAddress;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>import org.anarres.dhcp.common.address.Subnet;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import org.anarres.jallocator.ResourceAllocator;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>import org.apache.directory.server.dhcp.DhcpException;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>import org.apache.directory.server.dhcp.io.DhcpRequestContext;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import org.apache.directory.server.dhcp.messages.DhcpMessage;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import org.apache.directory.server.dhcp.messages.HardwareAddress;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>import org.apache.directory.server.dhcp.messages.MessageType;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import org.slf4j.Logger;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import org.slf4j.LoggerFactory;<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>/**<a name="line.29"></a>
+<span class="sourceLineNo">030</span> * A base class for lease managers which allocate addresses from a pool.<a name="line.30"></a>
+<span class="sourceLineNo">031</span> *<a name="line.31"></a>
+<span class="sourceLineNo">032</span> * @author shevek<a name="line.32"></a>
+<span class="sourceLineNo">033</span> */<a name="line.33"></a>
+<span class="sourceLineNo">034</span>public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {<a name="line.34"></a>
+<span class="sourceLineNo">035</span><a name="line.35"></a>
+<span class="sourceLineNo">036</span>    private static final Logger LOG = LoggerFactory.getLogger(AbstractDynamicLeaseManager.class);<a name="line.36"></a>
+<span class="sourceLineNo">037</span>    public static final int TTL_EXPIRE = 600;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    private final Cache&lt;NetworkAddress, ResourceAllocator&lt;InetAddress&gt;&gt; allocators = CacheBuilder.newBuilder()<a name="line.38"></a>
+<span class="sourceLineNo">039</span>            .expireAfterAccess(TTL_LEASE.maxLeaseTime * 4, TimeUnit.SECONDS)<a name="line.39"></a>
+<span class="sourceLineNo">040</span>            .recordStats()<a name="line.40"></a>
+<span class="sourceLineNo">041</span>            .build();<a name="line.41"></a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span>    @CheckForNull<a name="line.43"></a>
+<span class="sourceLineNo">044</span>    protected abstract InetAddress getFixedAddressFor(@Nonnull HardwareAddress hardwareAddress) throws DhcpException;<a name="line.44"></a>
+<span class="sourceLineNo">045</span><a name="line.45"></a>
+<span class="sourceLineNo">046</span>    @CheckForNull<a name="line.46"></a>
+<span class="sourceLineNo">047</span>    protected abstract Subnet getSubnetFor(@Nonnull NetworkAddress networkAddress) throws DhcpException;<a name="line.47"></a>
+<span class="sourceLineNo">048</span><a name="line.48"></a>
+<span class="sourceLineNo">049</span>    @CheckForNull<a name="line.49"></a>
+<span class="sourceLineNo">050</span>    private ResourceAllocator&lt;InetAddress&gt; getAllocatorFor(@Nonnull NetworkAddress networkAddress) throws DhcpException {<a name="line.50"></a>
+<span class="sourceLineNo">051</span>        final Subnet subnet = getSubnetFor(networkAddress);<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        if (subnet == null)<a name="line.52"></a>
+<span class="sourceLineNo">053</span>            return null;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        NetworkAddress network = subnet.getNetworkAddress();<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        ResourceAllocator&lt;InetAddress&gt; allocator = allocators.getIfPresent(network);<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        // TODO: Update the resource allocator if it's out of date.<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        if (allocator != null)<a name="line.57"></a>
+<span class="sourceLineNo">058</span>            return allocator;<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        try {<a name="line.59"></a>
+<span class="sourceLineNo">060</span>            return allocators.get(network, new Callable&lt;ResourceAllocator&lt;InetAddress&gt;&gt;() {<a name="line.60"></a>
+<span class="sourceLineNo">061</span>                @Override<a name="line.61"></a>
+<span class="sourceLineNo">062</span>                public ResourceAllocator&lt;InetAddress&gt; call() throws Exception {<a name="line.62"></a>
+<span class="sourceLineNo">063</span>                    DhcpAddressResourceProvider resourceProvider = new DhcpAddressResourceProvider(subnet);<a name="line.63"></a>
+<span class="sourceLineNo">064</span>                    return new ResourceAllocator&lt;InetAddress&gt;(resourceProvider);<a name="line.64"></a>
+<span class="sourceLineNo">065</span>                }<a name="line.65"></a>
+<span class="sourceLineNo">066</span>            });<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        } catch (ExecutionException e) {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>            throw new DhcpException("Failed to load ResourceAllocator for " + subnet, e);<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        }<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    }<a name="line.70"></a>
+<span class="sourceLineNo">071</span><a name="line.71"></a>
+<span class="sourceLineNo">072</span>    /**<a name="line.72"></a>
+<span class="sourceLineNo">073</span>     * Leases an InetAddress for the given HardwareAddress.<a name="line.73"></a>
+<span class="sourceLineNo">074</span>     *<a name="line.74"></a>
+<span class="sourceLineNo">075</span>     * Lock, retrieve current mapping from store.<a name="line.75"></a>
+<span class="sourceLineNo">076</span>     * If the InetAddress is unallocated OR allocated to the given HardwareAddress, return it.<a name="line.76"></a>
+<span class="sourceLineNo">077</span>     * Else return null.<a name="line.77"></a>
+<span class="sourceLineNo">078</span>     */<a name="line.78"></a>
+<span class="sourceLineNo">079</span>    @CheckForNull<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    protected abstract boolean leaseIp(<a name="line.80"></a>
+<span class="sourceLineNo">081</span>            @Nonnull InetAddress address,<a name="line.81"></a>
+<span class="sourceLineNo">082</span>            @Nonnull HardwareAddress hardwareAddress,<a name="line.82"></a>
+<span class="sourceLineNo">083</span>            @Nonnegative long ttl) throws Exception;<a name="line.83"></a>
+<span class="sourceLineNo">084</span><a name="line.84"></a>
+<span class="sourceLineNo">085</span>    @CheckForNull<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    protected InetAddress leaseMac(<a name="line.86"></a>
+<span class="sourceLineNo">087</span>            @Nonnull DhcpRequestContext context,<a name="line.87"></a>
+<span class="sourceLineNo">088</span>            @Nonnull HardwareAddress hardwareAddress,<a name="line.88"></a>
+<span class="sourceLineNo">089</span>            @CheckForNull InetAddress currentAddress, @CheckForNull InetAddress requestedAddress,<a name="line.89"></a>
+<span class="sourceLineNo">090</span>            @Nonnegative long ttl)<a name="line.90"></a>
+<span class="sourceLineNo">091</span>            throws Exception {<a name="line.91"></a>
+<span class="sourceLineNo">092</span><a name="line.92"></a>
+<span class="sourceLineNo">093</span>        // Is it a singular system?<a name="line.93"></a>
+<span class="sourceLineNo">094</span>        // If it's singular, perhaps it deliberately gets no DHCP.<a name="line.94"></a>
+<span class="sourceLineNo">095</span>        // What network should the system address come from?<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        // String hardwareId = InventoryUtils.hardwareAddress(hardwareAddress);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        // UUID systemId = new InventoryManager.GetSystemIdCommand(inventoryManager, hardwareId).execute();<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        // BareMetalBootParameters bootParameters = new BareMetalManager.GetBootParametersCommand(bareMetalManager, systemId).execute();<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        // Fixed address from configuration.<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        FIXED:<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        {<a name="line.101"></a>
+<span class="sourceLineNo">102</span>            LOG.debug("Looking for fixed address.");<a name="line.102"></a>
+<span class="sourceLineNo">103</span>            InetAddress fixedAddress = getFixedAddressFor(hardwareAddress);<a name="line.103"></a>
+<span class="sourceLineNo">104</span>            if (fixedAddress != null) {<a name="line.104"></a>
+<span class="sourceLineNo">105</span>                if (!leaseIp(fixedAddress, hardwareAddress, ttl * 2))<a name="line.105"></a>
+<span class="sourceLineNo">106</span>                    LOG.error("Client configured with fixed-address " + fixedAddress + " but lease failed.");<a name="line.106"></a>
+<span class="sourceLineNo">107</span>                else if (LOG.isDebugEnabled())<a name="line.107"></a>
+<span class="sourceLineNo">108</span>                    LOG.debug("Using fixed address " + fixedAddress);<a name="line.108"></a>
+<span class="sourceLineNo">109</span>                return fixedAddress;<a name="line.109"></a>
+<span class="sourceLineNo">110</span>            }<a name="line.110"></a>
+<span class="sourceLineNo">111</span>        }<a name="line.111"></a>
+<span class="sourceLineNo">112</span><a name="line.112"></a>
+<span class="sourceLineNo">113</span>        // Current or previous lease address, if available.<a name="line.113"></a>
+<span class="sourceLineNo">114</span>        EXISTING:<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        {<a name="line.115"></a>
+<span class="sourceLineNo">116</span>            LOG.debug("Looking for pre-existing address.");<a name="line.116"></a>
+<span class="sourceLineNo">117</span>            if (currentAddress != null) {<a name="line.117"></a>
+<span class="sourceLineNo">118</span>                if (leaseIp(currentAddress, hardwareAddress, ttl * 2)) {<a name="line.118"></a>
+<span class="sourceLineNo">119</span>                    if (LOG.isDebugEnabled())<a name="line.119"></a>
+<span class="sourceLineNo">120</span>                        LOG.debug("Using pre-existing address " + currentAddress);<a name="line.120"></a>
+<span class="sourceLineNo">121</span>                    return currentAddress;<a name="line.121"></a>
+<span class="sourceLineNo">122</span>                }<a name="line.122"></a>
+<span class="sourceLineNo">123</span>            }<a name="line.123"></a>
+<span class="sourceLineNo">124</span>        }<a name="line.124"></a>
+<span class="sourceLineNo">125</span><a name="line.125"></a>
+<span class="sourceLineNo">126</span>        REQUESTED:<a name="line.126"></a>
+<span class="sourceLineNo">127</span>        {<a name="line.127"></a>
+<span class="sourceLineNo">128</span>            LOG.debug("Looking for client-requested address.");<a name="line.128"></a>
+<span class="sourceLineNo">129</span>            // Requested address, if available.<a name="line.129"></a>
+<span class="sourceLineNo">130</span>            if (requestedAddress != null) {<a name="line.130"></a>
+<span class="sourceLineNo">131</span>                if (leaseIp(requestedAddress, hardwareAddress, ttl * 2)) {<a name="line.131"></a>
+<span class="sourceLineNo">132</span>                    if (LOG.isDebugEnabled())<a name="line.132"></a>
+<span class="sourceLineNo">133</span>                        LOG.debug("Using client-requested address {}", requestedAddress);<a name="line.133"></a>
+<span class="sourceLineNo">134</span>                    return requestedAddress;<a name="line.134"></a>
+<span class="sourceLineNo">135</span>                }<a name="line.135"></a>
+<span class="sourceLineNo">136</span>            }<a name="line.136"></a>
+<span class="sourceLineNo">137</span>        }<a name="line.137"></a>
+<span class="sourceLineNo">138</span><a name="line.138"></a>
+<span class="sourceLineNo">139</span>        CREATED:<a name="line.139"></a>
+<span class="sourceLineNo">140</span>        for (InterfaceAddress interfaceAddress : context.getInterfaceAddresses()) {<a name="line.140"></a>
+<span class="sourceLineNo">141</span>            // New address from the server's pool<a name="line.141"></a>
+<span class="sourceLineNo">142</span>            ResourceAllocator&lt;InetAddress&gt; allocator = getAllocatorFor(interfaceAddress.toNetworkAddress());<a name="line.142"></a>
+<span class="sourceLineNo">143</span>            if (allocator == null) {<a name="line.143"></a>
+<span class="sourceLineNo">144</span>                if (LOG.isDebugEnabled())<a name="line.144"></a>
+<span class="sourceLineNo">145</span>                    LOG.debug("No address allocator for {}", interfaceAddress);<a name="line.145"></a>
+<span class="sourceLineNo">146</span>                continue CREATED;<a name="line.146"></a>
+<span class="sourceLineNo">147</span>            }<a name="line.147"></a>
+<span class="sourceLineNo">148</span>            for (InetAddress allocatedAddress : allocator) {<a name="line.148"></a>
+<span class="sourceLineNo">149</span>                if (leaseIp(allocatedAddress, hardwareAddress, ttl * 2)) {<a name="line.149"></a>
+<span class="sourceLineNo">150</span>                    if (LOG.isDebugEnabled())<a name="line.150"></a>
+<span class="sourceLineNo">151</span>                        LOG.debug("Using server-generated address {}", allocatedAddress);<a name="line.151"></a>
+<span class="sourceLineNo">152</span>                    return allocatedAddress;<a name="line.152"></a>
+<span class="sourceLineNo">153</span>                }<a name="line.153"></a>
+<span class="sourceLineNo">154</span>            }<a name="line.154"></a>
+<span class="sourceLineNo">155</span>        }<a name="line.155"></a>
+<span class="sourceLineNo">156</span>        LOG.warn("Failed to generate a lease for {}", hardwareAddress);<a name="line.156"></a>
+<span class="sourceLineNo">157</span><a name="line.157"></a>
+<span class="sourceLineNo">158</span>        return null;<a name="line.158"></a>
+<span class="sourceLineNo">159</span>    }<a name="line.159"></a>
+<span class="sourceLineNo">160</span><a name="line.160"></a>
+<span class="sourceLineNo">161</span>    /**<a name="line.161"></a>
+<span class="sourceLineNo">162</span>     * Leases an InetAddress for the given HardwareAddress.<a name="line.162"></a>
+<span class="sourceLineNo">163</span>     *<a name="line.163"></a>
+<span class="sourceLineNo">164</span>     * Lock, retrieve current mapping from store.<a name="line.164"></a>
+<span class="sourceLineNo">165</span>     * Call {@link #leaseMac(DhcpRequestContext, HardwareAddress, InetAddress, InetAddress, long)}<a name="line.165"></a>
+<span class="sourceLineNo">166</span>     * with the current mapping.<a name="line.166"></a>
+<span class="sourceLineNo">167</span>     * Store the returned address (if given) as the new current mapping and release the lock.<a name="line.167"></a>
+<span class="sourceLineNo">168</span>     */<a name="line.168"></a>
+<span class="sourceLineNo">169</span>    @CheckForNull<a name="line.169"></a>
+<span class="sourceLineNo">170</span>    protected abstract InetAddress leaseMac(<a name="line.170"></a>
+<span class="sourceLineNo">171</span>            @Nonnull DhcpRequestContext context,<a name="line.171"></a>
+<span class="sourceLineNo">172</span>            @Nonnull DhcpMessage request,<a name="line.172"></a>
+<span class="sourceLineNo">173</span>            @CheckForNull InetAddress clientRequestedAddress, @Nonnegative long ttl)<a name="line.173"></a>
+<span class="sourceLineNo">174</span>            throws Exception;<a name="line.174"></a>
+<span class="sourceLineNo">175</span><a name="line.175"></a>
+<span class="sourceLineNo">176</span>    @Override<a name="line.176"></a>
+<span class="sourceLineNo">177</span>    public DhcpMessage leaseOffer(<a name="line.177"></a>
+<span class="sourceLineNo">178</span>            DhcpRequestContext context,<a name="line.178"></a>
+<span class="sourceLineNo">179</span>            DhcpMessage request,<a name="line.179"></a>
+<span class="sourceLineNo">180</span>            InetAddress clientRequestedAddress, long clientRequestedExpirySecs)<a name="line.180"></a>
+<span class="sourceLineNo">181</span>            throws DhcpException {<a name="line.181"></a>
+<span class="sourceLineNo">182</span>        // LOG.info("OFFER: interfaceAddress=" + interfaceAddress + ", networkAddress=" + networkAddress + ", request=" + request + ", hardwareAddress=" + hardwareAddress + ", requestedAddress=" + requestedAddress + ", requestedLeaseTimeSecs=" + requestedLeaseTimeSecs);<a name="line.182"></a>
+<span class="sourceLineNo">183</span>        try {<a name="line.183"></a>
+<span class="sourceLineNo">184</span>            long leaseTimeSecs = getLeaseTime(TTL_OFFER, clientRequestedExpirySecs);<a name="line.184"></a>
+<span class="sourceLineNo">185</span>            InetAddress clientAddress = leaseMac(context, request, clientRequestedAddress, leaseTimeSecs);<a name="line.185"></a>
+<span class="sourceLineNo">186</span>            if (clientAddress == null)<a name="line.186"></a>
+<span class="sourceLineNo">187</span>                return null;<a name="line.187"></a>
+<span class="sourceLineNo">188</span>            return newReplyAck(request, MessageType.DHCPACK, clientAddress, leaseTimeSecs);<a name="line.188"></a>
+<span class="sourceLineNo">189</span>        } catch (Exception e) {<a name="line.189"></a>
+<span class="sourceLineNo">190</span>            Throwables.propagateIfPossible(e, DhcpException.class);<a name="line.190"></a>
+<span class="sourceLineNo">191</span>            throw new DhcpException("Failed to lease for MAC " + request.getHardwareAddress() + ": " + e, e);<a name="line.191"></a>
+<span class="sourceLineNo">192</span>        }<a name="line.192"></a>
+<span class="sourceLineNo">193</span>    }<a name="line.193"></a>
+<span class="sourceLineNo">194</span><a name="line.194"></a>
+<span class="sourceLineNo">195</span>    @Override<a name="line.195"></a>
+<span class="sourceLineNo">196</span>    public DhcpMessage leaseRequest(<a name="line.196"></a>
+<span class="sourceLineNo">197</span>            DhcpRequestContext context,<a name="line.197"></a>
+<span class="sourceLineNo">198</span>            DhcpMessage request,<a name="line.198"></a>
+<span class="sourceLineNo">199</span>            InetAddress clientRequestedAddress, long clientRequestedExpirySecs)<a name="line.199"></a>
+<span class="sourceLineNo">200</span>            throws DhcpException {<a name="line.200"></a>
+<span class="sourceLineNo">201</span>        try {<a name="line.201"></a>
+<span class="sourceLineNo">202</span>            long leaseTimeSecs = getLeaseTime(TTL_LEASE, clientRequestedExpirySecs);<a name="line.202"></a>
+<span class="sourceLineNo">203</span>            if (clientRequestedAddress == null) {<a name="line.203"></a>
+<span class="sourceLineNo">204</span>                LOG.warn("REQUEST from " + request.getHardwareAddress() + " did not request an address.");<a name="line.204"></a>
+<span class="sourceLineNo">205</span>                return null;<a name="line.205"></a>
+<span class="sourceLineNo">206</span>            }<a name="line.206"></a>
+<span class="sourceLineNo">207</span>            InetAddress clientAddress = leaseMac(context, request, clientRequestedAddress, leaseTimeSecs);<a name="line.207"></a>
+<span class="sourceLineNo">208</span>            if (clientAddress == null)<a name="line.208"></a>
+<span class="sourceLineNo">209</span>                return null;<a name="line.209"></a>
+<span class="sourceLineNo">210</span>            return newReplyAck(request, MessageType.DHCPACK, clientAddress, leaseTimeSecs);<a name="line.210"></a>
+<span class="sourceLineNo">211</span>        } catch (Exception e) {<a name="line.211"></a>
+<span class="sourceLineNo">212</span>            Throwables.propagateIfPossible(e, DhcpException.class);<a name="line.212"></a>
+<span class="sourceLineNo">213</span>            throw new DhcpException("Failed to lease for MAC " + request.getHardwareAddress() + ": " + e, e);<a name="line.213"></a>
+<span class="sourceLineNo">214</span>        }<a name="line.214"></a>
+<span class="sourceLineNo">215</span>    }<a name="line.215"></a>
+<span class="sourceLineNo">216</span>}<a name="line.216"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * To change this license header, choose License Headers in Project Properties.<a name="line.2"></a>
+<span class="sourceLineNo">003</span> * To change this template file, choose Tools | Templates<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * and open the template in the editor.<a name="line.4"></a>
+<span class="sourceLineNo">005</span> */<a name="line.5"></a>
+<span class="sourceLineNo">006</span>package org.anarres.dhcp.server.pcap;<a name="line.6"></a>
+<span class="sourceLineNo">007</span><a name="line.7"></a>
+<span class="sourceLineNo">008</span>import java.net.InetSocketAddress;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import java.nio.ByteBuffer;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import java.util.Arrays;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import javax.annotation.Nonnull;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import org.anarres.dhcp.common.address.InterfaceAddress;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import org.apache.directory.server.dhcp.io.DhcpMessageDecoder;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import org.apache.directory.server.dhcp.io.DhcpMessageEncoder;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import org.apache.directory.server.dhcp.io.DhcpRequestContext;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import org.apache.directory.server.dhcp.messages.DhcpMessage;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>import org.apache.directory.server.dhcp.service.DhcpService;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>import org.pcap4j.core.PacketListener;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>import org.pcap4j.packet.EthernetPacket;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import org.pcap4j.packet.IpV4Packet;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>import org.pcap4j.packet.Packet;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>import org.pcap4j.packet.UdpPacket;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import org.pcap4j.packet.UnknownPacket;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import org.pcap4j.packet.namednumber.EtherType;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>import org.pcap4j.packet.namednumber.IpNumber;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import org.slf4j.Logger;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import org.slf4j.LoggerFactory;<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>/**<a name="line.29"></a>
+<span class="sourceLineNo">030</span> *<a name="line.30"></a>
+<span class="sourceLineNo">031</span> * @author shevek<a name="line.31"></a>
+<span class="sourceLineNo">032</span> */<a name="line.32"></a>
+<span class="sourceLineNo">033</span>public class DhcpPacketListener implements PacketListener {<a name="line.33"></a>
+<span class="sourceLineNo">034</span><a name="line.34"></a>
+<span class="sourceLineNo">035</span>    private static final Logger LOG = LoggerFactory.getLogger(DhcpPacketListener.class);<a name="line.35"></a>
+<span class="sourceLineNo">036</span>    private final DhcpMessageDecoder decoder = new DhcpMessageDecoder();<a name="line.36"></a>
+<span class="sourceLineNo">037</span>    private final DhcpMessageEncoder encoder = new DhcpMessageEncoder();<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    private final DhcpService service;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    private final InterfaceAddress[] interfaceAddresses;<a name="line.39"></a>
+<span class="sourceLineNo">040</span><a name="line.40"></a>
+<span class="sourceLineNo">041</span>    public DhcpPacketListener(@Nonnull DhcpService service, @Nonnull InterfaceAddress[] interfaceAddresses) {<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        this.service = service;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        this.interfaceAddresses = interfaceAddresses;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>    }<a name="line.44"></a>
+<span class="sourceLineNo">045</span><a name="line.45"></a>
+<span class="sourceLineNo">046</span>    public void gotPacket(Packet rawPacket) {<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        try {<a name="line.47"></a>
+<span class="sourceLineNo">048</span>            LOG.info("Read raw " + rawPacket);<a name="line.48"></a>
+<span class="sourceLineNo">049</span>            IpV4Packet ipPacket = rawPacket.get(IpV4Packet.class);<a name="line.49"></a>
+<span class="sourceLineNo">050</span>            UdpPacket udpPacket = rawPacket.get(UdpPacket.class);<a name="line.50"></a>
+<span class="sourceLineNo">051</span>            byte[] dhcpData = udpPacket.getPayload().getRawData();<a name="line.51"></a>
+<span class="sourceLineNo">052</span>            InetSocketAddress remoteAddress = new InetSocketAddress(ipPacket.getHeader().getSrcAddr(), udpPacket.getHeader().getSrcPort().valueAsInt());<a name="line.52"></a>
+<span class="sourceLineNo">053</span>            InetSocketAddress localAddress = new InetSocketAddress(ipPacket.getHeader().getDstAddr(), udpPacket.getHeader().getDstPort().valueAsInt());<a name="line.53"></a>
+<span class="sourceLineNo">054</span>            DhcpRequestContext context = new DhcpRequestContext(interfaceAddresses, remoteAddress, localAddress);<a name="line.54"></a>
+<span class="sourceLineNo">055</span>            DhcpMessage request = decoder.decode(ByteBuffer.wrap(dhcpData));<a name="line.55"></a>
+<span class="sourceLineNo">056</span>            LOG.info("Read DHCP " + request);<a name="line.56"></a>
+<span class="sourceLineNo">057</span>            DhcpMessage reply = service.getReplyFor(context, request);<a name="line.57"></a>
+<span class="sourceLineNo">058</span>            if (reply == null)<a name="line.58"></a>
+<span class="sourceLineNo">059</span>                return;<a name="line.59"></a>
+<span class="sourceLineNo">060</span>            byte[] replyData = new byte[1536];<a name="line.60"></a>
+<span class="sourceLineNo">061</span>            ByteBuffer buffer = ByteBuffer.wrap(replyData);<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            encoder.encode(buffer, reply);<a name="line.62"></a>
+<span class="sourceLineNo">063</span>            replyData = Arrays.copyOf(replyData, buffer.position());    // Truncate array to writer position.<a name="line.63"></a>
+<span class="sourceLineNo">064</span>            UnknownPacket.Builder dhcpBuilder = new UnknownPacket.Builder()<a name="line.64"></a>
+<span class="sourceLineNo">065</span>                    .rawData(replyData);<a name="line.65"></a>
+<span class="sourceLineNo">066</span>            UdpPacket.Builder udpBuilder = new UdpPacket.Builder()<a name="line.66"></a>
+<span class="sourceLineNo">067</span>                    .payloadBuilder(dhcpBuilder)<a name="line.67"></a>
+<span class="sourceLineNo">068</span>                    .srcPort(udpPacket.getHeader().getDstPort())<a name="line.68"></a>
+<span class="sourceLineNo">069</span>                    .dstPort(udpPacket.getHeader().getSrcPort())<a name="line.69"></a>
+<span class="sourceLineNo">070</span>                    .correctChecksumAtBuild(true)<a name="line.70"></a>
+<span class="sourceLineNo">071</span>                    .correctLengthAtBuild(true);<a name="line.71"></a>
+<span class="sourceLineNo">072</span>            IpV4Packet.Builder ipBuilder = new IpV4Packet.Builder()<a name="line.72"></a>
+<span class="sourceLineNo">073</span>                    .payloadBuilder(udpBuilder)<a name="line.73"></a>
+<span class="sourceLineNo">074</span>                    .srcAddr(null) // TODO<a name="line.74"></a>
+<span class="sourceLineNo">075</span>                    .dstAddr(null) // TODO<a name="line.75"></a>
+<span class="sourceLineNo">076</span>                    .protocol(IpNumber.UDP)<a name="line.76"></a>
+<span class="sourceLineNo">077</span>                    .correctChecksumAtBuild(true)<a name="line.77"></a>
+<span class="sourceLineNo">078</span>                    .correctLengthAtBuild(true)<a name="line.78"></a>
+<span class="sourceLineNo">079</span>                    .paddingAtBuild(true);<a name="line.79"></a>
+<span class="sourceLineNo">080</span>            EthernetPacket.Builder ethernetBuilder = new EthernetPacket.Builder()<a name="line.80"></a>
+<span class="sourceLineNo">081</span>                    .payloadBuilder(ipBuilder)<a name="line.81"></a>
+<span class="sourceLineNo">082</span>                    .type(EtherType.IPV4)<a name="line.82"></a>
+<span class="sourceLineNo">083</span>                    .paddingAtBuild(true);<a name="line.83"></a>
+<span class="sourceLineNo">084</span>            Packet replyPacket = ethernetBuilder.build();<a name="line.84"></a>
+<span class="sourceLineNo">085</span>            // handle.sendPacket(replyPacket);<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        } catch (Exception e) {<a name="line.86"></a>
+<span class="sourceLineNo">087</span>            LOG.error("DHCP failed", e);<a name="line.87"></a>
+<span class="sourceLineNo">088</span>        }<a name="line.88"></a>
+<span class="sourceLineNo">089</span>    }<a name="line.89"></a>
+<span class="sourceLineNo">090</span><a name="line.90"></a>
+<span class="sourceLineNo">091</span>}<a name="line.91"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>
