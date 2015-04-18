@@ -216,7 +216,6 @@ public final class HardwareAddress {
      * 
      * @param text
      * @return HardwareAddress
-     * @throws ParseException
      */
     @Nonnull
     public static HardwareAddress fromString(@Nonnull String text) {
