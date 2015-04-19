@@ -1,17 +1,43 @@
-ext.githubProjectName = rootProject.name
-
 buildscript {
 	apply from: file('gradle/buildscript.gradle'), to: buildscript
 }
 
-apply from: file('gradle/convention.gradle')
-apply from: file('gradle/github.gradle')
-apply from: file('gradle/nexus.gradle')
-apply from: file('gradle/check.gradle')
-apply from: file('gradle/license.gradle')
+apply plugin: 'org.anarres.stdproject'
+stdproject {
+	javadocLink "https://mina.apache.org/mina-project/apidocs/"
+	javadocLink "http://netty.io/4.0/api/"
+	javadocLink "https://kaitoy.github.io/pcap4j/javadoc/latest/en/"
+	javadocGroup "Service Interfaces and Common code", "org.anarres.dhcp.common*",
+			"org.apache.directory.server.dhcp.service*",
+			"org.apache.directory.server.dhcp"
+	javadocGroup "DHCPv4 Protocol", "org.apache.directory.server.dhcp.options*",
+			"org.apache.directory.server.dhcp.io*",
+			"org.apache.directory.server.dhcp.messages*"
+	javadocGroup "DHCPv6 Protocol", "org.anarres.dhcp.v6*"
+	javadocGroup "Netty I/O Adapter", "org.apache.directory.server.dhcp.netty*"
+	javadocGroup "Mina I/O Adapter", "org.apache.directory.server.dhcp.mina*"
+	javadocGroup "Pcap4J I/O Adapter", "org.anarres.dhcp.server.pcap"
+}
 
 subprojects {
 	group = "org.anarres.dhcp"
+
+	apply plugin: 'org.anarres.stdmodule'
+	stdmodule {
+		description "A high-performance pure Java DHCP server."
+		author id: 'shevek', name: 'Shevek', email: 'github@anarres.org'
+		license 'Apache-2.0'
+	}
+
+	dependencies {
+		compile 'com.google.code.findbugs:jsr305:2.0.2'
+		compile 'org.slf4j:slf4j-api:1.7.12'
+	}
+
+	sourceCompatibility = 1.6
+	animalsniffer {
+		signature = "org.codehaus.mojo.signature:java16:+@signature"
+	}
 }
 
 project(':dhcp-protocol') {
