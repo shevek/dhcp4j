@@ -2,3 +2,5 @@ build
 .*.swp
 .gradle
 .nb-gradle
+.idea
+*.iml
