@@ -89,7 +89,12 @@ public abstract class BaseDhcpOption {
      */
     @Nonnull
     protected final String toStringDataFallback() {
-        return BaseEncoding.base16().withSeparator(" ", 8).encode(getData());
+        return toStringDataFallback(getData());
+    }
+
+    @Nonnull
+    protected static String toStringDataFallback(@Nonnull byte[] data) {
+        return BaseEncoding.base16().withSeparator(" ", 8).encode(data);
     }
 
     @Nonnull

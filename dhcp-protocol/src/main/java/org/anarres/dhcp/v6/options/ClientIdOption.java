@@ -17,4 +17,5 @@ public class ClientIdOption extends DuidOption {
     public short getTag() {
         return TAG;
     }
+
 }

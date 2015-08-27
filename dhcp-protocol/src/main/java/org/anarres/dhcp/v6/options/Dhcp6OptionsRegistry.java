@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 /**
  * See http://www.iana.org/assignments/bootp-dhcp-parameters/bootp-dhcp-parameters.xhtml#options
  *
- * @author shevek
+ * @author shevek, marosmars
  */
 public class Dhcp6OptionsRegistry {
 
@@ -22,7 +22,8 @@ public class Dhcp6OptionsRegistry {
         private static final Dhcp6OptionsRegistry INSTANCE = new Dhcp6OptionsRegistry();
 
         private static final Class OPTION_CLASSES[] = {
-
+            IaNaOption.class, ClientIdOption.class, ServerIdOption.class,
+            ElapsedTimeOption.class, IaTaOption.class, IaAddressOption.class
         };
 
         static {
@@ -49,6 +50,13 @@ public class Dhcp6OptionsRegistry {
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Cannot instantiate " + type, e);
         }
+    }
+
+    @Nonnull
+    public static <T extends Dhcp6Option> T copy(@Nonnull Class<T> type, @Nonnull T option) {
+        final T t = newInstance(type);
+        t.setData(option.getData());
+        return t;
     }
 
     private short getTagFrom(@Nonnull Class<? extends Dhcp6Option> type) {
