@@ -5,14 +5,18 @@
 package org.anarres.dhcp.v6.io;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.Ints;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.v6.Dhcp6Exception;
 import org.anarres.dhcp.v6.messages.Dhcp6Message;
 import org.anarres.dhcp.v6.messages.Dhcp6MessageType;
+import org.anarres.dhcp.v6.messages.Dhcp6RelayMessage;
 import org.anarres.dhcp.v6.options.Dhcp6Option;
 import org.anarres.dhcp.v6.options.Dhcp6Options;
 import org.anarres.dhcp.v6.options.Dhcp6OptionsRegistry;
@@ -26,6 +30,8 @@ import org.slf4j.LoggerFactory;
  */
 public class Dhcp6MessageDecoder {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Dhcp6MessageDecoder.class);
+
     private static class Inner {
 
         private static final Dhcp6MessageDecoder INSTANCE = new Dhcp6MessageDecoder();
@@ -38,29 +44,66 @@ public class Dhcp6MessageDecoder {
 
     private Dhcp6MessageDecoder() {}
 
-    private static final Logger LOG = LoggerFactory.getLogger(Dhcp6MessageDecoder.class);
-
     private final Dhcp6OptionsRegistry registry = Dhcp6OptionsRegistry.getInstance();
+
+    // TODO make this extensible, right now we fail for every undefined DHCP message
 
     /**
      * https://tools.ietf.org/html/rfc3315#section-6
+     * https://tools.ietf.org/html/rfc3315#section-7
      */
     public Dhcp6Message decode(@Nonnull ByteBuffer buffer) throws Dhcp6Exception, IOException {
         LOG.debug("Decoding Dhcp6 message: {}", buffer);
 
-        Dhcp6Message message = new Dhcp6Message();
+        final Dhcp6MessageType msgType = getMsgType(buffer);
+        LOG.debug("Message type: {}", msgType);
 
-        message.setMessageType(getMsgType(buffer));
-        LOG.debug("Message type: {}", message.getMessageType());
 
-        message.setTransactionId(getTxId(buffer));
-        LOG.debug("Transaction ID: {}", message.getTransactionId());
+        Dhcp6Message message;
+        if(isRelayedMessage(msgType)) {
+            LOG.debug("Message relay");
 
-        Dhcp6Options options = decodeOptions(buffer);
-        message.setOptions(options);
+            message = new Dhcp6RelayMessage();
+            final Dhcp6RelayMessage relayMsg = ((Dhcp6RelayMessage) message);
+
+            relayMsg.setHopCount(getByte(buffer));
+            LOG.debug("Hop count: {}", message.getTransactionId());
+
+            relayMsg.setLinkAddress(getInetAddress(buffer, (byte) 16));
+            LOG.debug("Link address: {}", message.getTransactionId());
+
+            relayMsg.setPeerAddress(getInetAddress(buffer, (byte) 16));
+            LOG.debug("Peer address: {}", message.getTransactionId());
+        } else {
+            message = new Dhcp6Message();
+            message.setMessageType(msgType);
+
+            message.setTransactionId(getTxId(buffer));
+            LOG.debug("Transaction ID: {}", message.getTransactionId());
+
+            Dhcp6Options options = decodeOptions(buffer);
+            message.setOptions(options);
+        }
 
         LOG.debug("Dhcp6 message decoded: {}", message);
+        message.setMessageType(msgType);
         return message;
+
+    }
+
+    private InetAddress getInetAddress(final ByteBuffer bufferm, final byte size) throws Dhcp6Exception {
+        Preconditions.checkArgument(bufferm.remaining() >= size);
+        final byte[] ipBytes = new byte[size];
+        bufferm.get(ipBytes, bufferm.position(), size);
+        try {
+            return InetAddress.getByAddress(ipBytes);
+        } catch (UnknownHostException e) {
+            throw new Dhcp6Exception("Unable to parse inet address from: " + BaseEncoding.base16().encode(ipBytes), e);
+        }
+    }
+
+    static boolean isRelayedMessage(final Dhcp6MessageType type) {
+        return type == Dhcp6MessageType.DHCP_RELAY_FORW || type == Dhcp6MessageType.DHCP_RELAY_REPL;
     }
 
     /**
@@ -79,11 +122,15 @@ public class Dhcp6MessageDecoder {
      */
     @Nonnull
     private static Dhcp6MessageType getMsgType(final ByteBuffer buffer) throws Dhcp6Exception.UnknownMsgException {
-        Preconditions.checkArgument(buffer.remaining() > 1);
-        final byte type = buffer.get();
+        final byte type = getByte(buffer);
         final Dhcp6MessageType dhcp6MessageType = Dhcp6MessageType.forTypeCode(type);
         Dhcp6Exception.UnknownMsgException.check(dhcp6MessageType, type);
         return dhcp6MessageType;
+    }
+
+    private static byte getByte(final ByteBuffer buffer) {
+        Preconditions.checkArgument(buffer.remaining() >= 1);
+        return buffer.get();
     }
 
     @Nonnull

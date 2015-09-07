@@ -23,7 +23,9 @@ public class Dhcp6OptionsRegistry {
 
         private static final Class OPTION_CLASSES[] = {
             IaNaOption.class, ClientIdOption.class, ServerIdOption.class,
-            ElapsedTimeOption.class, IaTaOption.class, IaAddressOption.class
+            ElapsedTimeOption.class, IaTaOption.class, IaAddressOption.class,
+            OptionRequestOption.class, StatusCodeOption.class, RelayMessageOption.class,
+            PreferenceOption.class
         };
 
         static {
@@ -45,9 +47,7 @@ public class Dhcp6OptionsRegistry {
     public static <T extends Dhcp6Option> T newInstance(@Nonnull Class<T> type) {
         try {
             return type.newInstance();
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException("Cannot instantiate " + type, e);
-        } catch (IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             throw new IllegalArgumentException("Cannot instantiate " + type, e);
         }
     }

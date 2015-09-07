@@ -4,9 +4,6 @@
  */
 package org.anarres.dhcp.v6.options;
 
-import java.nio.ByteBuffer;
-import javax.annotation.Nonnull;
-import org.anarres.dhcp.v6.io.Dhcp6MessageDecoder;
 import org.apache.directory.server.dhcp.DhcpException;
 
 /**
@@ -14,37 +11,14 @@ import org.apache.directory.server.dhcp.DhcpException;
  *
  * @author marosmars
  */
-public class IaTaOption extends Dhcp6Option {
+public class IaTaOption extends IaOption {
 
     private static final short TAG = 4;
+    private static final int HEADER_LENGTH = 12;
 
     @Override
     public short getTag() {
         return TAG;
-    }
-
-    public int getIAID() {
-        ByteBuffer buf = ByteBuffer.wrap(getData());
-        return buf.getInt(0);
-    }
-
-    public void setIAID(int IAID) {
-        ByteBuffer buf = ByteBuffer.wrap(getData());
-        buf.putInt(0, IAID);
-    }
-
-    // FIXME extrace base abstract class for option based options e.g. IANA IATA
-
-    @Nonnull
-    public Dhcp6Options getOptions() throws DhcpException {
-        Dhcp6MessageDecoder decoder = Dhcp6MessageDecoder.getInstance();
-        return decoder.decodeOptions(getOptionsRaw());
-    }
-
-    @Nonnull
-    private ByteBuffer getOptionsRaw() {
-        byte[] data = getData();
-        return ByteBuffer.wrap(data, 12, data.length - 12);
     }
 
     @Override
@@ -62,5 +36,9 @@ public class IaTaOption extends Dhcp6Option {
         }
 
         return getClass().getSimpleName() + "[" + getTagAsInt() + "]: " + values;
+    }
+
+    @Override protected int getHeaderSize() {
+        return HEADER_LENGTH;
     }
 }

@@ -9,7 +9,14 @@ package org.anarres.dhcp.v6.options;
  *
  * @author marosmars
  */
-public abstract class PreferenceOption extends Dhcp6Option {
+public class PreferenceOption extends Dhcp6Option {
+
+    private static final short TAG = 7;
+
+    @Override
+    public short getTag() {
+        return TAG;
+    }
 
     public byte getPreference() {
         return getData()[0];
@@ -17,5 +24,20 @@ public abstract class PreferenceOption extends Dhcp6Option {
 
     public void setPreference(byte preference) {
         setData(new byte[]{preference});
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder values = new StringBuilder();
+        values.append("preference:");
+        values.append(getPreference());
+        return getClass().getSimpleName() + "[" + getTagAsInt() + "]: " + values;
+    }
+
+    public static PreferenceOption create(final byte preference) {
+        final PreferenceOption iaNaOption = new PreferenceOption();
+        iaNaOption.setData(new byte[1]);
+        iaNaOption.setPreference(preference);
+        return iaNaOption;
     }
 }

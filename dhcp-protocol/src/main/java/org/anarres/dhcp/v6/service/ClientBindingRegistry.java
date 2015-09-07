@@ -20,6 +20,12 @@ public class ClientBindingRegistry {
     @GuardedBy("this")
     private final Set<InetAddress> allIps = new HashSet<>();
 
+    private final String id;
+
+    public ClientBindingRegistry(@Nonnull final String id) {
+        this.id = id;
+    }
+
     public synchronized void add(final DuidOption.Duid clientId, final int iaid, final InetAddress ip) {
         if(!bindings.containsKey(clientId)) {
             bindings.put(clientId, new ClientBindings());
@@ -30,11 +36,13 @@ public class ClientBindingRegistry {
         allIps.add(ip);
     }
 
-    public synchronized void remove(final DuidOption.Duid clientId, final int iaid) {
+    public synchronized ClientBinding remove(final DuidOption.Duid clientId, final int iaid) {
         if(bindings.containsKey(clientId)) {
             final ClientBinding removed = bindings.get(clientId).remove(iaid);
             allIps.remove(removed.getIp());
+            return removed;
         }
+        return null;
     }
 
     public boolean containsIp(final InetAddress ip) {
@@ -50,7 +58,12 @@ public class ClientBindingRegistry {
         return bindings.get(clientId) == null ? null : bindings.get(clientId).get(iaid);
     }
 
-
+    @Override public String toString() {
+        final StringBuilder sb = new StringBuilder("ClientBindingRegistry{");
+        sb.append("id='").append(id).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 
     public static class ClientBinding {
 

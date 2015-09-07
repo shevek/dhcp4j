@@ -8,6 +8,9 @@ import org.anarres.dhcp.v6.messages.Dhcp6MessageType;
 import org.anarres.dhcp.v6.options.ClientIdOption;
 import org.anarres.dhcp.v6.options.Dhcp6Option;
 import org.anarres.dhcp.v6.options.DuidOption;
+import org.anarres.dhcp.v6.options.IaNaOption;
+import org.anarres.dhcp.v6.options.IaTaOption;
+import org.anarres.dhcp.v6.options.RelayMessageOption;
 import org.anarres.dhcp.v6.options.ServerIdOption;
 import org.apache.directory.server.dhcp.DhcpException;
 
@@ -85,6 +88,12 @@ public class Dhcp6Exception extends DhcpException {
             }
         }
 
+        private static void checkNoOption(@Nonnull final Dhcp6Message msg, @Nonnull final Class<? extends Dhcp6Option> type) throws InvalidMsgException {
+            if(!noOption(msg, type)) {
+                throw new InvalidMsgException(String.format("Unexpected option: %s", type));
+            }
+        }
+
         private static void checkMsgType(@Nonnull final Dhcp6Message msg, @Nonnull final Dhcp6MessageType expected) throws InvalidMsgException {
             if(!isMsgType(msg, expected)) {
                 throw new InvalidMsgException(String.format("Incorrect type, expected: %s, but was: %s", expected, msg.getMessageType()));
@@ -147,5 +156,55 @@ public class Dhcp6Exception extends DhcpException {
             checkOption(msg, ClientIdOption.class);
         }
 
+        /**
+         * https://tools.ietf.org/html/rfc3315#section-7.1
+         */
+        public static void checkRelayForward(@Nonnull final Dhcp6Message msg) throws InvalidMsgException {
+            checkMsgType(msg, Dhcp6MessageType.DHCP_RELAY_FORW);
+            checkOption(msg, RelayMessageOption.class);
+        }
+
+        /**
+         *
+         * https://tools.ietf.org/html/rfc3315#section-15.12
+         */
+        public static void checkInformationRequest(final Dhcp6Message msg, final DuidOption.Duid duid)
+            throws InvalidMsgException {
+            checkMsgType(msg, Dhcp6MessageType.DHCP_INFORMATION_REQUEST);
+            if(msg.getOptions().contains(ServerIdOption.class)) {
+                checkOptionValue(msg, ServerIdOption.class, duid.getData());
+            }
+            checkNoOption(msg, IaNaOption.class);
+            checkNoOption(msg, IaTaOption.class);
+        }
+
+        /**
+         * https://tools.ietf.org/html/rfc3315#section-15.5
+         */
+        public static void checkConfirm(final Dhcp6Message msg) throws InvalidMsgException {
+            checkMsgType(msg, Dhcp6MessageType.DHCP_CONFIRM);
+            checkOption(msg, ClientIdOption.class);
+            checkNoOption(msg, ServerIdOption.class);
+        }
+
+        /**
+         * https://tools.ietf.org/html/rfc3315#section-15.6
+         */
+        public static void checkRenew(final Dhcp6Message msg, final DuidOption.Duid duid) throws InvalidMsgException {
+            checkMsgType(msg, Dhcp6MessageType.DHCP_RENEW);
+            checkOption(msg, ServerIdOption.class);
+            checkOptionValue(msg, ServerIdOption.class, duid.getData());
+            checkOption(msg, ClientIdOption.class);
+        }
+
+        /**
+         * https://tools.ietf.org/html/rfc3315#section-15.8
+         */
+        public static void checkDecline(final Dhcp6Message msg, final DuidOption.Duid duid) throws InvalidMsgException {
+            checkMsgType(msg, Dhcp6MessageType.DHCP_RENEW);
+            checkOption(msg, ServerIdOption.class);
+            checkOptionValue(msg, ServerIdOption.class, duid.getData());
+            checkOption(msg, ClientIdOption.class);
+        }
     }
 }

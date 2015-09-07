@@ -4,7 +4,7 @@ import com.google.common.base.Optional;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.v6.Dhcp6Exception;
-import org.anarres.dhcp.v6.io.DHcp6RequestContext;
+import org.anarres.dhcp.v6.io.Dhcp6RequestContext;
 import org.anarres.dhcp.v6.messages.Dhcp6Message;
 
 /**
@@ -25,7 +25,7 @@ public interface Dhcp6Service {
      * message should be ignored.
      */
     @CheckForNull
-    public Optional<Dhcp6Message> getReplyFor(@Nonnull DHcp6RequestContext requestContext,
+    public Optional<Dhcp6Message> getReplyFor(@Nonnull Dhcp6RequestContext requestContext,
         @Nonnull Dhcp6Message request)
         throws Dhcp6Exception;
 }

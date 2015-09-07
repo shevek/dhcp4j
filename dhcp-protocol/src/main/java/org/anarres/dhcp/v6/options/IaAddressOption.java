@@ -11,7 +11,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
-import org.anarres.dhcp.v6.io.Dhcp6MessageDecoder;
 import org.anarres.dhcp.v6.io.Dhcp6MessageEncoder;
 import org.apache.directory.server.dhcp.DhcpException;
 
@@ -20,9 +19,10 @@ import org.apache.directory.server.dhcp.DhcpException;
  *
  * @author marosmars
  */
-public class IaAddressOption extends Dhcp6Option {
+public class IaAddressOption extends SuboptionOption {
 
     private static final short TAG = 5;
+    private static final int HEADER_SIZE = 24;
 
     @Override
     public short getTag() {
@@ -69,31 +69,8 @@ public class IaAddressOption extends Dhcp6Option {
         buf.putInt(20, validLifetime);
     }
 
-    public void setOptions(@Nonnull final ByteBuffer options) {
-        ByteBuffer buf = ByteBuffer.wrap(getData());
-        options.position(0);
-        buf.position(12);
-        buf.put(options);
-    }
-
-    public void setOptions(@Nonnull final Dhcp6Options options) {
-        ByteBuffer buf = ByteBuffer.wrap(getData());
-        buf.position(12);
-        Dhcp6MessageEncoder.getInstance().encode(buf, options);
-    }
-
-    // FIXME extrace base abstract class for option based options e.g. IANA IATA
-
-    @Nonnull
-    public Dhcp6Options getOptions() throws DhcpException {
-        Dhcp6MessageDecoder decoder = Dhcp6MessageDecoder.getInstance();
-        return decoder.decodeOptions(getOptionsRaw());
-    }
-
-    @Nonnull
-    private ByteBuffer getOptionsRaw() {
-        byte[] data = getData();
-        return ByteBuffer.wrap(data, 24, data.length - 24);
+    @Override protected int getHeaderSize() {
+        return HEADER_SIZE;
     }
 
     @Override
@@ -119,7 +96,7 @@ public class IaAddressOption extends Dhcp6Option {
 
     public static IaAddressOption create(@Nonnull final InetAddress ip, final int preferredLifetime, final int validaLifetime, final Optional<Dhcp6Options> options) {
         final IaAddressOption iaNaOption = new IaAddressOption();
-        int length = 24;
+        int length = HEADER_SIZE;
 
         ByteBuffer encodedOptions = null;
         if(options.isPresent() && !options.get().isEmpty()) {

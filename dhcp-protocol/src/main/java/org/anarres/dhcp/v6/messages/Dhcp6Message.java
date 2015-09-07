@@ -50,5 +50,11 @@ public class Dhcp6Message {
         return sb.toString();
     }
 
-
+    /**
+     *
+     * @return total length of this message (4 + options length)
+     */
+    public int getLength() {
+        return 4 /*type + txID*/ + getOptions().getLength();
+    }
 }
