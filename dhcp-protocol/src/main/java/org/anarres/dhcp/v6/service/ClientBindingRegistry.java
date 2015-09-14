@@ -1,5 +1,6 @@
 package org.anarres.dhcp.v6.service;
 
+import com.google.common.annotations.Beta;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +13,7 @@ import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
 import org.anarres.dhcp.v6.options.DuidOption;
 
+@Beta
 @ThreadSafe
 public class ClientBindingRegistry {
 

@@ -14,7 +14,7 @@ import org.apache.directory.server.dhcp.DhcpException;
  *
  * @author shevek, marosmars
  */
-public class IaNaOption extends IaOption {
+public class IaNaOption extends IaOption implements TimedOption {
 
     private static final short TAG = 3;
     private static final int HEADER_LENGTH = 12;
@@ -24,22 +24,22 @@ public class IaNaOption extends IaOption {
         return TAG;
     }
 
-    public int getT1() {
+    @Override public int getT1() {
         ByteBuffer buf = ByteBuffer.wrap(getData());
         return buf.getInt(4);
     }
 
-    public void setT1(int t1) {
+    @Override public void setT1(int t1) {
         ByteBuffer buf = ByteBuffer.wrap(getData());
         buf.putInt(4, t1);
     }
 
-    public void setT2(int t2) {
+    @Override public void setT2(int t2) {
         ByteBuffer buf = ByteBuffer.wrap(getData());
         buf.putInt(8, t2);
     }
 
-    public int getT2() {
+    @Override public int getT2() {
         ByteBuffer buf = ByteBuffer.wrap(getData());
         return buf.getInt(8);
     }

@@ -25,7 +25,8 @@ public class Dhcp6OptionsRegistry {
             IaNaOption.class, ClientIdOption.class, ServerIdOption.class,
             ElapsedTimeOption.class, IaTaOption.class, IaAddressOption.class,
             OptionRequestOption.class, StatusCodeOption.class, RelayMessageOption.class,
-            PreferenceOption.class
+            PreferenceOption.class, InterfaceIdOption.class, ServerUnicastOption.class,
+            UserClassOption.class, VendorClassOption.class, VendorSpecificInformationOption.class
         };
 
         static {

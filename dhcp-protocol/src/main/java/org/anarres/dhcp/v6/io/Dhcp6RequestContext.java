@@ -1,6 +1,7 @@
 package org.anarres.dhcp.v6.io;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import java.net.InetAddress;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -51,5 +52,10 @@ public class Dhcp6RequestContext {
      */
     public Optional<Dhcp6Options> getRelayedOptions() {
         return relayedOptions;
+    }
+
+    public Dhcp6RequestContext withRelayedOptions(Dhcp6Options relayedOptions) {
+        Preconditions.checkState(!getRelayedOptions().isPresent(), "Relayed options already set");
+        return new Dhcp6RequestContext(getLinkAddress(), getClientAddress(), relayedOptions);
     }
 }

@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
  */
 public class ServerUnicastOption extends Dhcp6Option {
 
-    private static final short TAG = 5;
+    private static final short TAG = 12;
 
     @Override
     public short getTag() {

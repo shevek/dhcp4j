@@ -22,7 +22,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.anarres.dhcp.v6.options.DuidOption;
-import org.anarres.dhcp.v6.service.SimplePooledDhcp6LeaseManager;
+import org.anarres.dhcp.v6.service.PooledDhcp6LeaseManager;
 import org.anarres.dhcp.v6.service.Dhcp6LeaseManager;
 import org.anarres.dhcp.v6.service.Dhcp6Service;
 import org.anarres.dhcp.v6.service.LeaseManagerDhcp6Service;
@@ -53,8 +53,8 @@ public class Dhcp6Server {
             throw new RuntimeException(e);
         }
 
-        final Dhcp6Server dhcp6Server = new Dhcp6Server(new SimplePooledDhcp6LeaseManager(startingAddress,
-            endingAddress), Dhcp6Service.SERVER_PORT, new DuidOption.Duid(new byte[]{1,2}));
+        final Dhcp6Server dhcp6Server = new Dhcp6Server(new PooledDhcp6LeaseManager(startingAddress,
+            endingAddress, new PooledDhcp6LeaseManager.Lifetimes(50000, 80000, 100000, 150000)), Dhcp6Service.SERVER_PORT, new DuidOption.Duid(new byte[]{1,2}));
         try {
             dhcp6Server.start();
             Thread.sleep(50000);

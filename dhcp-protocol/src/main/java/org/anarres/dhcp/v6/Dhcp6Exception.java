@@ -1,5 +1,6 @@
 package org.anarres.dhcp.v6;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import java.util.Arrays;
 import javax.annotation.Nonnull;
@@ -17,6 +18,7 @@ import org.apache.directory.server.dhcp.DhcpException;
 /**
  * Created by marosmars
  */
+@Beta
 public class Dhcp6Exception extends DhcpException {
 
     public Dhcp6Exception() {
@@ -188,6 +190,15 @@ public class Dhcp6Exception extends DhcpException {
         }
 
         /**
+         * https://tools.ietf.org/html/rfc3315#section-15.7
+         */
+        public static void checkRebind(final Dhcp6Message msg) throws InvalidMsgException {
+            checkMsgType(msg, Dhcp6MessageType.DHCP_REBIND);
+            checkNoOption(msg, ServerIdOption.class);
+            checkOption(msg, ClientIdOption.class);
+        }
+
+        /**
          * https://tools.ietf.org/html/rfc3315#section-15.6
          */
         public static void checkRenew(final Dhcp6Message msg, final DuidOption.Duid duid) throws InvalidMsgException {
@@ -205,6 +216,24 @@ public class Dhcp6Exception extends DhcpException {
             checkOption(msg, ServerIdOption.class);
             checkOptionValue(msg, ServerIdOption.class, duid.getData());
             checkOption(msg, ClientIdOption.class);
+        }
+    }
+
+    /**
+     * Exception indicating the inability of replying to some DHCP client message
+     */
+    public static final class UnableToAnswerException extends Dhcp6Exception {
+
+        public UnableToAnswerException() {
+            super();
+        }
+
+        public UnableToAnswerException(@Nonnull final String description) {
+            super(description);
+        }
+
+        public UnableToAnswerException(@Nonnull final String description, @Nonnull final Exception e) {
+            super(description, e);
         }
     }
 }
