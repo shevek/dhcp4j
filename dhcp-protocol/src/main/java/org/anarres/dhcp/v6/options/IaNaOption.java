@@ -85,7 +85,8 @@ public class IaNaOption extends IaOption implements TimedOption {
         return iaNaOption;
     }
 
-    @Override protected int getHeaderSize() {
+    @Override
+    public int getHeaderSize() {
         return HEADER_LENGTH;
     }
 }

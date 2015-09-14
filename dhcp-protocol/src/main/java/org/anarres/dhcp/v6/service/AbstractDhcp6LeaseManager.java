@@ -77,19 +77,26 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
         final DuidOption.Duid clientId = getClientId(incomingMsg);
         for (T incomingIaOption : incomingMsg.getOptions().getAll(iaType)) {
             LOG.debug("Client {} requested IA:{} for {}. IA option: {}", clientId, iaRegistry, incomingIaOption.getIAID(), incomingIaOption);
-            final Dhcp6Options iaNaResponseOptions = new Dhcp6Options();
+            final Dhcp6Options iaResponseOptions = new Dhcp6Options();
             final IaAddressOption option;
 
             option = wrapIp(clientId, incomingIaOption, iaRegistry,
                 getIp(requestContext, clientId, incomingIaOption, iaRegistry));
 
-            iaNaResponseOptions.add(option);
-            final T copy = Dhcp6OptionsRegistry.copy(iaType, incomingIaOption);
-            setTimeParameters(copy);
+            iaResponseOptions.add(option);
+            final T copy = createIaOption(iaType, incomingIaOption, iaResponseOptions);
 
-            copy.setOptions(iaNaResponseOptions);
             reply.getOptions().add(copy);
         }
+    }
+
+    private <T extends IaOption> T createIaOption(final Class<T> iaType, final T incomingIaOption, final Dhcp6Options iaResponseOptions) {
+        final T copy = Dhcp6OptionsRegistry.newInstance(iaType);
+        copy.setData(new byte[copy.getHeaderSize() + iaResponseOptions.getLength()]);
+        setTimeParameters(copy);
+        copy.setIAID(incomingIaOption.getIAID());
+        copy.setOptions(iaResponseOptions);
+        return copy;
     }
 
     /**
@@ -112,7 +119,7 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
         final DuidOption.Duid clientId = getClientId(incomingMsg);
         for (T incomingIaOption : incomingMsg.getOptions().getAll(iaType)) {
 
-            final Dhcp6Options iaNaResponseOptions = new Dhcp6Options();
+            final Dhcp6Options iaResponseOptions = new Dhcp6Options();
             final Dhcp6Option option;
 
             if(iaRegistry.contains(clientId, incomingIaOption.getIAID())) {
@@ -122,11 +129,9 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
                 option = StatusCodeOption.create(StatusCodeOption.NO_BINDING);
             }
 
-            iaNaResponseOptions.add(option);
-            final T copy = Dhcp6OptionsRegistry.copy(iaType, incomingIaOption);
-            setTimeParameters(copy);
+            iaResponseOptions.add(option);
+            final T copy = createIaOption(iaType, incomingIaOption, iaResponseOptions);
 
-            copy.setOptions(iaNaResponseOptions);
             reply.getOptions().add(copy);
         }
     }
@@ -134,7 +139,7 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
     private <T extends IaOption> void setTimeParameters(final T copy) {
         if(copy instanceof TimedOption) {
             ((TimedOption) copy).setT1(lifetimes.getT1());
-            ((TimedOption) copy).setT1(lifetimes.getT2());
+            ((TimedOption) copy).setT2(lifetimes.getT2());
         }
     }
 
@@ -210,10 +215,8 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
             }
 
             iaResponseOptions.add(option);
-            final T copy = Dhcp6OptionsRegistry.copy(iaType, incomingIaOption);
-            setTimeParameters(copy);
+            final T copy = createIaOption(iaType, incomingIaOption, iaResponseOptions);
 
-            copy.setOptions(iaResponseOptions);
             reply.getOptions().add(copy);
         }
     }
@@ -246,11 +249,10 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
             } else {
                 LOG.warn("Client {} tried to release unknown IA:{}: {}", clientId, iaRegistry, incomingIaOption.getIAID());
                 // TODO make this options a constant
-                final Dhcp6Options unknownIaNaOptions = new Dhcp6Options();
-                unknownIaNaOptions.add(StatusCodeOption.create(StatusCodeOption.NO_BINDING));
+                final Dhcp6Options unknownIaOptions = new Dhcp6Options();
+                unknownIaOptions.add(StatusCodeOption.create(StatusCodeOption.NO_BINDING));
 
-                final T copy = Dhcp6OptionsRegistry.copy(iaType, incomingIaOption);
-                copy.setOptions(unknownIaNaOptions);
+                final T copy = createIaOption(iaType, incomingIaOption, unknownIaOptions);
 
                 reply.getOptions().add(copy);
             }
@@ -362,7 +364,7 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
         return true;
     }
 
-    public static final Iterable<InetAddress> getAddressesFromIa(final SuboptionOption incomingIaNaOption) throws Dhcp6Exception {
+    public static Iterable<InetAddress> getAddressesFromIa(final SuboptionOption incomingIaNaOption) throws Dhcp6Exception {
         return Iterables.transform(incomingIaNaOption.getOptions().getAll(IaAddressOption.class), new Function<IaAddressOption, InetAddress>() {
             @Override public InetAddress apply(final IaAddressOption input) {
                 return input.getIp();
@@ -378,7 +380,7 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
         final ClientBindingRegistry iaRegistry, final InetAddress ip) {
 
         final IaAddressOption option = IaAddressOption
-            .create(ip, lifetimes.getPreferredLt(), lifetimes.getPreferredLt(), Optional.<Dhcp6Options>absent());
+            .create(ip, lifetimes.getPreferredLt(), lifetimes.getValidLt(), Optional.<Dhcp6Options>absent());
 
         iaRegistry.add(clientId, incomingIaOption.getIAID(), ip);
         LOG.debug("Client {} leased: {} for IaNa {}", clientId, ip, incomingIaOption.getIAID());
@@ -404,6 +406,9 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
         IaOption iaOption)
         throws Dhcp6Exception;
 
+    /**
+     * Static lifetimes container
+     */
     public static final class Lifetimes {
 
         private final int t1, t2;

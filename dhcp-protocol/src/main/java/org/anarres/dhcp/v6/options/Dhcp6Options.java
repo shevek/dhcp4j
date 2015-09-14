@@ -137,7 +137,7 @@ public class Dhcp6Options implements Iterable<Dhcp6Option> {
     public int getLength() {
         int length = 0;
         for (Dhcp6Option dhcp6Option : options.values()) {
-            length = dhcp6Option.getData().length;
+            length = dhcp6Option.getData().length + 4;
         }
 
         return length;

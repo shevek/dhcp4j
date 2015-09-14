@@ -23,7 +23,7 @@ public abstract class SuboptionOption extends Dhcp6Option {
         buf.put(options);
     }
 
-    protected abstract int getHeaderSize();
+    public abstract int getHeaderSize();
 
     public void setOptions(@Nonnull final Dhcp6Options options) {
         ByteBuffer buf = ByteBuffer.wrap(getData());

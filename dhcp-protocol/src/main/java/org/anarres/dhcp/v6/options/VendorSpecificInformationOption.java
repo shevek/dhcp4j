@@ -24,7 +24,8 @@ public class VendorSpecificInformationOption extends SuboptionOption {
         return buf.getInt(0);
     }
 
-    @Override protected int getHeaderSize() {
+    @Override
+    public int getHeaderSize() {
         return HEADER_SIZE;
     }
 

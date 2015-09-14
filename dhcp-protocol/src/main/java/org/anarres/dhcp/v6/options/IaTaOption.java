@@ -38,7 +38,8 @@ public class IaTaOption extends IaOption {
         return getClass().getSimpleName() + "[" + getTagAsInt() + "]: " + values;
     }
 
-    @Override protected int getHeaderSize() {
+    @Override
+    public int getHeaderSize() {
         return HEADER_LENGTH;
     }
 }

@@ -69,7 +69,8 @@ public class IaAddressOption extends SuboptionOption {
         buf.putInt(20, validLifetime);
     }
 
-    @Override protected int getHeaderSize() {
+    @Override
+    public int getHeaderSize() {
         return HEADER_SIZE;
     }
 
