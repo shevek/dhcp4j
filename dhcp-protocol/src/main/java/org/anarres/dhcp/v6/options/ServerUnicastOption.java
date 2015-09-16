@@ -40,7 +40,7 @@ public class ServerUnicastOption extends Dhcp6Option {
     }
 
     public void setIp(@Nonnull final InetAddress address) {
-        Preconditions.checkArgument(address instanceof Inet6Address);
+        Preconditions.checkArgument(address instanceof Inet6Address, "Ipv4 detected: %s", address);
         ByteBuffer buf = ByteBuffer.wrap(getData());
         buf.put(address.getAddress());
     }

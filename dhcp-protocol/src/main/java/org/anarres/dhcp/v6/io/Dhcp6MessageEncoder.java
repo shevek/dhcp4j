@@ -57,18 +57,9 @@ public class Dhcp6MessageEncoder {
     }
 
     public ByteBuffer encode(@Nonnull Dhcp6Options options) {
-        ByteBuffer allOptions = ByteBuffer.allocate(0);
-
-        for (Dhcp6Option option : options) {
-            // Option continuation per RFC3396
-            final ByteBuffer allocate = ByteBuffer.allocate(option.getData().length + 4);
-            encode(allocate, option);
-            allocate.flip();
-            allOptions.flip();
-            allOptions = ByteBuffer.allocate(allOptions.limit() + allocate.limit()).put(allOptions).put(allocate);
-        }
-
-        return allOptions;
+        final ByteBuffer allocate = ByteBuffer.allocate(options.getLength());
+        encode(allocate, options);
+        return allocate;
     }
 
     public void encode(final @Nonnull ByteBuffer byteBuffer, @Nonnull final Dhcp6Option option) {

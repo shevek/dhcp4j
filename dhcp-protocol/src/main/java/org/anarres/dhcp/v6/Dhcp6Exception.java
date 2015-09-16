@@ -140,7 +140,7 @@ public class Dhcp6Exception extends DhcpException {
 
         private static boolean isOptionValue(@Nonnull final Dhcp6Message msg, @Nonnull final Class<? extends Dhcp6Option> optionType,
             @Nonnull final byte[] expectedValue) {
-            final Dhcp6Option dhcp6Option = Preconditions.checkNotNull(msg.getOptions().get(optionType));
+            final Dhcp6Option dhcp6Option = Preconditions.checkNotNull(msg.getOptions().get(optionType), "Option %s missing within: %s", optionType, msg.getOptions());
             return Arrays.equals(dhcp6Option.getData(), expectedValue);
         }
 

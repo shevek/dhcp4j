@@ -423,10 +423,10 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
         }
 
         private void validate() {
-            Preconditions.checkArgument(getPreferredLt() < getValidLt());
-            Preconditions.checkArgument(t1 < t2);
-            Preconditions.checkArgument(t1 < getPreferredLt());
-            Preconditions.checkArgument(t2 < getPreferredLt());
+            Preconditions.checkArgument(getPreferredLt() < getValidLt(), "Preferred lifetime < Valid lifetime");
+            Preconditions.checkArgument(t1 < t2, "T1 < T2");
+            Preconditions.checkArgument(t1 < getPreferredLt(), "T1 < Preferred lifetime");
+            Preconditions.checkArgument(t2 < getPreferredLt(), "T2 < Preferred lifetime");
         }
 
         public int getPreferredLt() {

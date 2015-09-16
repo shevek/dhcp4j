@@ -34,6 +34,8 @@ import javax.annotation.Nullable;
 
 public class Dhcp6Options implements Iterable<Dhcp6Option> {
 
+    public static final Dhcp6Options EMPTY = new Dhcp6Options();
+
     private final ListMultimap<Short, Dhcp6Option> options = LinkedListMultimap.create();
 
     public boolean isEmpty() {
@@ -96,9 +98,9 @@ public class Dhcp6Options implements Iterable<Dhcp6Option> {
      *
      * @param type
      */
-    public void remove(@Nonnull Class<? extends Dhcp6Option> type) {
+    public Collection<Dhcp6Option> removeAll(@Nonnull Class<? extends Dhcp6Option> type) {
         Dhcp6OptionsRegistry registry = Dhcp6OptionsRegistry.getInstance();
-        removeAll(registry.getOptionTag(type));
+        return removeAll(registry.getOptionTag(type));
     }
 
     public Collection<Dhcp6Option> removeAll(final short optionTag) {
@@ -107,10 +109,10 @@ public class Dhcp6Options implements Iterable<Dhcp6Option> {
 
     public void remove(@Nonnull Class<? extends Dhcp6Option> type, Dhcp6Option value) {
         Dhcp6OptionsRegistry registry = Dhcp6OptionsRegistry.getInstance();
-        remove(value, registry.getOptionTag(type));
+        remove(registry.getOptionTag(type), value);
     }
 
-    public boolean remove(final Dhcp6Option value, final short optionTag) {
+    public boolean remove(final short optionTag, final Dhcp6Option value) {
         return options.remove(optionTag, value);
     }
 
@@ -137,7 +139,7 @@ public class Dhcp6Options implements Iterable<Dhcp6Option> {
     public int getLength() {
         int length = 0;
         for (Dhcp6Option dhcp6Option : options.values()) {
-            length = dhcp6Option.getData().length + 4;
+            length += dhcp6Option.getData().length + 4;
         }
 
         return length;

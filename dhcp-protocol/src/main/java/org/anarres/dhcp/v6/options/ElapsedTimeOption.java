@@ -1,6 +1,6 @@
 package org.anarres.dhcp.v6.options;
 
-import java.nio.ByteBuffer;
+import com.google.common.primitives.Shorts;
 
 /**
  * https://tools.ietf.org/html/rfc3315#section-22.9
@@ -17,7 +17,6 @@ public class ElapsedTimeOption extends Dhcp6Option {
     }
 
     public short getElapsedTime() {
-        ByteBuffer buf = ByteBuffer.wrap(getData());
-        return buf.getShort(0);
+        return Shorts.fromByteArray(getData());
     }
 }

@@ -40,7 +40,7 @@ public class VendorClassOption extends Dhcp6Option {
     @Override
     public String toString() {
         final StringBuilder values = new StringBuilder();
-        values.append("preference:");
+        values.append("enterpriseNumber:");
         values.append(getEnterpriseNumber());
         values.append(", vendorClassData:");
         values.append(BaseEncoding.base16().encode(getVendorClassData()));

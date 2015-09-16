@@ -156,6 +156,7 @@ public abstract class AbstractDhcp6Service implements Dhcp6Service {
             }
             }
         } catch (Dhcp6Exception.UnknownMsgException e) {
+            // FIXME Unknown MsgException is never thrown here. Unknown message types need better handling
             reply = handle(requestContext, incomingMsg, e.getMsgType());
         }
 

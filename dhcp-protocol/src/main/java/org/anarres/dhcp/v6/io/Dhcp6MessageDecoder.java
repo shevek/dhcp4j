@@ -4,7 +4,6 @@
  */
 package org.anarres.dhcp.v6.io;
 
-import com.google.common.base.Preconditions;
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.Ints;
 import java.io.IOException;
@@ -58,13 +57,12 @@ public class Dhcp6MessageDecoder {
         final Dhcp6MessageType msgType = getMsgType(buffer);
         LOG.debug("Message type: {}", msgType);
 
-
         Dhcp6Message message;
         if(isRelayedMessage(msgType)) {
             LOG.debug("Message relay");
 
-            message = new Dhcp6RelayMessage();
-            final Dhcp6RelayMessage relayMsg = ((Dhcp6RelayMessage) message);
+            final Dhcp6RelayMessage relayMsg = new Dhcp6RelayMessage();
+            message = relayMsg;
 
             relayMsg.setHopCount(getByte(buffer));
             LOG.debug("Hop count: {}", message.getTransactionId());
@@ -92,7 +90,6 @@ public class Dhcp6MessageDecoder {
     }
 
     private InetAddress getInetAddress(final ByteBuffer bufferm, final byte size) throws Dhcp6Exception {
-        Preconditions.checkArgument(bufferm.remaining() >= size);
         final byte[] ipBytes = new byte[size];
         bufferm.get(ipBytes, bufferm.position(), size);
         try {
@@ -110,7 +107,6 @@ public class Dhcp6MessageDecoder {
      * https://tools.ietf.org/html/rfc3315#section-15.1
      */
     private static int getTxId(final ByteBuffer buffer) {
-        Preconditions.checkArgument(buffer.remaining() > 3);
         final byte[] txBytes = new byte[4];
         buffer.get(txBytes, 1, 3);
         txBytes[0] = 0;
@@ -129,7 +125,6 @@ public class Dhcp6MessageDecoder {
     }
 
     private static byte getByte(final ByteBuffer buffer) {
-        Preconditions.checkArgument(buffer.remaining() >= 1);
         return buffer.get();
     }
 

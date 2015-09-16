@@ -5,7 +5,9 @@
 package org.anarres.dhcp.v6.messages;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import java.net.InetAddress;
+import java.util.Arrays;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.v6.options.Dhcp6Options;
 
@@ -16,22 +18,20 @@ import org.anarres.dhcp.v6.options.Dhcp6Options;
  */
 public class Dhcp6RelayMessage extends Dhcp6Message {
 
-    private Dhcp6MessageType messageType;
+    private static final java.util.EnumSet<Dhcp6MessageType> RELAY_MSG_TYPES = Sets
+        .newEnumSet(Arrays.asList(Dhcp6MessageType.DHCP_RELAY_FORW, Dhcp6MessageType.DHCP_RELAY_REPL),
+            Dhcp6MessageType.class);
+
     private byte hopCount;
     private InetAddress linkAddress;
     private InetAddress peerAddress;
 
     private Dhcp6Options options = new Dhcp6Options();
 
-    @Nonnull
-    public Dhcp6MessageType getMessageType() {
-        return messageType;
-    }
-
     public void setMessageType(@Nonnull Dhcp6MessageType messageType) {
-        Preconditions.checkArgument(messageType == Dhcp6MessageType.DHCP_RELAY_FORW ||
-            messageType == Dhcp6MessageType.DHCP_RELAY_REPL);
-        this.messageType = messageType;
+        Preconditions.checkArgument(RELAY_MSG_TYPES.contains(messageType),
+            "Not a relay type: %s, expected: %s", messageType, RELAY_MSG_TYPES);
+        super.setMessageType(messageType);
     }
 
     public int getTransactionId() {
@@ -78,7 +78,7 @@ public class Dhcp6RelayMessage extends Dhcp6Message {
     @Override public String toString() {
         final StringBuilder sb = new StringBuilder("Dhcp6RelayMessage{");
         sb.append("hopCount=").append(hopCount);
-        sb.append(", messageType=").append(messageType);
+        sb.append(", messageType=").append(getMessageType());
         sb.append(", linkAddress=").append(linkAddress);
         sb.append(", peerAddress=").append(peerAddress);
         sb.append(", options=").append(options);
