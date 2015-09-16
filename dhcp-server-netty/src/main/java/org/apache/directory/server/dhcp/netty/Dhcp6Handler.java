@@ -63,8 +63,6 @@ public class Dhcp6Handler extends SimpleChannelInboundHandler<DatagramPacket> {
             return;
         }
 
-        LOG.debug("Incoming message decoded as: {}", incommingMsg);
-
         final Optional<Dhcp6Message> reply = dhcpService
             .getReplyFor(new Dhcp6RequestContext(msg.sender().getAddress()), incommingMsg);
 

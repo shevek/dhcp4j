@@ -6,7 +6,6 @@
 package org.apache.directory.server.dhcp.netty;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.EventLoop;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -15,17 +14,20 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 import java.io.IOException;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.concurrent.ThreadFactory;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.anarres.dhcp.v6.options.DuidOption;
-import org.anarres.dhcp.v6.service.PooledDhcp6LeaseManager;
 import org.anarres.dhcp.v6.service.Dhcp6LeaseManager;
 import org.anarres.dhcp.v6.service.Dhcp6Service;
 import org.anarres.dhcp.v6.service.LeaseManagerDhcp6Service;
+import org.anarres.dhcp.v6.service.PooledDhcp6LeaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +41,7 @@ public class Dhcp6Server {
 
     private final Dhcp6Service service;
     private final int port;
-    private Channel channel;
+    private NioDatagramChannel channel;
     private static final byte[] SERVER_ID = new byte[] { 0, 1 };
 
     public static void main(String[] args) {
@@ -47,13 +49,13 @@ public class Dhcp6Server {
         final InetAddress endingAddress;
 
         try {
-            startingAddress = Inet6Address.getByName("fe80::a00:27ff:fe4f:7b7e");
-            endingAddress = Inet6Address.getByName("fe80::a00:27ff:fe4f:7b7f");
+            startingAddress = Inet6Address.getByName("fe80::a00:27ff:fe4f:7b7f");
+            endingAddress = Inet6Address.getByName("fe80::a00:27ff:fe4f:7b8f");
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
 
-        final Dhcp6Server dhcp6Server = new Dhcp6Server(new PooledDhcp6LeaseManager(startingAddress,
+        final Dhcp6Server dhcp6Server = new Dhcp6Server(new RPDDhcp6LeaseManager(startingAddress,
             endingAddress, new PooledDhcp6LeaseManager.Lifetimes(50000, 80000, 100000, 150000)), Dhcp6Service.SERVER_PORT, new DuidOption.Duid(new byte[]{1,2}));
         try {
             dhcp6Server.start();
@@ -91,8 +93,19 @@ public class Dhcp6Server {
         b.group(group);
         b.channel(NioDatagramChannel.class);
         b.handler(new Dhcp6Handler(service, SERVER_ID));
-        channel = b.bind(port).sync().channel();
+        channel = (NioDatagramChannel) b.bind(port).sync().channel();
+
         LOG.info("DHCPv6 server started on : {}, with id: {}", channel.localAddress(), SERVER_ID);
+
+        final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+        while(networkInterfaces.hasMoreElements()) {
+            final NetworkInterface netIf = networkInterfaces.nextElement();
+
+            final InetSocketAddress relayGroup = new InetSocketAddress(InetAddress.getByName("FF02::1:2"), port);
+            channel.joinGroup(relayGroup, netIf);
+            final InetSocketAddress serverGroup = new InetSocketAddress(InetAddress.getByName("FF02::1:3"), port);
+            channel.joinGroup(serverGroup, netIf);
+        }
     }
 
     @PreDestroy
