@@ -198,7 +198,8 @@ public abstract class AbstractDhcp6Service implements Dhcp6Service {
 
         filtered.addAll(Iterables.filter(reply.getOptions(), new Predicate<Dhcp6Option>() {
             @Override public boolean apply(final Dhcp6Option input) {
-                return requestedOptions.contains(input.getTag());
+                // keep only requested options + the standard options RFC3315
+                return input.getTag() <= 20 || requestedOptions.contains(input.getTag());
             }
         }));
 

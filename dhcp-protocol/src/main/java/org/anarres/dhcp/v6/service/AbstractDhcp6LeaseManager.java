@@ -269,7 +269,7 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
     @Nonnull
     @Override
     public Dhcp6Message decline(final Dhcp6RequestContext requestContext,
-        final Dhcp6Message incomingMsg, final Dhcp6Message reply) {
+        final Dhcp6Message incomingMsg, final Dhcp6Message reply) throws Dhcp6Exception {
         declineIa(incomingMsg, reply, IaNaOption.class, iaNaRegistry);
         declineIa(incomingMsg, reply, IaTaOption.class, iaTaRegistry);
 
@@ -296,7 +296,8 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
      */
     @Nonnull
     @Override
-    public Dhcp6Message requestInformation(final Dhcp6RequestContext requestContext, final Dhcp6Message incomingMsg, final Dhcp6Message reply) {
+    public Dhcp6Message requestInformation(final Dhcp6RequestContext requestContext, final Dhcp6Message incomingMsg, final Dhcp6Message reply)
+        throws Dhcp6Exception {
         // Add some additional options
         return reply;
     }

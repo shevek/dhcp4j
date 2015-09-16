@@ -1,6 +1,5 @@
 package org.anarres.dhcp.v6.options;
 
-import com.google.common.base.Optional;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.v6.io.Dhcp6MessageEncoder;
@@ -13,6 +12,11 @@ public class VendorSpecificInformationOption extends SuboptionOption {
 
     private static final short TAG = 17;
     private static final int HEADER_SIZE = 4;
+
+    // FIXME this is not a pure suboption option because the suboptions are vendor specific and can use
+    // the same codes as the standard options. If we use the standard parser to parse suboptions here, we might fail horribly because it
+    // will treat vendor specific suboption with code 3 as IaNa option.
+    // We should provide an extensible vendor specific parser to parse vendor specific suboptions. or just parse all vendor specific as unknown.
 
     public void setEnterpriseNumber(int enterpriseNumber) {
         ByteBuffer buf = ByteBuffer.wrap(getData());
@@ -51,13 +55,13 @@ public class VendorSpecificInformationOption extends SuboptionOption {
         return getClass().getSimpleName() + "[" + getTagAsInt() + "]: " + values;
     }
 
-    public static VendorSpecificInformationOption create(@Nonnull final int enterpriseNumber, final Optional<Dhcp6Options> options) {
+    public static VendorSpecificInformationOption create(@Nonnull final int enterpriseNumber, @Nonnull final Dhcp6Options options) {
         final VendorSpecificInformationOption iaNaOption = new VendorSpecificInformationOption();
         int length = HEADER_SIZE;
 
         ByteBuffer encodedOptions = null;
-        if(options.isPresent() && !options.get().isEmpty()) {
-            encodedOptions = Dhcp6MessageEncoder.getInstance().encode(options.get());
+        if(!options.isEmpty()) {
+            encodedOptions = Dhcp6MessageEncoder.getInstance().encode(options);
             length += encodedOptions.limit();
         }
 

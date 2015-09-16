@@ -20,6 +20,7 @@ public abstract class SuboptionOption extends Dhcp6Option {
     public void setOptions(@Nonnull final ByteBuffer options) {
         ByteBuffer buf = ByteBuffer.wrap(getData());
         buf.position(getHeaderSize());
+        options.position(0);
         buf.put(options);
     }
 
