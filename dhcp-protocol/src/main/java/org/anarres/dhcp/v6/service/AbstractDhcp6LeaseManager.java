@@ -38,12 +38,15 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(PooledDhcp6LeaseManager.class);
 
-    private final ClientBindingRegistry iaNaRegistry = new ClientBindingRegistry("IaNa");
-    private final ClientBindingRegistry iaTaRegistry = new ClientBindingRegistry("IaTa");
+    private final ClientBindingRegistry iaNaRegistry;
+    private final ClientBindingRegistry iaTaRegistry;
     private final Lifetimes lifetimes;
 
-    public AbstractDhcp6LeaseManager(@Nonnull final Lifetimes lifetimes) {
+    public AbstractDhcp6LeaseManager(@Nonnull final Lifetimes lifetimes, final ClientBindingRegistry iaNa,
+        final ClientBindingRegistry iaTa) {
         this.lifetimes = lifetimes;
+        iaNaRegistry = iaNa;
+        iaTaRegistry = iaTa;
     }
 
     // TODO add a timer to monitor valid lifetimes of leased addresses. After the valid lifetime has passed, make the address available again.
@@ -60,7 +63,7 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
         return lifetimes;
     }
 
-    @Nonnull
+    @Nullable
     @Override
     public Dhcp6Message lease(final Dhcp6RequestContext requestContext, @Nonnull final Dhcp6Message incomingMsg, @Nonnull final Dhcp6Message reply)
         throws Dhcp6Exception {
@@ -279,9 +282,8 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
 
     @Nullable
     @Override
-    public Dhcp6Message handle(final Dhcp6RequestContext requestContext, final Dhcp6Message incomingMsg,
-        final byte msgType) throws Dhcp6Exception {
-        LOG.warn("Unknown message type detected: {}, Ignoring: {}", msgType, incomingMsg);
+    public Dhcp6Message handle(final Dhcp6RequestContext requestContext, final Dhcp6Message incomingMsg) throws Dhcp6Exception {
+        LOG.warn("Unknown message type detected: {}, Ignoring: {}", incomingMsg.getMessageType(), incomingMsg);
         throw new Dhcp6Exception.UnknownMsgException(incomingMsg.getMessageType().getCode());
     }
 

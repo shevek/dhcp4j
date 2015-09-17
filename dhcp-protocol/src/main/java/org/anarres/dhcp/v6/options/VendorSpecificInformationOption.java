@@ -1,7 +1,10 @@
 package org.anarres.dhcp.v6.options;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.Nonnull;
+import org.anarres.dhcp.v6.io.Dhcp6MessageDecoder;
 import org.anarres.dhcp.v6.io.Dhcp6MessageEncoder;
 import org.apache.directory.server.dhcp.DhcpException;
 
@@ -13,10 +16,23 @@ public class VendorSpecificInformationOption extends SuboptionOption {
     private static final short TAG = 17;
     private static final int HEADER_SIZE = 4;
 
-    // FIXME this is not a pure suboption option because the suboptions are vendor specific and can use
-    // the same codes as the standard options. If we use the standard parser to parse suboptions here, we might fail horribly because it
-    // will treat vendor specific suboption with code 3 as IaNa option.
-    // We should provide an extensible vendor specific parser to parse vendor specific suboptions. or just parse all vendor specific as unknown.
+    /**
+     * Default decoder treats all suboptions as unknown
+     */
+    public static Dhcp6MessageDecoder DEFAULT_DECODER = new Dhcp6MessageDecoder(new Dhcp6OptionsRegistry());
+    public static Map<Integer, Dhcp6MessageDecoder> DECODERS = new HashMap<>();
+
+    /**
+     *
+     * Add vendor specific suboption decoder
+     *
+     * @param enterpriseNumber
+     * @param dhcp6MessageDecoder
+     */
+    public static void addDecoder(final int enterpriseNumber, final Dhcp6MessageDecoder dhcp6MessageDecoder) {
+        // TODO enable multiple option type registries per vendor
+        DECODERS.put(enterpriseNumber, dhcp6MessageDecoder);
+    }
 
     public void setEnterpriseNumber(int enterpriseNumber) {
         ByteBuffer buf = ByteBuffer.wrap(getData());
@@ -37,6 +53,10 @@ public class VendorSpecificInformationOption extends SuboptionOption {
         return TAG;
     }
 
+    @Override protected Dhcp6MessageDecoder getDecoder() {
+        final Dhcp6MessageDecoder specificDecoder = DECODERS.get(getEnterpriseNumber());
+        return specificDecoder == null ? DEFAULT_DECODER : specificDecoder;
+    }
 
     @Override
     public String toString() {
@@ -72,4 +92,5 @@ public class VendorSpecificInformationOption extends SuboptionOption {
         }
         return iaNaOption;
     }
+
 }

@@ -32,8 +32,7 @@ public class Dhcp6MessageDecoder {
     private static final Logger LOG = LoggerFactory.getLogger(Dhcp6MessageDecoder.class);
 
     private static class Inner {
-
-        private static final Dhcp6MessageDecoder INSTANCE = new Dhcp6MessageDecoder();
+        private static final Dhcp6MessageDecoder INSTANCE = new Dhcp6MessageDecoder(Dhcp6OptionsRegistry.getInstance());
     }
 
     @Nonnull
@@ -41,11 +40,14 @@ public class Dhcp6MessageDecoder {
         return Inner.INSTANCE;
     }
 
-    private Dhcp6MessageDecoder() {}
+    private final Dhcp6OptionsRegistry registry;
 
-    private final Dhcp6OptionsRegistry registry = Dhcp6OptionsRegistry.getInstance();
+    public Dhcp6MessageDecoder(final Dhcp6OptionsRegistry registry) {
+        this.registry = registry;
+    }
 
     // TODO make this extensible, right now we fail for every undefined DHCP message
+    // TODO extract option decoder and use just the decoder for VendorSpecificInformationOption like options
 
     /**
      * https://tools.ietf.org/html/rfc3315#section-6
@@ -149,7 +151,7 @@ public class Dhcp6MessageDecoder {
             LOG.trace("Option len: {}", length);
             byte[] value = decodeBytes(message, length);
             final Dhcp6Option option = newOptionInstance(tag, value);
-            LOG.debug("Option: {}", option);
+            LOG.trace("Option: {}", option);
             options.add(option);
         }
 

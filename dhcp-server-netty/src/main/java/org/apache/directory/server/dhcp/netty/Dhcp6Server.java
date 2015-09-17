@@ -12,11 +12,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import java.io.IOException;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
-import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.concurrent.ThreadFactory;
 import javax.annotation.Nonnegative;
@@ -27,7 +25,6 @@ import org.anarres.dhcp.v6.options.DuidOption;
 import org.anarres.dhcp.v6.service.Dhcp6LeaseManager;
 import org.anarres.dhcp.v6.service.Dhcp6Service;
 import org.anarres.dhcp.v6.service.LeaseManagerDhcp6Service;
-import org.anarres.dhcp.v6.service.PooledDhcp6LeaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,29 +40,6 @@ public class Dhcp6Server {
     private final int port;
     private NioDatagramChannel channel;
     private static final byte[] SERVER_ID = new byte[] { 0, 1 };
-
-    public static void main(String[] args) {
-        final InetAddress startingAddress;
-        final InetAddress endingAddress;
-
-        try {
-            startingAddress = Inet6Address.getByName("fe80::a00:27ff:fe4f:7b7f");
-            endingAddress = Inet6Address.getByName("fe80::a00:27ff:fe4f:7b8f");
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
-
-        final Dhcp6Server dhcp6Server = new Dhcp6Server(new RPDDhcp6LeaseManager(startingAddress,
-            endingAddress, new PooledDhcp6LeaseManager.Lifetimes(50000, 80000, 100000, 150000)), Dhcp6Service.SERVER_PORT, new DuidOption.Duid(new byte[]{1,2}));
-        try {
-            dhcp6Server.start();
-            Thread.sleep(50000);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 
     public Dhcp6Server(@Nonnull Dhcp6Service service, @Nonnegative int port) {
         this.service = service;

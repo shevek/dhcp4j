@@ -67,6 +67,14 @@ public class ClientBindingRegistry {
         return sb.toString();
     }
 
+    public static ClientBindingRegistry createForIaNa() {
+        return new ClientBindingRegistry("IaNa");
+    }
+
+    public static ClientBindingRegistry createForIaTa() {
+        return new ClientBindingRegistry("IaTa");
+    }
+
     public static class ClientBinding {
 
         private final int iaId;

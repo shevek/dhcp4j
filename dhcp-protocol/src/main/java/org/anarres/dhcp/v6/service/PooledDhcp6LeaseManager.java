@@ -22,7 +22,7 @@ public class PooledDhcp6LeaseManager extends AbstractDhcp6LeaseManager {
 
     public PooledDhcp6LeaseManager(@Nonnull final InetAddress startingAddress, @Nonnull final InetAddress endingAddress,
         @Nonnull final Lifetimes lifetimes) {
-        super(lifetimes);
+        super(lifetimes, ClientBindingRegistry.createForIaNa(), ClientBindingRegistry.createForIaTa());
         this.startingAddress = startingAddress;
         this.endingAddress = endingAddress;
     }

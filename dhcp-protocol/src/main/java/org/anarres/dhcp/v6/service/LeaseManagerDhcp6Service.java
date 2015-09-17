@@ -46,10 +46,9 @@ public class LeaseManagerDhcp6Service extends AbstractDhcp6Service {
      * Handle message with no specific handler implemented
      */
     @Override @Nullable
-    protected Dhcp6Message handle(final Dhcp6RequestContext requestContext, final Dhcp6Message incomingMsg,
-        final byte msgType) throws Dhcp6Exception {
+    protected Dhcp6Message handle(final Dhcp6RequestContext requestContext, final Dhcp6Message incomingMsg) throws Dhcp6Exception {
         // Delegate full handling of unknown message to lease manager
-        return leaseManager.handle(requestContext, incomingMsg, msgType);
+        return leaseManager.handle(requestContext, incomingMsg);
     }
 
     /**
@@ -143,7 +142,11 @@ public class LeaseManagerDhcp6Service extends AbstractDhcp6Service {
         Dhcp6Message reply = createReply(incomingMsg);
         reply.setMessageType(Dhcp6MessageType.DHCP_ADVERTISE);
 
-        return leaseManager.lease(requestContext, incomingMsg, reply);
+        final Dhcp6Message lease = leaseManager.lease(requestContext, incomingMsg, reply);
+
+        leaseManager.requestInformation(requestContext, incomingMsg, reply);
+
+        return lease;
     }
 
     /**

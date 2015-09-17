@@ -47,6 +47,7 @@ project(':dhcp-protocol') {
 		// compile 'org.codehaus.mojo:animal-sniffer-annotations:1.14'
 		// compile 'dnsjava:dnsjava:2.1.1'
 		compile "org.anarres.jallocator:jallocator:1.0.1"
+		testCompile "org.mockito:mockito-all:1.10.19"
 	}
 }
 

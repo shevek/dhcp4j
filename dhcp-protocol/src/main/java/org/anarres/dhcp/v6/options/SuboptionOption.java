@@ -13,8 +13,16 @@ public abstract class SuboptionOption extends Dhcp6Option {
 
     @Nonnull
     public Dhcp6Options getOptions() throws Dhcp6Exception {
-        Dhcp6MessageDecoder decoder = Dhcp6MessageDecoder.getInstance();
+        Dhcp6MessageDecoder decoder = getDecoder();
         return decoder.decodeOptions(getOptionsRaw());
+    }
+
+    protected Dhcp6MessageDecoder getDecoder() {
+        return Dhcp6MessageDecoder.getInstance();
+    }
+
+    protected Dhcp6MessageEncoder getEncoder() {
+        return Dhcp6MessageEncoder.getInstance();
     }
 
     public void setOptions(@Nonnull final ByteBuffer options) {
@@ -29,7 +37,7 @@ public abstract class SuboptionOption extends Dhcp6Option {
     public void setOptions(@Nonnull final Dhcp6Options options) {
         ByteBuffer buf = ByteBuffer.wrap(getData());
         buf.position(getHeaderSize());
-        Dhcp6MessageEncoder.getInstance().encode(buf, options);
+        getEncoder().encode(buf, options);
     }
 
     @Nonnull protected ByteBuffer getOptionsRaw() {
