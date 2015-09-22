@@ -185,7 +185,7 @@ public abstract class AbstractDynamicLeaseManager extends AbstractLeaseManager {
             InetAddress clientAddress = leaseMac(context, request, clientRequestedAddress, leaseTimeSecs);
             if (clientAddress == null)
                 return null;
-            return newReplyAck(request, MessageType.DHCPACK, clientAddress, leaseTimeSecs);
+            return newReplyAck(request, MessageType.DHCPOFFER, clientAddress, leaseTimeSecs);
         } catch (Exception e) {
             Throwables.propagateIfPossible(e, DhcpException.class);
             throw new DhcpException("Failed to lease for MAC " + request.getHardwareAddress() + ": " + e, e);

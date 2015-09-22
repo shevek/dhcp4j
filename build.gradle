@@ -26,6 +26,7 @@ subprojects {
 	stdmodule {
 		description "A high-performance pure Java DHCP server."
 		author id: 'shevek', name: 'Shevek', email: 'github@anarres.org'
+		author id: 'marosmars', name: 'Maros', email: 'maros.mars@gmail.com'
 		license 'Apache-2.0'
 	}
 
@@ -34,9 +35,9 @@ subprojects {
 		compile 'org.slf4j:slf4j-api:1.7.12'
 	}
 
-	sourceCompatibility = 1.6
+	sourceCompatibility = 1.7
 	animalsniffer {
-		signature = "org.codehaus.mojo.signature:java16:+@signature"
+		signature = "org.codehaus.mojo.signature:java17:+@signature"
 	}
 }
 
@@ -46,6 +47,7 @@ project(':dhcp-protocol') {
 		// compile 'org.codehaus.mojo:animal-sniffer-annotations:1.14'
 		// compile 'dnsjava:dnsjava:2.1.1'
 		compile "org.anarres.jallocator:jallocator:1.0.1"
+		testCompile "org.mockito:mockito-all:1.10.19"
 	}
 }
 

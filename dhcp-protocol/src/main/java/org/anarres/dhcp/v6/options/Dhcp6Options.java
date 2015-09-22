@@ -14,20 +14,29 @@
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  *  KIND, either express or implied.  See the License for the
  *  specific language governing permissions and limitations
- *  under the License. 
+ *  under the License.
  *
  */
 package org.anarres.dhcp.v6.options;
 
-import java.util.HashMap;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ListMultimap;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Dhcp6Options implements Iterable<Dhcp6Option> {
 
-    private final Map<Short, Dhcp6Option> options = new HashMap<Short, Dhcp6Option>();
+    public static final Dhcp6Options EMPTY = new Dhcp6Options();
+
+    private final ListMultimap<Short, Dhcp6Option> options = LinkedListMultimap.create();
 
     public boolean isEmpty() {
         return options.isEmpty();
@@ -38,21 +47,38 @@ public class Dhcp6Options implements Iterable<Dhcp6Option> {
         return options.values().iterator();
     }
 
-    @CheckForNull
-    public <T extends Dhcp6Option> T get(@Nonnull Class<T> type) {
+    @Nonnull
+    public <T extends Dhcp6Option> Iterable<T> getAll(@Nonnull final Class<T> type) {
         Dhcp6OptionsRegistry registry = Dhcp6OptionsRegistry.getInstance();
-        Dhcp6Option option = get(registry.getOptionTag(type));
-        if (option == null)
-            return null;
-        if (type.isInstance(option))
-            return type.cast(option);
-        T impl = Dhcp6OptionsRegistry.newInstance(type);
-        impl.setData(option.getData());
-        return impl;
+        final Iterable<Dhcp6Option> option = get(registry.getOptionTag(type));
+
+        return Iterables.transform(option, new Function<Dhcp6Option, T>() {
+            @Nullable @Override public T apply(final Dhcp6Option input) {
+                if (type.isInstance(input)) {
+                    return type.cast(input);
+                }
+                T impl = Dhcp6OptionsRegistry.newInstance(type);
+                impl.setData(input.getData());
+                return impl;
+            }
+        });
     }
 
     @CheckForNull
-    public Dhcp6Option get(short tag) {
+    public <T extends Dhcp6Option> T get(@Nonnull final Class<T> type) {
+        Dhcp6OptionsRegistry registry = Dhcp6OptionsRegistry.getInstance();
+        final List<Dhcp6Option> dhcp6Options = options.get(registry.getOptionTag(type));
+        Preconditions.checkArgument(dhcp6Options.size() < 2, "Not a singleton option: %s, %s", type, getAll(type));
+
+        if(dhcp6Options.isEmpty()) {
+            return null;
+        }
+
+        return getAll(type).iterator().next();
+    }
+
+    @CheckForNull
+    public Iterable<Dhcp6Option> get(short tag) {
         return options.get(tag);
     }
 
@@ -69,21 +95,25 @@ public class Dhcp6Options implements Iterable<Dhcp6Option> {
 
     /**
      * Remove instances of the given option class.
-     * 
+     *
      * @param type
      */
-    public void remove(@Nonnull Class<? extends Dhcp6Option> type) {
+    public Collection<Dhcp6Option> removeAll(@Nonnull Class<? extends Dhcp6Option> type) {
         Dhcp6OptionsRegistry registry = Dhcp6OptionsRegistry.getInstance();
-        remove(registry.getOptionTag(type));
+        return removeAll(registry.getOptionTag(type));
     }
 
-    /**
-     * Remove options matching the given tag
-     * 
-     * @param tag
-     */
-    public void remove(short tag) {
-        options.remove(tag);
+    public Collection<Dhcp6Option> removeAll(final short optionTag) {
+        return options.removeAll(optionTag);
+    }
+
+    public void remove(@Nonnull Class<? extends Dhcp6Option> type, Dhcp6Option value) {
+        Dhcp6OptionsRegistry registry = Dhcp6OptionsRegistry.getInstance();
+        remove(registry.getOptionTag(type), value);
+    }
+
+    public boolean remove(final short optionTag, final Dhcp6Option value) {
+        return options.remove(optionTag, value);
     }
 
     /**
@@ -96,5 +126,22 @@ public class Dhcp6Options implements Iterable<Dhcp6Option> {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "(" + options.values() + ")";
+    }
+
+    public boolean contains(@Nonnull final Class<? extends Dhcp6Option> type) {
+        return options.get(Dhcp6OptionsRegistry.getInstance().getOptionTag(type)).isEmpty();
+    }
+
+    /**
+     *
+     * @return total length of all options
+     */
+    public int getLength() {
+        int length = 0;
+        for (Dhcp6Option dhcp6Option : options.values()) {
+            length += dhcp6Option.getData().length + 4;
+        }
+
+        return length;
     }
 }

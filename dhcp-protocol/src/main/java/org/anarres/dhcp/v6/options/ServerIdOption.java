@@ -17,4 +17,8 @@ public class ServerIdOption extends DuidOption {
     public short getTag() {
         return TAG;
     }
+
+    @Override public String toString() {
+        return super.toString();
+    }
 }

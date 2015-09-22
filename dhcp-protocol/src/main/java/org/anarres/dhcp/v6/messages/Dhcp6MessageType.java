@@ -70,9 +70,11 @@ public enum Dhcp6MessageType {
 
     @Nonnull
     public static Dhcp6MessageType forTypeCode(byte type) {
-        for (Dhcp6MessageType mt : Dhcp6MessageType.values())
-            if (type == mt.getCode())
+        for (Dhcp6MessageType mt : Dhcp6MessageType.values()) {
+            if (type == mt.getCode()) {
                 return mt;
+            }
+        }
         return DHCP_UNRECOGNIZED;
     }
 }

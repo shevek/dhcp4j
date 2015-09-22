@@ -49,4 +49,12 @@ public class Dhcp6Message {
         sb.append(messageType).append(": tx=").append(transactionId).append(", options=").append(options);
         return sb.toString();
     }
+
+    /**
+     *
+     * @return total length of this message (4 + options length)
+     */
+    public int getLength() {
+        return 4 /*type + txID*/ + getOptions().getLength();
+    }
 }
