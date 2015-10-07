@@ -16,11 +16,10 @@ import io.netty.channel.socket.DatagramPacket;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.v6.Dhcp6Exception;
-import org.anarres.dhcp.v6.io.Dhcp6RequestContext;
 import org.anarres.dhcp.v6.io.Dhcp6MessageDecoder;
 import org.anarres.dhcp.v6.io.Dhcp6MessageEncoder;
+import org.anarres.dhcp.v6.io.Dhcp6RequestContext;
 import org.anarres.dhcp.v6.messages.Dhcp6Message;
-import org.anarres.dhcp.v6.options.ServerIdOption;
 import org.anarres.dhcp.v6.service.Dhcp6Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +41,6 @@ public class Dhcp6Handler extends SimpleChannelInboundHandler<DatagramPacket> {
     public Dhcp6Handler(@Nonnull Dhcp6Service dhcpService, @Nonnull final byte[] serverDuid) {
         this.dhcpService = dhcpService;
         Preconditions.checkArgument(serverDuid.length == 2); // https://tools.ietf.org/html/rfc3315#section-9.1
-        final ServerIdOption serverId = new ServerIdOption();
-        serverId.setDuid(serverDuid);
 
         dhcp6MessageDecoder = Dhcp6MessageDecoder.getInstance();
         dhcp6MessageEncoder = Dhcp6MessageEncoder.getInstance();

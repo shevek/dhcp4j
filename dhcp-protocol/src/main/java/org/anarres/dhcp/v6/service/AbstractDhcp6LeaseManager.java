@@ -233,7 +233,7 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
         final Dhcp6Message reply) {
         releaseIa(incomingMsg, reply, IaNaOption.class, iaNaRegistry);
         releaseIa(incomingMsg, reply, IaTaOption.class, iaTaRegistry);
-
+        reply.getOptions().add(StatusCodeOption.create(StatusCodeOption.SUCCESS));
         return reply;
     }
 
@@ -260,8 +260,6 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
                 reply.getOptions().add(copy);
             }
         }
-
-        reply.getOptions().add(StatusCodeOption.create(StatusCodeOption.SUCCESS));
 
         return removedBindings;
     }

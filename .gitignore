@@ -4,3 +4,7 @@ build
 .nb-gradle
 .idea
 *.iml
+.project
+.settings
+bin
+.classpath
