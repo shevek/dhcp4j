@@ -143,7 +143,7 @@ public abstract class AbstractDhcp6Service implements Dhcp6Service {
         case DHCP_REPLY: {}
         // https://tools.ietf.org/html/rfc3315#section-15.11
         case DHCP_RECONFIGURE: {}
-        // https://tools.ietf.org/html/rfc3315#section-15.13
+        // https://tools.ietf.org/html/rfc3315#section-15.14
         case DHCP_RELAY_REPL: {}
         // https://tools.ietf.org/html/rfc3315#section-15.3
         case DHCP_ADVERTISE: {

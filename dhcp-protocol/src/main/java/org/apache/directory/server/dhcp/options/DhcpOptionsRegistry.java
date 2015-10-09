@@ -96,28 +96,38 @@ import org.apache.directory.server.dhcp.options.vendor.MeritDumpFile;
 import org.apache.directory.server.dhcp.options.vendor.NameServers;
 import org.apache.directory.server.dhcp.options.vendor.NetwareDomainName;
 import org.apache.directory.server.dhcp.options.vendor.NetwareOptions;
+import org.apache.directory.server.dhcp.options.vendor.PCode;
 import org.apache.directory.server.dhcp.options.vendor.ResourceLocationServers;
 import org.apache.directory.server.dhcp.options.vendor.RootPath;
 import org.apache.directory.server.dhcp.options.vendor.Routers;
 import org.apache.directory.server.dhcp.options.vendor.ServiceScope;
 import org.apache.directory.server.dhcp.options.vendor.SubnetMask;
 import org.apache.directory.server.dhcp.options.vendor.SwapServer;
+import org.apache.directory.server.dhcp.options.vendor.TCode;
 import org.apache.directory.server.dhcp.options.vendor.TimeOffset;
 import org.apache.directory.server.dhcp.options.vendor.TimeServers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * See http://www.iana.org/assignments/bootp-dhcp-parameters/bootp-dhcp-parameters.xhtml#options
  *
  * @author shevek
+ * @author marekgr
  */
+@SuppressWarnings("deprecation")
 public class DhcpOptionsRegistry {
 
+    private static final Logger LOG = LoggerFactory.getLogger(DhcpOptionsRegistry.class);
+
+    @SuppressWarnings("unchecked")
     private static class Inner {
 
         private static final DhcpOptionsRegistry INSTANCE = new DhcpOptionsRegistry();
         /**
          * An array of concrete implementations of DhcpOption.
          */
+        @SuppressWarnings({ "rawtypes" })
         private static final Class OPTION_CLASSES[] = {
             AllSubnetsAreLocal.class,
             ArpCacheTimeout.class,
@@ -171,6 +181,7 @@ public class DhcpOptionsRegistry {
             ParameterRequestList.class,
             PathMtuAgingTimeout.class,
             PathMtuPlateauTable.class,
+            PCode.class,
             PerformMaskDiscovery.class,
             PerformRouterDiscovery.class,
             PolicyFilter.class,
@@ -199,6 +210,7 @@ public class DhcpOptionsRegistry {
             StreetTalkServers.class,
             SubnetMask.class,
             SwapServer.class,
+            TCode.class,
             TcpDefaultTimeToLive.class,
             TcpKeepaliveGarbage.class,
             TcpKeepaliveInterval.class,
@@ -265,7 +277,7 @@ public class DhcpOptionsRegistry {
         Byte tag = optionTags.get(type);
         if (tag != null)
             return tag.byteValue();
-        // TODO: Warn about unregistered option.
+        LOG.warn("Unregistered option type: {}", type);
         return getTagFrom(type);
     }
 

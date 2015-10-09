@@ -19,20 +19,23 @@
  */
 package org.apache.directory.server.dhcp.options.vendor;
 
-import org.apache.directory.server.dhcp.options.AddressOption;
+import org.apache.directory.server.dhcp.options.IntOption;
 
 /**
- * The time offset field specifies the offset of the client's subnet in
- * seconds from Coordinated Universal Time (UTC).  The offset is
- * expressed as a two's complement 32-bit integer.  A positive offset
- * indicates a location east of the zero meridian and a negative offset
- * indicates a location west of the zero meridian.
+ * The time offset field specifies the offset of the client's subnet in seconds from Coordinated Universal Time (UTC).
+ * The offset is expressed as a two's complement 32-bit integer. A positive offset indicates a location east of the zero
+ * meridian and a negative offset indicates a location west of the zero meridian. <br>
+ * <br>
+ * The code for the time offset option is 2, and its length is 4 octets. <br>
+ * <br>
  * 
- * The code for the time offset option is 2, and its length is 4 octets.
- *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
+ * @author marekgr
+ * @deprecated use {@link PCode} and {@link TCode} instead. For DHCPv6 use equivalent options defined in
+ *             <a href="http://tools.ietf.org/html/rfc4833">RFC 4833</a>.
  */
-public class TimeOffset extends AddressOption {
+@Deprecated
+public class TimeOffset extends IntOption {
     /*
      * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()
      */

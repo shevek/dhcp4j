@@ -9,25 +9,32 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * See http://www.iana.org/assignments/bootp-dhcp-parameters/bootp-dhcp-parameters.xhtml#options
  *
- * @author shevek, marosmars
+ * @author shevek
+ * @author marosmars
+ * @author marekgr
  */
 public class Dhcp6OptionsRegistry {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Dhcp6OptionsRegistry.class);
+
+    @SuppressWarnings("unchecked")
     private static class Inner {
 
         private static final Dhcp6OptionsRegistry INSTANCE = new Dhcp6OptionsRegistry();
 
-        private static final Class OPTION_CLASSES[] = {
-            IaNaOption.class, ClientIdOption.class, ServerIdOption.class,
-            ElapsedTimeOption.class, IaTaOption.class, IaAddressOption.class,
-            OptionRequestOption.class, StatusCodeOption.class, RelayMessageOption.class,
-            PreferenceOption.class, InterfaceIdOption.class, ServerUnicastOption.class,
-            UserClassOption.class, VendorClassOption.class, VendorSpecificInformationOption.class
-        };
+        @SuppressWarnings("rawtypes")
+        private static final Class OPTION_CLASSES[] = { IaNaOption.class, ClientIdOption.class, ServerIdOption.class,
+                        ElapsedTimeOption.class, IaTaOption.class, IaAddressOption.class, NewPOSIXTimezone.class,
+                        NewTZDBTimezone.class, OptionRequestOption.class, StatusCodeOption.class,
+                        RelayMessageOption.class, PreferenceOption.class, InterfaceIdOption.class,
+                        ServerUnicastOption.class, UserClassOption.class, VendorClassOption.class,
+                        VendorSpecificInformationOption.class };
 
         static {
             for (Class<? extends Dhcp6Option> optionType : OPTION_CLASSES) {
@@ -81,7 +88,7 @@ public class Dhcp6OptionsRegistry {
         Short tag = optionTypes.inverse().get(type);
         if (tag != null)
             return tag;
-        // TODO: Warn about unregistered option.
+        LOG.warn("Unregistered option type: {}", type);
         return getTagFrom(type);
     }
 

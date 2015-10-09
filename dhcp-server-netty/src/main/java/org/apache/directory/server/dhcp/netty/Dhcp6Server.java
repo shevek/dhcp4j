@@ -39,7 +39,8 @@ public class Dhcp6Server {
     private final Dhcp6Service service;
     private final int port;
     private NioDatagramChannel channel;
-    private static final byte[] SERVER_ID = new byte[] { 0, 1 };
+    private static final byte[] SERVER_ID = new byte[] { 0, 1 }; // TODO invalid type code
+    // see https://tools.ietf.org/html/rfc3315#section-9.2
 
     public Dhcp6Server(@Nonnull Dhcp6Service service, @Nonnegative int port) {
         this.service = service;
@@ -72,7 +73,7 @@ public class Dhcp6Server {
         LOG.info("DHCPv6 server started on : {}, with id: {}", channel.localAddress(), SERVER_ID);
 
         final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-        while(networkInterfaces.hasMoreElements()) {
+        while (networkInterfaces.hasMoreElements()) {
             final NetworkInterface netIf = networkInterfaces.nextElement();
 
             final InetSocketAddress relayGroup = new InetSocketAddress(InetAddress.getByName("FF02::1:2"), port);
