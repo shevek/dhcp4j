@@ -29,10 +29,12 @@ public class LeaseManagerDhcp6Service extends AbstractDhcp6Service {
 
     /**
      *
-     * @param leaseManager lease managing delegate
-     * @param serverId ServerIdOption
-     * @param serverUnicastAddress this server's address to be placed into server unicast option to
-     *                             allow unicast messages from clients
+     * @param leaseManager
+     *            lease managing delegate
+     * @param serverId
+     *            ServerIdOption
+     * @param serverUnicastAddress
+     *            this server's address to be placed into server unicast option to allow unicast messages from clients
      */
     public LeaseManagerDhcp6Service(@Nonnull final Dhcp6LeaseManager leaseManager, @Nonnull final DuidOption.Duid serverId, @Nonnull final
         InetAddress serverUnicastAddress) {
@@ -80,7 +82,7 @@ public class LeaseManagerDhcp6Service extends AbstractDhcp6Service {
 
         final Dhcp6Message lease = leaseManager.lease(requestContext, incomingMsg, reply);
 
-        //The server includes other options containing configuration
+        // The server includes other options containing configuration
         // information to be returned to the client as described in section 18.2.
         leaseManager.requestInformation(requestContext, incomingMsg, lease);
 
@@ -96,7 +98,7 @@ public class LeaseManagerDhcp6Service extends AbstractDhcp6Service {
 
         final Dhcp6Message renew = leaseManager.renew(requestContext, incomingMsg, reply);
 
-        //The server includes other options containing configuration
+        // The server includes other options containing configuration
         // information to be returned to the client as described in section 18.2.
         leaseManager.requestInformation(requestContext, incomingMsg, renew);
 
@@ -106,13 +108,14 @@ public class LeaseManagerDhcp6Service extends AbstractDhcp6Service {
     /**
      * https://tools.ietf.org/html/rfc3315#section-18.2.3
      */
-    @Override protected Dhcp6Message rebind(final Dhcp6RequestContext requestContext, final Dhcp6Message incomingMsg)
+    @Override
+    protected Dhcp6Message rebind(final Dhcp6RequestContext requestContext, final Dhcp6Message incomingMsg)
         throws Dhcp6Exception {
         Dhcp6Message reply = createReply(incomingMsg);
 
         final Dhcp6Message rebind = leaseManager.rebind(requestContext, incomingMsg, reply);
 
-        //The server includes other options containing configuration
+        // The server includes other options containing configuration
         // information to be returned to the client as described in section 18.2.
         leaseManager.requestInformation(requestContext, incomingMsg, reply);
 
@@ -122,12 +125,12 @@ public class LeaseManagerDhcp6Service extends AbstractDhcp6Service {
     /**
      * https://tools.ietf.org/html/rfc3315#section-18.2.5
      */
-    @Override protected Dhcp6Message requestInformation(final Dhcp6RequestContext requestContext,
-        final Dhcp6Message incomingMsg)
+    @Override
+    protected Dhcp6Message requestInformation(final Dhcp6RequestContext requestContext, final Dhcp6Message incomingMsg)
         throws Dhcp6Exception {
         Dhcp6Message reply = createGenericReply(incomingMsg, Dhcp6MessageType.DHCP_REPLY);
 
-        if(incomingMsg.getOptions().contains(ClientIdOption.class)) {
+        if (incomingMsg.getOptions().contains(ClientIdOption.class)) {
             reply.getOptions().add(incomingMsg.getOptions().get(ClientIdOption.class));
         }
 
@@ -137,12 +140,17 @@ public class LeaseManagerDhcp6Service extends AbstractDhcp6Service {
     /**
      * https://tools.ietf.org/html/rfc3315#section-17.2.2
      */
-    @Override protected Dhcp6Message advertise(final Dhcp6RequestContext requestContext, final Dhcp6Message incomingMsg)
+    @Override
+    protected Dhcp6Message advertise(final Dhcp6RequestContext requestContext, final Dhcp6Message incomingMsg)
         throws Dhcp6Exception {
         Dhcp6Message reply = createReply(incomingMsg);
         reply.setMessageType(Dhcp6MessageType.DHCP_ADVERTISE);
 
         final Dhcp6Message lease = leaseManager.lease(requestContext, incomingMsg, reply);
+
+        // TODO https://tools.ietf.org/html/rfc3315#section-17.2.2 paragraph 6
+        // If the server will not assign any addresses to any IAs in a
+        // SUBSEQUENT Request from the client the server MUST send an Advertise with NoAddrsAvail status.
 
         leaseManager.requestInformation(requestContext, incomingMsg, reply);
 
@@ -159,7 +167,8 @@ public class LeaseManagerDhcp6Service extends AbstractDhcp6Service {
         return leaseManager.confirm(requestContext, incomingMsg, reply);
     }
 
-    @Override protected ServerIdOption getServerId() {
+    @Override
+    protected ServerIdOption getServerId() {
         return serverId;
     }
 }

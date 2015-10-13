@@ -1,6 +1,7 @@
 package org.anarres.dhcp.v6.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
@@ -32,7 +33,7 @@ public abstract class AbstractDhcp6LeaseManagerTest {
     protected ClientIdOption clientId;
     protected ServerIdOption serverId;
     protected Dhcp6LeaseManager leaseManager;
-    private Dhcp6RequestContext requestContext;
+    protected Dhcp6RequestContext requestContext;
     protected InetAddress localHost;
 
     @Before
@@ -48,8 +49,17 @@ public abstract class AbstractDhcp6LeaseManagerTest {
 
     protected abstract Dhcp6LeaseManager getLeaseManagerInstance() throws UnknownHostException;
 
-    protected <T extends Dhcp6Option> void assertSingle(Dhcp6Options options, @Nonnull final Class<T> type) {
+    protected <T extends Dhcp6Option> void assertSingle(@Nonnull Dhcp6Options options, @Nonnull final Class<T> type) {
         assertEquals(1, Iterables.size(options.getAll(type)));
+    }
+
+    protected void assertStatusEquals(@Nonnull Dhcp6Options options, short statusCode) {
+        assertEquals(1, Iterables.size(options.getAll(StatusCodeOption.class)));
+        assertEquals(statusCode, options.get(StatusCodeOption.class).getStatusCode());
+    }
+
+    protected <T extends Dhcp6Option> void assertAppearedNTimes(Dhcp6Options options, @Nonnull final Class<T> type, final int N) {
+        assertEquals(N, Iterables.size(options.getAll(type)));
     }
 
     protected Dhcp6Message createDhcp6Message(@Nonnull Dhcp6MessageType messageType, Dhcp6Option... options) {
@@ -76,8 +86,7 @@ public abstract class AbstractDhcp6LeaseManagerTest {
         response = leaseManager.release(requestContext, request, new Dhcp6Message());
 
         responseOptions = response.getOptions();
-        assertSingle(responseOptions, StatusCodeOption.class);
-        assertEquals(StatusCodeOption.SUCCESS, responseOptions.get(StatusCodeOption.class).getStatusCode());
+        assertStatusEquals(response.getOptions(), StatusCodeOption.SUCCESS);
     }
 
     @Test
@@ -92,14 +101,12 @@ public abstract class AbstractDhcp6LeaseManagerTest {
         Dhcp6Message response = leaseManager.release(requestContext, request, new Dhcp6Message());
 
         Dhcp6Options responseOptions = response.getOptions();
-        assertSingle(responseOptions, StatusCodeOption.class);
-        assertEquals(StatusCodeOption.SUCCESS, responseOptions.get(StatusCodeOption.class).getStatusCode());
+        assertStatusEquals(response.getOptions(), StatusCodeOption.SUCCESS);
 
-        IaNaOption iaNaOption = responseOptions.get(IaNaOption.class);
+        final IaNaOption iaNaOption = responseOptions.get(IaNaOption.class);
+        assertNotNull(iaNaOption);
         assertEquals(iaId2, iaNaOption.getIAID());
-        Dhcp6Options options = iaNaOption.getOptions();
-        StatusCodeOption statusCodeOption = options.get(StatusCodeOption.class);
-        assertEquals(StatusCodeOption.NO_BINDING, statusCodeOption.getStatusCode());
+        assertStatusEquals(iaNaOption.getOptions(), StatusCodeOption.NO_BINDING);
     }
 
 }

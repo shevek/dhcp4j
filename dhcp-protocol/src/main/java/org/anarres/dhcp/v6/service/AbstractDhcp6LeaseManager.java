@@ -43,13 +43,14 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
     private final Lifetimes lifetimes;
 
     public AbstractDhcp6LeaseManager(@Nonnull final Lifetimes lifetimes, final ClientBindingRegistry iaNa,
-        final ClientBindingRegistry iaTa) {
+                    final ClientBindingRegistry iaTa) {
         this.lifetimes = lifetimes;
         iaNaRegistry = iaNa;
         iaTaRegistry = iaTa;
     }
 
-    // TODO add a timer to monitor valid lifetimes of leased addresses. After the valid lifetime has passed, make the address available again.
+    // TODO add a timer to monitor valid lifetimes of leased addresses. After the valid lifetime has passed, make the
+    // address available again.
 
     protected ClientBindingRegistry getIaNaRegistry() {
         return iaNaRegistry;
@@ -79,14 +80,26 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
 
         final DuidOption.Duid clientId = getClientId(incomingMsg);
         for (T incomingIaOption : incomingMsg.getOptions().getAll(iaType)) {
-            LOG.debug("Client {} requested IA:{} for {}. IA option: {}", clientId, iaRegistry, incomingIaOption.getIAID(), incomingIaOption);
+            LOG.debug("Client {} requested IA:{} for {}. IA option: {}", clientId, iaRegistry,
+                            incomingIaOption.getIAID(), incomingIaOption);
+
             final Dhcp6Options iaResponseOptions = new Dhcp6Options();
-            final IaAddressOption option;
 
-            option = wrapIp(clientId, incomingIaOption, iaRegistry,
-                getIp(requestContext, clientId, incomingIaOption, iaRegistry));
-
-            iaResponseOptions.add(option);
+            InetAddress ip = getIp(requestContext, clientId, incomingIaOption, iaRegistry);
+            if (ip != null) {
+                // For any IAs to which the server can assign addresses, the server
+                // includes the IA with addresses and other configuration parameters,
+                // and records the IA as a new client binding.
+                final IaAddressOption option = wrapIp(clientId, incomingIaOption, iaRegistry,
+                                getIp(requestContext, clientId, incomingIaOption, iaRegistry));
+                iaResponseOptions.add(option);
+            } else {
+                // If the server cannot assign any addresses to an IA in the message
+                // from the client, the server MUST include the IA in the Reply message
+                // with no addresses in the IA and a Status Code option in the IA
+                // containing status code NoAddrsAvail.
+                iaResponseOptions.add(StatusCodeOption.create(StatusCodeOption.NO_ADDRS_AVAIL));
+            }
             final T copy = createIaOption(iaType, incomingIaOption, iaResponseOptions);
 
             reply.getOptions().add(copy);
@@ -125,10 +138,11 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
             final Dhcp6Options iaResponseOptions = new Dhcp6Options();
             final Dhcp6Option option;
 
-            if(iaRegistry.contains(clientId, incomingIaOption.getIAID())) {
+            if (iaRegistry.contains(clientId, incomingIaOption.getIAID())) {
                 option = renewIAInstance(requestContext, iaRegistry, clientId, incomingIaOption, "renews");
             } else {
-                LOG.debug("Client {} renews UNKNOWN IA:{} for {}. IA option: {}", clientId, iaRegistry, incomingIaOption.getIAID(), incomingIaOption);
+                LOG.debug("Client {} renews UNKNOWN IA:{} for {}. IA option: {}", clientId, iaRegistry,
+                                incomingIaOption.getIAID(), incomingIaOption);
                 option = StatusCodeOption.create(StatusCodeOption.NO_BINDING);
             }
 
@@ -140,7 +154,7 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
     }
 
     private <T extends IaOption> void setTimeParameters(final T copy) {
-        if(copy instanceof TimedOption) {
+        if (copy instanceof TimedOption) {
             ((TimedOption) copy).setT1(lifetimes.getT1());
             ((TimedOption) copy).setT2(lifetimes.getT2());
         }
@@ -153,23 +167,27 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
         final Dhcp6Option option;
         LOG.debug("Client {} {} IA:{} for {}. IA option: {}", clientId, type, iaRegistry, incomingIaOption.getIAID(), incomingIaOption);
         // FIXME what if the address from client does not match address stored for the client on server ?
+        // should it return NO_BINDING or UNSPEC_FAIL?
         final InetAddress ip = iaRegistry.get(clientId, incomingIaOption.getIAID()).getIp();
 
         final Iterable<InetAddress> addressesFromIa = getAddressesFromIa(incomingIaOption);
 
         // Check whether client provided at least one address for IA
-        if(Iterables.isEmpty(addressesFromIa)) {
+        if (Iterables.isEmpty(addressesFromIa)) {
             LOG.warn("Client {} {} IA:{} for {}. IA option: {}. No address present", clientId, type, iaRegistry,
-                incomingIaOption.getIAID(), incomingIaOption);
+                            incomingIaOption.getIAID(), incomingIaOption);
         }
 
-        // FIXME can the client request renew with a single IaNa option containing multiple addresses ? according to RFC this is possible
+        // FIXME can the client request renew with a single IaNa option containing multiple addresses ? according to RFC
+        // this is possible
         // but it is real ? how would client have multiple addresses for a single Ia ?
+        // for example see http://serverfault.com/questions/312221/can-a-single-network-card-have-2-ip-addresses
 
         // Check whether client provided the same address as is assigned to it
         final InetAddress ipFromClient = Iterables.getFirst(addressesFromIa, null);
-        if(!ipFromClient.equals(ip)) {
-            LOG.warn("Client {} {} UNKNOWN address:{} vs {}, IA:{} for {}.", clientId, type, ipFromClient, ip, iaRegistry, incomingIaOption.getIAID());
+        if (!ipFromClient.equals(ip)) {
+            LOG.warn("Client {} {} UNKNOWN address:{} vs {}, IA:{} for {}.", clientId, type, ipFromClient, ip,
+                            iaRegistry, incomingIaOption.getIAID());
         }
 
         option = wrapIp(clientId, incomingIaOption, iaRegistry, ip);
@@ -210,7 +228,7 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
             final Dhcp6Options iaResponseOptions = new Dhcp6Options();
             final Dhcp6Option option;
 
-            if(iaRegistry.contains(clientId, incomingIaOption.getIAID())) {
+            if (iaRegistry.contains(clientId, incomingIaOption.getIAID())) {
                 option = renewIAInstance(requestContext, iaRegistry, clientId, incomingIaOption, "rebinds");
             } else {
                 LOG.debug("Client {} rebinds UNKNOWN IA:{} for {}. IA option: {}", clientId, iaRegistry, incomingIaOption.getIAID(), incomingIaOption);
@@ -342,7 +360,7 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
         for (IaOption incomingIaOption : incomingMsg.getOptions().getAll(iaType)) {
             LOG.debug("Client {} confirming IA:{} for {}. IA option: {}", clientId, iaRegistry, incomingIaOption.getIAID(), incomingIaOption);
 
-            if(iaRegistry.contains(clientId, incomingIaOption.getIAID())) {
+            if (iaRegistry.contains(clientId, incomingIaOption.getIAID())) {
                 final Iterable<InetAddress> addresses = getAddressesFromIa(incomingIaOption);
 
                 //or there were no addresses in any of the IAs sent by the client, the server MUST NOT send a reply to the client.
@@ -391,7 +409,7 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
     private InetAddress getIp(final Dhcp6RequestContext requestContext, final DuidOption.Duid clientId, final IaOption incomingIaNaOption,
         final ClientBindingRegistry iaRegistry) throws Dhcp6Exception {
         final InetAddress ip;
-        if(iaRegistry.contains(clientId, incomingIaNaOption.getIAID())) {
+        if (iaRegistry.contains(clientId, incomingIaNaOption.getIAID())) {
             ip = iaRegistry.get(clientId, incomingIaNaOption.getIAID()).getIp();
         } else {
             ip = newIp(requestContext, clientId, incomingIaNaOption);

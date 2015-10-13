@@ -8,12 +8,16 @@ import org.anarres.dhcp.v6.Dhcp6Exception;
 import org.anarres.dhcp.v6.io.Dhcp6RequestContext;
 import org.anarres.dhcp.v6.options.DuidOption;
 import org.anarres.dhcp.v6.options.IaOption;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Basic implementation of a lease manager providing IPs from an IP pool
  */
 @Beta
 public class PooledDhcp6LeaseManager extends AbstractDhcp6LeaseManager {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PooledDhcp6LeaseManager.class);
 
     private final InetAddress startingAddress;
     private final InetAddress endingAddress;
@@ -44,12 +48,14 @@ public class PooledDhcp6LeaseManager extends AbstractDhcp6LeaseManager {
         throws Dhcp6Exception {
         // Client provided address hints
         final Iterable<InetAddress> requestedAddresses = getAddressesFromIa(iaOption);
-
+        // TODO try to use hints in address allocation
+        
         // Warning, this is highly inefficient
         InetAddress current = startingAddress;
         while (true) {
             if(current.equals(endingAddress)) {
-                throw new IllegalStateException("IP pool exhausted");
+                LOG.warn("IP pool exhausted");
+                return null;
             }
 
             if(!getIaNaRegistry().containsIp(current) && !getIaTaRegistry().containsIp(current)) {

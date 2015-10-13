@@ -129,7 +129,7 @@ public class Dhcp6Options implements Iterable<Dhcp6Option> {
     }
 
     public boolean contains(@Nonnull final Class<? extends Dhcp6Option> type) {
-        return options.get(Dhcp6OptionsRegistry.getInstance().getOptionTag(type)).isEmpty();
+        return !options.get(Dhcp6OptionsRegistry.getInstance().getOptionTag(type)).isEmpty();
     }
 
     /**
