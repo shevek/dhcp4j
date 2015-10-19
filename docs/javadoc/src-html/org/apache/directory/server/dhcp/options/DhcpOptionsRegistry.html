@@ -104,184 +104,196 @@
 <span class="sourceLineNo">096</span>import org.apache.directory.server.dhcp.options.vendor.NameServers;<a name="line.96"></a>
 <span class="sourceLineNo">097</span>import org.apache.directory.server.dhcp.options.vendor.NetwareDomainName;<a name="line.97"></a>
 <span class="sourceLineNo">098</span>import org.apache.directory.server.dhcp.options.vendor.NetwareOptions;<a name="line.98"></a>
-<span class="sourceLineNo">099</span>import org.apache.directory.server.dhcp.options.vendor.ResourceLocationServers;<a name="line.99"></a>
-<span class="sourceLineNo">100</span>import org.apache.directory.server.dhcp.options.vendor.RootPath;<a name="line.100"></a>
-<span class="sourceLineNo">101</span>import org.apache.directory.server.dhcp.options.vendor.Routers;<a name="line.101"></a>
-<span class="sourceLineNo">102</span>import org.apache.directory.server.dhcp.options.vendor.ServiceScope;<a name="line.102"></a>
-<span class="sourceLineNo">103</span>import org.apache.directory.server.dhcp.options.vendor.SubnetMask;<a name="line.103"></a>
-<span class="sourceLineNo">104</span>import org.apache.directory.server.dhcp.options.vendor.SwapServer;<a name="line.104"></a>
-<span class="sourceLineNo">105</span>import org.apache.directory.server.dhcp.options.vendor.TimeOffset;<a name="line.105"></a>
-<span class="sourceLineNo">106</span>import org.apache.directory.server.dhcp.options.vendor.TimeServers;<a name="line.106"></a>
-<span class="sourceLineNo">107</span><a name="line.107"></a>
-<span class="sourceLineNo">108</span>/**<a name="line.108"></a>
-<span class="sourceLineNo">109</span> * See http://www.iana.org/assignments/bootp-dhcp-parameters/bootp-dhcp-parameters.xhtml#options<a name="line.109"></a>
-<span class="sourceLineNo">110</span> *<a name="line.110"></a>
-<span class="sourceLineNo">111</span> * @author shevek<a name="line.111"></a>
-<span class="sourceLineNo">112</span> */<a name="line.112"></a>
-<span class="sourceLineNo">113</span>public class DhcpOptionsRegistry {<a name="line.113"></a>
-<span class="sourceLineNo">114</span><a name="line.114"></a>
-<span class="sourceLineNo">115</span>    private static class Inner {<a name="line.115"></a>
-<span class="sourceLineNo">116</span><a name="line.116"></a>
-<span class="sourceLineNo">117</span>        private static final DhcpOptionsRegistry INSTANCE = new DhcpOptionsRegistry();<a name="line.117"></a>
-<span class="sourceLineNo">118</span>        /**<a name="line.118"></a>
-<span class="sourceLineNo">119</span>         * An array of concrete implementations of DhcpOption.<a name="line.119"></a>
-<span class="sourceLineNo">120</span>         */<a name="line.120"></a>
-<span class="sourceLineNo">121</span>        private static final Class OPTION_CLASSES[] = {<a name="line.121"></a>
-<span class="sourceLineNo">122</span>            AllSubnetsAreLocal.class,<a name="line.122"></a>
-<span class="sourceLineNo">123</span>            ArpCacheTimeout.class,<a name="line.123"></a>
-<span class="sourceLineNo">124</span>            BootfileName.class,<a name="line.124"></a>
-<span class="sourceLineNo">125</span>            BootFileSize.class,<a name="line.125"></a>
-<span class="sourceLineNo">126</span>            BroadcastAddress.class,<a name="line.126"></a>
-<span class="sourceLineNo">127</span>            ClientIdentifier.class,<a name="line.127"></a>
-<span class="sourceLineNo">128</span>            ClientFQDN.class,<a name="line.128"></a>
-<span class="sourceLineNo">129</span>            ClientNetworkInterface.class,<a name="line.129"></a>
-<span class="sourceLineNo">130</span>            ClientSystemArchitecture.class,<a name="line.130"></a>
-<span class="sourceLineNo">131</span>            CookieServers.class,<a name="line.131"></a>
-<span class="sourceLineNo">132</span>            DefaultFingerServers.class,<a name="line.132"></a>
-<span class="sourceLineNo">133</span>            DefaultIpTimeToLive.class,<a name="line.133"></a>
-<span class="sourceLineNo">134</span>            DefaultIrcServers.class,<a name="line.134"></a>
-<span class="sourceLineNo">135</span>            DefaultWwwServers.class,<a name="line.135"></a>
-<span class="sourceLineNo">136</span>            DhcpMessageType.class,<a name="line.136"></a>
-<span class="sourceLineNo">137</span>            DirectoryAgent.class,<a name="line.137"></a>
-<span class="sourceLineNo">138</span>            DomainName.class,<a name="line.138"></a>
-<span class="sourceLineNo">139</span>            DomainNameServers.class,<a name="line.139"></a>
-<span class="sourceLineNo">140</span>            DomainSearch.class,<a name="line.140"></a>
-<span class="sourceLineNo">141</span>            EthernetEncapsulation.class,<a name="line.141"></a>
-<span class="sourceLineNo">142</span>            ExtensionsPath.class,<a name="line.142"></a>
-<span class="sourceLineNo">143</span>            HostName.class,<a name="line.143"></a>
-<span class="sourceLineNo">144</span>            ImpressServers.class,<a name="line.144"></a>
-<span class="sourceLineNo">145</span>            InterfaceMtu.class,<a name="line.145"></a>
-<span class="sourceLineNo">146</span>            IpAddressLeaseTime.class,<a name="line.146"></a>
-<span class="sourceLineNo">147</span>            IpForwarding.class,<a name="line.147"></a>
-<span class="sourceLineNo">148</span>            LogServers.class,<a name="line.148"></a>
-<span class="sourceLineNo">149</span>            LprServers.class,<a name="line.149"></a>
-<span class="sourceLineNo">150</span>            MaskSupplier.class,<a name="line.150"></a>
-<span class="sourceLineNo">151</span>            MaximumDatagramSize.class,<a name="line.151"></a>
-<span class="sourceLineNo">152</span>            MaximumDhcpMessageSize.class,<a name="line.152"></a>
-<span class="sourceLineNo">153</span>            MeritDumpFile.class,<a name="line.153"></a>
-<span class="sourceLineNo">154</span>            Message.class,<a name="line.154"></a>
-<span class="sourceLineNo">155</span>            MobileIpHomeAgents.class,<a name="line.155"></a>
-<span class="sourceLineNo">156</span>            NameServers.class,<a name="line.156"></a>
-<span class="sourceLineNo">157</span>            NbddServers.class,<a name="line.157"></a>
-<span class="sourceLineNo">158</span>            NetbiosNameServers.class,<a name="line.158"></a>
-<span class="sourceLineNo">159</span>            NetbiosNodeType.class,<a name="line.159"></a>
-<span class="sourceLineNo">160</span>            NetbiosScope.class,<a name="line.160"></a>
-<span class="sourceLineNo">161</span>            NetwareDomainName.class,<a name="line.161"></a>
-<span class="sourceLineNo">162</span>            NetwareOptions.class,<a name="line.162"></a>
-<span class="sourceLineNo">163</span>            NisDomain.class,<a name="line.163"></a>
-<span class="sourceLineNo">164</span>            NisPlusDomain.class,<a name="line.164"></a>
-<span class="sourceLineNo">165</span>            NisPlusServers.class,<a name="line.165"></a>
-<span class="sourceLineNo">166</span>            NisServers.class,<a name="line.166"></a>
-<span class="sourceLineNo">167</span>            NntpServers.class,<a name="line.167"></a>
-<span class="sourceLineNo">168</span>            NonLocalSourceRouting.class,<a name="line.168"></a>
-<span class="sourceLineNo">169</span>            NtpServers.class,<a name="line.169"></a>
-<span class="sourceLineNo">170</span>            OptionOverload.class,<a name="line.170"></a>
-<span class="sourceLineNo">171</span>            ParameterRequestList.class,<a name="line.171"></a>
-<span class="sourceLineNo">172</span>            PathMtuAgingTimeout.class,<a name="line.172"></a>
-<span class="sourceLineNo">173</span>            PathMtuPlateauTable.class,<a name="line.173"></a>
-<span class="sourceLineNo">174</span>            PerformMaskDiscovery.class,<a name="line.174"></a>
-<span class="sourceLineNo">175</span>            PerformRouterDiscovery.class,<a name="line.175"></a>
-<span class="sourceLineNo">176</span>            PolicyFilter.class,<a name="line.176"></a>
-<span class="sourceLineNo">177</span>            Pop3Servers.class,<a name="line.177"></a>
-<span class="sourceLineNo">178</span>            PxeReserved128.class,<a name="line.178"></a>
-<span class="sourceLineNo">179</span>            PxeReserved129.class,<a name="line.179"></a>
-<span class="sourceLineNo">180</span>            PxeReserved130.class,<a name="line.180"></a>
-<span class="sourceLineNo">181</span>            PxeReserved131.class,<a name="line.181"></a>
-<span class="sourceLineNo">182</span>            PxeReserved132.class,<a name="line.182"></a>
-<span class="sourceLineNo">183</span>            PxeReserved133.class,<a name="line.183"></a>
-<span class="sourceLineNo">184</span>            PxeReserved134.class,<a name="line.184"></a>
-<span class="sourceLineNo">185</span>            PxeReserved135.class,<a name="line.185"></a>
-<span class="sourceLineNo">186</span>            RebindingTimeValue.class,<a name="line.186"></a>
-<span class="sourceLineNo">187</span>            RelayAgentInformation.class,<a name="line.187"></a>
-<span class="sourceLineNo">188</span>            RenewalTimeValue.class,<a name="line.188"></a>
-<span class="sourceLineNo">189</span>            RequestedIpAddress.class,<a name="line.189"></a>
-<span class="sourceLineNo">190</span>            ResourceLocationServers.class,<a name="line.190"></a>
-<span class="sourceLineNo">191</span>            RootPath.class,<a name="line.191"></a>
-<span class="sourceLineNo">192</span>            Routers.class,<a name="line.192"></a>
-<span class="sourceLineNo">193</span>            RouterSolicitationAddress.class,<a name="line.193"></a>
-<span class="sourceLineNo">194</span>            ServerIdentifier.class,<a name="line.194"></a>
-<span class="sourceLineNo">195</span>            ServiceScope.class,<a name="line.195"></a>
-<span class="sourceLineNo">196</span>            SmtpServers.class,<a name="line.196"></a>
-<span class="sourceLineNo">197</span>            StaticRoute.class,<a name="line.197"></a>
-<span class="sourceLineNo">198</span>            StdaServers.class,<a name="line.198"></a>
-<span class="sourceLineNo">199</span>            StreetTalkServers.class,<a name="line.199"></a>
-<span class="sourceLineNo">200</span>            SubnetMask.class,<a name="line.200"></a>
-<span class="sourceLineNo">201</span>            SwapServer.class,<a name="line.201"></a>
-<span class="sourceLineNo">202</span>            TcpDefaultTimeToLive.class,<a name="line.202"></a>
-<span class="sourceLineNo">203</span>            TcpKeepaliveGarbage.class,<a name="line.203"></a>
-<span class="sourceLineNo">204</span>            TcpKeepaliveInterval.class,<a name="line.204"></a>
-<span class="sourceLineNo">205</span>            TftpServerName.class,<a name="line.205"></a>
-<span class="sourceLineNo">206</span>            TimeOffset.class,<a name="line.206"></a>
-<span class="sourceLineNo">207</span>            TimeServers.class,<a name="line.207"></a>
-<span class="sourceLineNo">208</span>            TrailerEncapsulation.class,<a name="line.208"></a>
-<span class="sourceLineNo">209</span>            UnrecognizedOption.class,<a name="line.209"></a>
-<span class="sourceLineNo">210</span>            UserClass.class,<a name="line.210"></a>
-<span class="sourceLineNo">211</span>            UUIDClientIdentifier.class,<a name="line.211"></a>
-<span class="sourceLineNo">212</span>            VendorClassIdentifier.class,<a name="line.212"></a>
-<span class="sourceLineNo">213</span>            VendorSpecificInformation.class,<a name="line.213"></a>
-<span class="sourceLineNo">214</span>            XWindowDisplayManagers.class,<a name="line.214"></a>
-<span class="sourceLineNo">215</span>            XWindowFontServers.class,<a name="line.215"></a>
-<span class="sourceLineNo">216</span><a name="line.216"></a>
-<span class="sourceLineNo">217</span>        };<a name="line.217"></a>
-<span class="sourceLineNo">218</span><a name="line.218"></a>
-<span class="sourceLineNo">219</span>        static {<a name="line.219"></a>
-<span class="sourceLineNo">220</span>            for (Class&lt;? extends DhcpOption&gt; optionType : OPTION_CLASSES) {<a name="line.220"></a>
-<span class="sourceLineNo">221</span>                INSTANCE.addOptionType(optionType);<a name="line.221"></a>
-<span class="sourceLineNo">222</span>            }<a name="line.222"></a>
-<span class="sourceLineNo">223</span>        }<a name="line.223"></a>
-<span class="sourceLineNo">224</span>    }<a name="line.224"></a>
-<span class="sourceLineNo">225</span><a name="line.225"></a>
-<span class="sourceLineNo">226</span>    @Nonnull<a name="line.226"></a>
-<span class="sourceLineNo">227</span>    public static DhcpOptionsRegistry getInstance() {<a name="line.227"></a>
-<span class="sourceLineNo">228</span>        return Inner.INSTANCE;<a name="line.228"></a>
-<span class="sourceLineNo">229</span>    }<a name="line.229"></a>
-<span class="sourceLineNo">230</span>    private final Map&lt;Byte, Class&lt;? extends DhcpOption&gt;&gt; optionTypes = new HashMap&lt;Byte, Class&lt;? extends DhcpOption&gt;&gt;();<a name="line.230"></a>
-<span class="sourceLineNo">231</span>    private final Map&lt;Class&lt;? extends DhcpOption&gt;, Byte&gt; optionTags = new WeakHashMap&lt;Class&lt;? extends DhcpOption&gt;, Byte&gt;();<a name="line.231"></a>
-<span class="sourceLineNo">232</span><a name="line.232"></a>
-<span class="sourceLineNo">233</span>    @Nonnull<a name="line.233"></a>
-<span class="sourceLineNo">234</span>    public static &lt;T extends DhcpOption&gt; T newInstance(@Nonnull Class&lt;T&gt; type) {<a name="line.234"></a>
-<span class="sourceLineNo">235</span>        try {<a name="line.235"></a>
-<span class="sourceLineNo">236</span>            return type.newInstance();<a name="line.236"></a>
-<span class="sourceLineNo">237</span>        } catch (InstantiationException e) {<a name="line.237"></a>
-<span class="sourceLineNo">238</span>            throw new IllegalArgumentException("Cannot instantiate " + type, e);<a name="line.238"></a>
-<span class="sourceLineNo">239</span>        } catch (IllegalAccessException e) {<a name="line.239"></a>
-<span class="sourceLineNo">240</span>            throw new IllegalArgumentException("Cannot instantiate " + type, e);<a name="line.240"></a>
-<span class="sourceLineNo">241</span>        }<a name="line.241"></a>
-<span class="sourceLineNo">242</span>    }<a name="line.242"></a>
-<span class="sourceLineNo">243</span><a name="line.243"></a>
-<span class="sourceLineNo">244</span>    private byte getTagFrom(@Nonnull Class&lt;? extends DhcpOption&gt; type) {<a name="line.244"></a>
-<span class="sourceLineNo">245</span>        DhcpOption o = newInstance(type);<a name="line.245"></a>
-<span class="sourceLineNo">246</span>        byte tag = o.getTag();<a name="line.246"></a>
-<span class="sourceLineNo">247</span>        optionTags.put(type, tag);<a name="line.247"></a>
-<span class="sourceLineNo">248</span>        return tag;<a name="line.248"></a>
-<span class="sourceLineNo">249</span>    }<a name="line.249"></a>
-<span class="sourceLineNo">250</span><a name="line.250"></a>
-<span class="sourceLineNo">251</span>    public void addOptionType(@Nonnull Class&lt;? extends DhcpOption&gt; type) {<a name="line.251"></a>
-<span class="sourceLineNo">252</span>        byte tag = getTagFrom(type);<a name="line.252"></a>
-<span class="sourceLineNo">253</span>        if (optionTypes.put(tag, type) != null)<a name="line.253"></a>
-<span class="sourceLineNo">254</span>            throw new IllegalArgumentException("Duplicate tag: " + type);<a name="line.254"></a>
-<span class="sourceLineNo">255</span>        optionTags.put(type, tag);<a name="line.255"></a>
-<span class="sourceLineNo">256</span>    }<a name="line.256"></a>
-<span class="sourceLineNo">257</span><a name="line.257"></a>
-<span class="sourceLineNo">258</span>    @CheckForNull<a name="line.258"></a>
-<span class="sourceLineNo">259</span>    public Class&lt;? extends DhcpOption&gt; getOptionType(byte tag) {<a name="line.259"></a>
-<span class="sourceLineNo">260</span>        return optionTypes.get(tag);<a name="line.260"></a>
+<span class="sourceLineNo">099</span>import org.apache.directory.server.dhcp.options.vendor.PCode;<a name="line.99"></a>
+<span class="sourceLineNo">100</span>import org.apache.directory.server.dhcp.options.vendor.ResourceLocationServers;<a name="line.100"></a>
+<span class="sourceLineNo">101</span>import org.apache.directory.server.dhcp.options.vendor.RootPath;<a name="line.101"></a>
+<span class="sourceLineNo">102</span>import org.apache.directory.server.dhcp.options.vendor.Routers;<a name="line.102"></a>
+<span class="sourceLineNo">103</span>import org.apache.directory.server.dhcp.options.vendor.ServiceScope;<a name="line.103"></a>
+<span class="sourceLineNo">104</span>import org.apache.directory.server.dhcp.options.vendor.SubnetMask;<a name="line.104"></a>
+<span class="sourceLineNo">105</span>import org.apache.directory.server.dhcp.options.vendor.SwapServer;<a name="line.105"></a>
+<span class="sourceLineNo">106</span>import org.apache.directory.server.dhcp.options.vendor.TCode;<a name="line.106"></a>
+<span class="sourceLineNo">107</span>import org.apache.directory.server.dhcp.options.vendor.TimeOffset;<a name="line.107"></a>
+<span class="sourceLineNo">108</span>import org.apache.directory.server.dhcp.options.vendor.TimeServers;<a name="line.108"></a>
+<span class="sourceLineNo">109</span>import org.slf4j.Logger;<a name="line.109"></a>
+<span class="sourceLineNo">110</span>import org.slf4j.LoggerFactory;<a name="line.110"></a>
+<span class="sourceLineNo">111</span><a name="line.111"></a>
+<span class="sourceLineNo">112</span>/**<a name="line.112"></a>
+<span class="sourceLineNo">113</span> * See http://www.iana.org/assignments/bootp-dhcp-parameters/bootp-dhcp-parameters.xhtml#options<a name="line.113"></a>
+<span class="sourceLineNo">114</span> *<a name="line.114"></a>
+<span class="sourceLineNo">115</span> * @author shevek<a name="line.115"></a>
+<span class="sourceLineNo">116</span> * @author marekgr<a name="line.116"></a>
+<span class="sourceLineNo">117</span> */<a name="line.117"></a>
+<span class="sourceLineNo">118</span>@SuppressWarnings("deprecation")<a name="line.118"></a>
+<span class="sourceLineNo">119</span>public class DhcpOptionsRegistry {<a name="line.119"></a>
+<span class="sourceLineNo">120</span><a name="line.120"></a>
+<span class="sourceLineNo">121</span>    private static final Logger LOG = LoggerFactory.getLogger(DhcpOptionsRegistry.class);<a name="line.121"></a>
+<span class="sourceLineNo">122</span><a name="line.122"></a>
+<span class="sourceLineNo">123</span>    @SuppressWarnings("unchecked")<a name="line.123"></a>
+<span class="sourceLineNo">124</span>    private static class Inner {<a name="line.124"></a>
+<span class="sourceLineNo">125</span><a name="line.125"></a>
+<span class="sourceLineNo">126</span>        private static final DhcpOptionsRegistry INSTANCE = new DhcpOptionsRegistry();<a name="line.126"></a>
+<span class="sourceLineNo">127</span>        /**<a name="line.127"></a>
+<span class="sourceLineNo">128</span>         * An array of concrete implementations of DhcpOption.<a name="line.128"></a>
+<span class="sourceLineNo">129</span>         */<a name="line.129"></a>
+<span class="sourceLineNo">130</span>        @SuppressWarnings({ "rawtypes" })<a name="line.130"></a>
+<span class="sourceLineNo">131</span>        private static final Class OPTION_CLASSES[] = {<a name="line.131"></a>
+<span class="sourceLineNo">132</span>            AllSubnetsAreLocal.class,<a name="line.132"></a>
+<span class="sourceLineNo">133</span>            ArpCacheTimeout.class,<a name="line.133"></a>
+<span class="sourceLineNo">134</span>            BootfileName.class,<a name="line.134"></a>
+<span class="sourceLineNo">135</span>            BootFileSize.class,<a name="line.135"></a>
+<span class="sourceLineNo">136</span>            BroadcastAddress.class,<a name="line.136"></a>
+<span class="sourceLineNo">137</span>            ClientIdentifier.class,<a name="line.137"></a>
+<span class="sourceLineNo">138</span>            ClientFQDN.class,<a name="line.138"></a>
+<span class="sourceLineNo">139</span>            ClientNetworkInterface.class,<a name="line.139"></a>
+<span class="sourceLineNo">140</span>            ClientSystemArchitecture.class,<a name="line.140"></a>
+<span class="sourceLineNo">141</span>            CookieServers.class,<a name="line.141"></a>
+<span class="sourceLineNo">142</span>            DefaultFingerServers.class,<a name="line.142"></a>
+<span class="sourceLineNo">143</span>            DefaultIpTimeToLive.class,<a name="line.143"></a>
+<span class="sourceLineNo">144</span>            DefaultIrcServers.class,<a name="line.144"></a>
+<span class="sourceLineNo">145</span>            DefaultWwwServers.class,<a name="line.145"></a>
+<span class="sourceLineNo">146</span>            DhcpMessageType.class,<a name="line.146"></a>
+<span class="sourceLineNo">147</span>            DirectoryAgent.class,<a name="line.147"></a>
+<span class="sourceLineNo">148</span>            DomainName.class,<a name="line.148"></a>
+<span class="sourceLineNo">149</span>            DomainNameServers.class,<a name="line.149"></a>
+<span class="sourceLineNo">150</span>            DomainSearch.class,<a name="line.150"></a>
+<span class="sourceLineNo">151</span>            EthernetEncapsulation.class,<a name="line.151"></a>
+<span class="sourceLineNo">152</span>            ExtensionsPath.class,<a name="line.152"></a>
+<span class="sourceLineNo">153</span>            HostName.class,<a name="line.153"></a>
+<span class="sourceLineNo">154</span>            ImpressServers.class,<a name="line.154"></a>
+<span class="sourceLineNo">155</span>            InterfaceMtu.class,<a name="line.155"></a>
+<span class="sourceLineNo">156</span>            IpAddressLeaseTime.class,<a name="line.156"></a>
+<span class="sourceLineNo">157</span>            IpForwarding.class,<a name="line.157"></a>
+<span class="sourceLineNo">158</span>            LogServers.class,<a name="line.158"></a>
+<span class="sourceLineNo">159</span>            LprServers.class,<a name="line.159"></a>
+<span class="sourceLineNo">160</span>            MaskSupplier.class,<a name="line.160"></a>
+<span class="sourceLineNo">161</span>            MaximumDatagramSize.class,<a name="line.161"></a>
+<span class="sourceLineNo">162</span>            MaximumDhcpMessageSize.class,<a name="line.162"></a>
+<span class="sourceLineNo">163</span>            MeritDumpFile.class,<a name="line.163"></a>
+<span class="sourceLineNo">164</span>            Message.class,<a name="line.164"></a>
+<span class="sourceLineNo">165</span>            MobileIpHomeAgents.class,<a name="line.165"></a>
+<span class="sourceLineNo">166</span>            NameServers.class,<a name="line.166"></a>
+<span class="sourceLineNo">167</span>            NbddServers.class,<a name="line.167"></a>
+<span class="sourceLineNo">168</span>            NetbiosNameServers.class,<a name="line.168"></a>
+<span class="sourceLineNo">169</span>            NetbiosNodeType.class,<a name="line.169"></a>
+<span class="sourceLineNo">170</span>            NetbiosScope.class,<a name="line.170"></a>
+<span class="sourceLineNo">171</span>            NetwareDomainName.class,<a name="line.171"></a>
+<span class="sourceLineNo">172</span>            NetwareOptions.class,<a name="line.172"></a>
+<span class="sourceLineNo">173</span>            NisDomain.class,<a name="line.173"></a>
+<span class="sourceLineNo">174</span>            NisPlusDomain.class,<a name="line.174"></a>
+<span class="sourceLineNo">175</span>            NisPlusServers.class,<a name="line.175"></a>
+<span class="sourceLineNo">176</span>            NisServers.class,<a name="line.176"></a>
+<span class="sourceLineNo">177</span>            NntpServers.class,<a name="line.177"></a>
+<span class="sourceLineNo">178</span>            NonLocalSourceRouting.class,<a name="line.178"></a>
+<span class="sourceLineNo">179</span>            NtpServers.class,<a name="line.179"></a>
+<span class="sourceLineNo">180</span>            OptionOverload.class,<a name="line.180"></a>
+<span class="sourceLineNo">181</span>            ParameterRequestList.class,<a name="line.181"></a>
+<span class="sourceLineNo">182</span>            PathMtuAgingTimeout.class,<a name="line.182"></a>
+<span class="sourceLineNo">183</span>            PathMtuPlateauTable.class,<a name="line.183"></a>
+<span class="sourceLineNo">184</span>            PCode.class,<a name="line.184"></a>
+<span class="sourceLineNo">185</span>            PerformMaskDiscovery.class,<a name="line.185"></a>
+<span class="sourceLineNo">186</span>            PerformRouterDiscovery.class,<a name="line.186"></a>
+<span class="sourceLineNo">187</span>            PolicyFilter.class,<a name="line.187"></a>
+<span class="sourceLineNo">188</span>            Pop3Servers.class,<a name="line.188"></a>
+<span class="sourceLineNo">189</span>            PxeReserved128.class,<a name="line.189"></a>
+<span class="sourceLineNo">190</span>            PxeReserved129.class,<a name="line.190"></a>
+<span class="sourceLineNo">191</span>            PxeReserved130.class,<a name="line.191"></a>
+<span class="sourceLineNo">192</span>            PxeReserved131.class,<a name="line.192"></a>
+<span class="sourceLineNo">193</span>            PxeReserved132.class,<a name="line.193"></a>
+<span class="sourceLineNo">194</span>            PxeReserved133.class,<a name="line.194"></a>
+<span class="sourceLineNo">195</span>            PxeReserved134.class,<a name="line.195"></a>
+<span class="sourceLineNo">196</span>            PxeReserved135.class,<a name="line.196"></a>
+<span class="sourceLineNo">197</span>            RebindingTimeValue.class,<a name="line.197"></a>
+<span class="sourceLineNo">198</span>            RelayAgentInformation.class,<a name="line.198"></a>
+<span class="sourceLineNo">199</span>            RenewalTimeValue.class,<a name="line.199"></a>
+<span class="sourceLineNo">200</span>            RequestedIpAddress.class,<a name="line.200"></a>
+<span class="sourceLineNo">201</span>            ResourceLocationServers.class,<a name="line.201"></a>
+<span class="sourceLineNo">202</span>            RootPath.class,<a name="line.202"></a>
+<span class="sourceLineNo">203</span>            Routers.class,<a name="line.203"></a>
+<span class="sourceLineNo">204</span>            RouterSolicitationAddress.class,<a name="line.204"></a>
+<span class="sourceLineNo">205</span>            ServerIdentifier.class,<a name="line.205"></a>
+<span class="sourceLineNo">206</span>            ServiceScope.class,<a name="line.206"></a>
+<span class="sourceLineNo">207</span>            SmtpServers.class,<a name="line.207"></a>
+<span class="sourceLineNo">208</span>            StaticRoute.class,<a name="line.208"></a>
+<span class="sourceLineNo">209</span>            StdaServers.class,<a name="line.209"></a>
+<span class="sourceLineNo">210</span>            StreetTalkServers.class,<a name="line.210"></a>
+<span class="sourceLineNo">211</span>            SubnetMask.class,<a name="line.211"></a>
+<span class="sourceLineNo">212</span>            SwapServer.class,<a name="line.212"></a>
+<span class="sourceLineNo">213</span>            TCode.class,<a name="line.213"></a>
+<span class="sourceLineNo">214</span>            TcpDefaultTimeToLive.class,<a name="line.214"></a>
+<span class="sourceLineNo">215</span>            TcpKeepaliveGarbage.class,<a name="line.215"></a>
+<span class="sourceLineNo">216</span>            TcpKeepaliveInterval.class,<a name="line.216"></a>
+<span class="sourceLineNo">217</span>            TftpServerName.class,<a name="line.217"></a>
+<span class="sourceLineNo">218</span>            TimeOffset.class,<a name="line.218"></a>
+<span class="sourceLineNo">219</span>            TimeServers.class,<a name="line.219"></a>
+<span class="sourceLineNo">220</span>            TrailerEncapsulation.class,<a name="line.220"></a>
+<span class="sourceLineNo">221</span>            UnrecognizedOption.class,<a name="line.221"></a>
+<span class="sourceLineNo">222</span>            UserClass.class,<a name="line.222"></a>
+<span class="sourceLineNo">223</span>            UUIDClientIdentifier.class,<a name="line.223"></a>
+<span class="sourceLineNo">224</span>            VendorClassIdentifier.class,<a name="line.224"></a>
+<span class="sourceLineNo">225</span>            VendorSpecificInformation.class,<a name="line.225"></a>
+<span class="sourceLineNo">226</span>            XWindowDisplayManagers.class,<a name="line.226"></a>
+<span class="sourceLineNo">227</span>            XWindowFontServers.class,<a name="line.227"></a>
+<span class="sourceLineNo">228</span><a name="line.228"></a>
+<span class="sourceLineNo">229</span>        };<a name="line.229"></a>
+<span class="sourceLineNo">230</span><a name="line.230"></a>
+<span class="sourceLineNo">231</span>        static {<a name="line.231"></a>
+<span class="sourceLineNo">232</span>            for (Class&lt;? extends DhcpOption&gt; optionType : OPTION_CLASSES) {<a name="line.232"></a>
+<span class="sourceLineNo">233</span>                INSTANCE.addOptionType(optionType);<a name="line.233"></a>
+<span class="sourceLineNo">234</span>            }<a name="line.234"></a>
+<span class="sourceLineNo">235</span>        }<a name="line.235"></a>
+<span class="sourceLineNo">236</span>    }<a name="line.236"></a>
+<span class="sourceLineNo">237</span><a name="line.237"></a>
+<span class="sourceLineNo">238</span>    @Nonnull<a name="line.238"></a>
+<span class="sourceLineNo">239</span>    public static DhcpOptionsRegistry getInstance() {<a name="line.239"></a>
+<span class="sourceLineNo">240</span>        return Inner.INSTANCE;<a name="line.240"></a>
+<span class="sourceLineNo">241</span>    }<a name="line.241"></a>
+<span class="sourceLineNo">242</span>    private final Map&lt;Byte, Class&lt;? extends DhcpOption&gt;&gt; optionTypes = new HashMap&lt;Byte, Class&lt;? extends DhcpOption&gt;&gt;();<a name="line.242"></a>
+<span class="sourceLineNo">243</span>    private final Map&lt;Class&lt;? extends DhcpOption&gt;, Byte&gt; optionTags = new WeakHashMap&lt;Class&lt;? extends DhcpOption&gt;, Byte&gt;();<a name="line.243"></a>
+<span class="sourceLineNo">244</span><a name="line.244"></a>
+<span class="sourceLineNo">245</span>    @Nonnull<a name="line.245"></a>
+<span class="sourceLineNo">246</span>    public static &lt;T extends DhcpOption&gt; T newInstance(@Nonnull Class&lt;T&gt; type) {<a name="line.246"></a>
+<span class="sourceLineNo">247</span>        try {<a name="line.247"></a>
+<span class="sourceLineNo">248</span>            return type.newInstance();<a name="line.248"></a>
+<span class="sourceLineNo">249</span>        } catch (InstantiationException e) {<a name="line.249"></a>
+<span class="sourceLineNo">250</span>            throw new IllegalArgumentException("Cannot instantiate " + type, e);<a name="line.250"></a>
+<span class="sourceLineNo">251</span>        } catch (IllegalAccessException e) {<a name="line.251"></a>
+<span class="sourceLineNo">252</span>            throw new IllegalArgumentException("Cannot instantiate " + type, e);<a name="line.252"></a>
+<span class="sourceLineNo">253</span>        }<a name="line.253"></a>
+<span class="sourceLineNo">254</span>    }<a name="line.254"></a>
+<span class="sourceLineNo">255</span><a name="line.255"></a>
+<span class="sourceLineNo">256</span>    private byte getTagFrom(@Nonnull Class&lt;? extends DhcpOption&gt; type) {<a name="line.256"></a>
+<span class="sourceLineNo">257</span>        DhcpOption o = newInstance(type);<a name="line.257"></a>
+<span class="sourceLineNo">258</span>        byte tag = o.getTag();<a name="line.258"></a>
+<span class="sourceLineNo">259</span>        optionTags.put(type, tag);<a name="line.259"></a>
+<span class="sourceLineNo">260</span>        return tag;<a name="line.260"></a>
 <span class="sourceLineNo">261</span>    }<a name="line.261"></a>
 <span class="sourceLineNo">262</span><a name="line.262"></a>
-<span class="sourceLineNo">263</span>    @Nonnull<a name="line.263"></a>
-<span class="sourceLineNo">264</span>    public byte getOptionTag(@Nonnull Class&lt;? extends DhcpOption&gt; type) {<a name="line.264"></a>
-<span class="sourceLineNo">265</span>        Byte tag = optionTags.get(type);<a name="line.265"></a>
-<span class="sourceLineNo">266</span>        if (tag != null)<a name="line.266"></a>
-<span class="sourceLineNo">267</span>            return tag.byteValue();<a name="line.267"></a>
-<span class="sourceLineNo">268</span>        // TODO: Warn about unregistered option.<a name="line.268"></a>
-<span class="sourceLineNo">269</span>        return getTagFrom(type);<a name="line.269"></a>
-<span class="sourceLineNo">270</span>    }<a name="line.270"></a>
-<span class="sourceLineNo">271</span><a name="line.271"></a>
-<span class="sourceLineNo">272</span>    @Override<a name="line.272"></a>
-<span class="sourceLineNo">273</span>    public String toString() {<a name="line.273"></a>
-<span class="sourceLineNo">274</span>        return getClass().getSimpleName() + "(" + optionTypes + ")";<a name="line.274"></a>
-<span class="sourceLineNo">275</span>    }<a name="line.275"></a>
-<span class="sourceLineNo">276</span>}<a name="line.276"></a>
+<span class="sourceLineNo">263</span>    public void addOptionType(@Nonnull Class&lt;? extends DhcpOption&gt; type) {<a name="line.263"></a>
+<span class="sourceLineNo">264</span>        byte tag = getTagFrom(type);<a name="line.264"></a>
+<span class="sourceLineNo">265</span>        if (optionTypes.put(tag, type) != null)<a name="line.265"></a>
+<span class="sourceLineNo">266</span>            throw new IllegalArgumentException("Duplicate tag: " + type);<a name="line.266"></a>
+<span class="sourceLineNo">267</span>        optionTags.put(type, tag);<a name="line.267"></a>
+<span class="sourceLineNo">268</span>    }<a name="line.268"></a>
+<span class="sourceLineNo">269</span><a name="line.269"></a>
+<span class="sourceLineNo">270</span>    @CheckForNull<a name="line.270"></a>
+<span class="sourceLineNo">271</span>    public Class&lt;? extends DhcpOption&gt; getOptionType(byte tag) {<a name="line.271"></a>
+<span class="sourceLineNo">272</span>        return optionTypes.get(tag);<a name="line.272"></a>
+<span class="sourceLineNo">273</span>    }<a name="line.273"></a>
+<span class="sourceLineNo">274</span><a name="line.274"></a>
+<span class="sourceLineNo">275</span>    @Nonnull<a name="line.275"></a>
+<span class="sourceLineNo">276</span>    public byte getOptionTag(@Nonnull Class&lt;? extends DhcpOption&gt; type) {<a name="line.276"></a>
+<span class="sourceLineNo">277</span>        Byte tag = optionTags.get(type);<a name="line.277"></a>
+<span class="sourceLineNo">278</span>        if (tag != null)<a name="line.278"></a>
+<span class="sourceLineNo">279</span>            return tag.byteValue();<a name="line.279"></a>
+<span class="sourceLineNo">280</span>        LOG.warn("Unregistered option type: {}", type);<a name="line.280"></a>
+<span class="sourceLineNo">281</span>        return getTagFrom(type);<a name="line.281"></a>
+<span class="sourceLineNo">282</span>    }<a name="line.282"></a>
+<span class="sourceLineNo">283</span><a name="line.283"></a>
+<span class="sourceLineNo">284</span>    @Override<a name="line.284"></a>
+<span class="sourceLineNo">285</span>    public String toString() {<a name="line.285"></a>
+<span class="sourceLineNo">286</span>        return getClass().getSimpleName() + "(" + optionTypes + ")";<a name="line.286"></a>
+<span class="sourceLineNo">287</span>    }<a name="line.287"></a>
+<span class="sourceLineNo">288</span>}<a name="line.288"></a>
 
 
 

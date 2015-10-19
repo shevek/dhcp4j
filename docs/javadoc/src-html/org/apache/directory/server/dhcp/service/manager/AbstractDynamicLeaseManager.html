@@ -193,7 +193,7 @@
 <span class="sourceLineNo">185</span>            InetAddress clientAddress = leaseMac(context, request, clientRequestedAddress, leaseTimeSecs);<a name="line.185"></a>
 <span class="sourceLineNo">186</span>            if (clientAddress == null)<a name="line.186"></a>
 <span class="sourceLineNo">187</span>                return null;<a name="line.187"></a>
-<span class="sourceLineNo">188</span>            return newReplyAck(request, MessageType.DHCPACK, clientAddress, leaseTimeSecs);<a name="line.188"></a>
+<span class="sourceLineNo">188</span>            return newReplyAck(request, MessageType.DHCPOFFER, clientAddress, leaseTimeSecs);<a name="line.188"></a>
 <span class="sourceLineNo">189</span>        } catch (Exception e) {<a name="line.189"></a>
 <span class="sourceLineNo">190</span>            Throwables.propagateIfPossible(e, DhcpException.class);<a name="line.190"></a>
 <span class="sourceLineNo">191</span>            throw new DhcpException("Failed to lease for MAC " + request.getHardwareAddress() + ": " + e, e);<a name="line.191"></a>

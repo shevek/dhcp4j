@@ -27,29 +27,32 @@
 <span class="sourceLineNo">019</span> */<a name="line.19"></a>
 <span class="sourceLineNo">020</span>package org.apache.directory.server.dhcp.options.vendor;<a name="line.20"></a>
 <span class="sourceLineNo">021</span><a name="line.21"></a>
-<span class="sourceLineNo">022</span>import org.apache.directory.server.dhcp.options.AddressOption;<a name="line.22"></a>
+<span class="sourceLineNo">022</span>import org.apache.directory.server.dhcp.options.IntOption;<a name="line.22"></a>
 <span class="sourceLineNo">023</span><a name="line.23"></a>
 <span class="sourceLineNo">024</span>/**<a name="line.24"></a>
-<span class="sourceLineNo">025</span> * The time offset field specifies the offset of the client's subnet in<a name="line.25"></a>
-<span class="sourceLineNo">026</span> * seconds from Coordinated Universal Time (UTC).  The offset is<a name="line.26"></a>
-<span class="sourceLineNo">027</span> * expressed as a two's complement 32-bit integer.  A positive offset<a name="line.27"></a>
-<span class="sourceLineNo">028</span> * indicates a location east of the zero meridian and a negative offset<a name="line.28"></a>
-<span class="sourceLineNo">029</span> * indicates a location west of the zero meridian.<a name="line.29"></a>
-<span class="sourceLineNo">030</span> * <a name="line.30"></a>
-<span class="sourceLineNo">031</span> * The code for the time offset option is 2, and its length is 4 octets.<a name="line.31"></a>
-<span class="sourceLineNo">032</span> *<a name="line.32"></a>
-<span class="sourceLineNo">033</span> * @author &lt;a href="mailto:dev@directory.apache.org"&gt;Apache Directory Project&lt;/a&gt;<a name="line.33"></a>
-<span class="sourceLineNo">034</span> */<a name="line.34"></a>
-<span class="sourceLineNo">035</span>public class TimeOffset extends AddressOption {<a name="line.35"></a>
-<span class="sourceLineNo">036</span>    /*<a name="line.36"></a>
-<span class="sourceLineNo">037</span>     * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()<a name="line.37"></a>
-<span class="sourceLineNo">038</span>     */<a name="line.38"></a>
-<span class="sourceLineNo">039</span><a name="line.39"></a>
-<span class="sourceLineNo">040</span>    @Override<a name="line.40"></a>
-<span class="sourceLineNo">041</span>    public byte getTag() {<a name="line.41"></a>
-<span class="sourceLineNo">042</span>        return 2;<a name="line.42"></a>
-<span class="sourceLineNo">043</span>    }<a name="line.43"></a>
-<span class="sourceLineNo">044</span>}<a name="line.44"></a>
+<span class="sourceLineNo">025</span> * The time offset field specifies the offset of the client's subnet in seconds from Coordinated Universal Time (UTC).<a name="line.25"></a>
+<span class="sourceLineNo">026</span> * The offset is expressed as a two's complement 32-bit integer. A positive offset indicates a location east of the zero<a name="line.26"></a>
+<span class="sourceLineNo">027</span> * meridian and a negative offset indicates a location west of the zero meridian. &lt;br&gt;<a name="line.27"></a>
+<span class="sourceLineNo">028</span> * &lt;br&gt;<a name="line.28"></a>
+<span class="sourceLineNo">029</span> * The code for the time offset option is 2, and its length is 4 octets. &lt;br&gt;<a name="line.29"></a>
+<span class="sourceLineNo">030</span> * &lt;br&gt;<a name="line.30"></a>
+<span class="sourceLineNo">031</span> * <a name="line.31"></a>
+<span class="sourceLineNo">032</span> * @author &lt;a href="mailto:dev@directory.apache.org"&gt;Apache Directory Project&lt;/a&gt;<a name="line.32"></a>
+<span class="sourceLineNo">033</span> * @author marekgr<a name="line.33"></a>
+<span class="sourceLineNo">034</span> * @deprecated use {@link PCode} and {@link TCode} instead. For DHCPv6 use equivalent options defined in<a name="line.34"></a>
+<span class="sourceLineNo">035</span> *             &lt;a href="http://tools.ietf.org/html/rfc4833"&gt;RFC 4833&lt;/a&gt;.<a name="line.35"></a>
+<span class="sourceLineNo">036</span> */<a name="line.36"></a>
+<span class="sourceLineNo">037</span>@Deprecated<a name="line.37"></a>
+<span class="sourceLineNo">038</span>public class TimeOffset extends IntOption {<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    /*<a name="line.39"></a>
+<span class="sourceLineNo">040</span>     * @see org.apache.directory.server.dhcp.options.DhcpOption#getTag()<a name="line.40"></a>
+<span class="sourceLineNo">041</span>     */<a name="line.41"></a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span>    @Override<a name="line.43"></a>
+<span class="sourceLineNo">044</span>    public byte getTag() {<a name="line.44"></a>
+<span class="sourceLineNo">045</span>        return 2;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    }<a name="line.46"></a>
+<span class="sourceLineNo">047</span>}<a name="line.47"></a>
 
 
 
