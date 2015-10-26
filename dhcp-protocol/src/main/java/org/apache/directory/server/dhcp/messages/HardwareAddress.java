@@ -22,13 +22,13 @@ package org.apache.directory.server.dhcp.messages;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.beans.PropertyEditorSupport;
-import java.text.ParseException;
 import javax.annotation.Nonnull;
 
 /**
  * A representation of a DHCP hardware address.
- * 
+ *
  * @author <a href="mailto:dev@directory.apache.org">Apache Directory Project</a>
  */
 public final class HardwareAddress {
@@ -71,6 +71,7 @@ public final class HardwareAddress {
      * @param length
      * @param address
      */
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public HardwareAddress(short type, short length, @Nonnull byte[] address) {
         this.type = type;
         this.length = length;
@@ -86,6 +87,7 @@ public final class HardwareAddress {
     }
 
     @Nonnull
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public byte[] getAddress() {
         return address;
     }
@@ -100,7 +102,7 @@ public final class HardwareAddress {
 
     /**
      * @see java.lang.Object#hashCode()
-     * @return the instance's hash code 
+     * @return the instance's hash code
      */
     @Override
     public int hashCode() {
@@ -144,7 +146,7 @@ public final class HardwareAddress {
      * 1==ethernet with the representation <code>a1:a2:a3:a4:a5:a6</code>.<br>
      * For all other types, this method falls back to the representation created
      * by toString().
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Nonnull
@@ -182,7 +184,7 @@ public final class HardwareAddress {
      * <code>t/a1:a2:a3...</code><br>
      * Where <code>t</code> represents the address type (decimal) and
      * <code>a<sub>n</sub></code> represent the address bytes (hexadecimal).
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
@@ -210,10 +212,10 @@ public final class HardwareAddress {
 
     /**
      * Parses a string representation of a hardware address.
-     * Valid: 1/11:22:33:44:55:66    (toString())
+     * Valid: 1/11:22:33:44:55:66 (toString())
      * Valid: Ethernet/11:22:33:44:55:66
-     * Valid: 11:22:33:44:55:66     (defaults to Ethernet)
-     * 
+     * Valid: 11:22:33:44:55:66 (defaults to Ethernet)
+     *
      * @param text
      * @return HardwareAddress
      */

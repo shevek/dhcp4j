@@ -17,6 +17,7 @@
 package org.apache.directory.server.dhcp.options;
 
 import com.google.common.io.BaseEncoding;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.apache.directory.server.dhcp.DhcpException;
@@ -54,6 +55,7 @@ public abstract class BaseDhcpOption {
      * @return byte[]
      */
     @Nonnull
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public final byte[] getData() {
         return data;
     }
@@ -65,6 +67,7 @@ public abstract class BaseDhcpOption {
      *
      * @param data
      */
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public final void setData(@Nonnull byte data[]) {
         this.data = data;
     }

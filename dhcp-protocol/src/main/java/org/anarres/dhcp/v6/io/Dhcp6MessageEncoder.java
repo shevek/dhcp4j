@@ -5,6 +5,7 @@
 package org.anarres.dhcp.v6.io;
 
 import com.google.common.primitives.Shorts;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
 import org.anarres.dhcp.v6.messages.Dhcp6Message;
@@ -35,8 +36,9 @@ public class Dhcp6MessageEncoder {
      */
     public void encode(ByteBuffer byteBuffer, Dhcp6Message message) {
         byteBuffer.put(message.getMessageType().getCode());
-        if(Dhcp6MessageDecoder.isRelayedMessage(message.getMessageType())) {
-            final Dhcp6RelayMessage relayedMessage = (Dhcp6RelayMessage) message;
+        if (Dhcp6MessageDecoder.isRelayedMessage(message.getMessageType())) {
+            @SuppressFBWarnings("BC_UNCONFIRMED_CAST")
+            Dhcp6RelayMessage relayedMessage = (Dhcp6RelayMessage) message;
             byteBuffer.put(relayedMessage.getHopCount());
             byteBuffer.put(relayedMessage.getLinkAddress().getAddress());
             byteBuffer.put(relayedMessage.getPeerAddress().getAddress());

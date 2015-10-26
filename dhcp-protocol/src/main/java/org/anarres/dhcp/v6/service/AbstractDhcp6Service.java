@@ -39,7 +39,6 @@ public abstract class AbstractDhcp6Service implements Dhcp6Service {
     // TODO add Authentication handling https://tools.ietf.org/html/rfc3315#section-21
     // TODO support server initiated reconfigure https://tools.ietf.org/html/rfc3315#section-19 + reconfigure accept option
     // TODO handle rapid commits
-
     public AbstractDhcp6Service() {
         this.serverUnicastOption = Optional.absent();
     }
@@ -50,114 +49,117 @@ public abstract class AbstractDhcp6Service implements Dhcp6Service {
 
     @Override
     public Optional<Dhcp6Message> getReplyFor(@Nonnull Dhcp6RequestContext requestContext, @Nonnull final Dhcp6Message incomingMsg)
-        throws Dhcp6Exception {
+            throws Dhcp6Exception {
         Dhcp6Message reply;
 
         switch (incomingMsg.getMessageType()) {
-        // TODO check reply types. Lease manager has the flexibility to change them
-        case DHCP_SOLICIT: {
-            Dhcp6Exception.InvalidMsgException.checkSolicit(incomingMsg);
-            reply = advertise(requestContext, incomingMsg);
+            // TODO check reply types. Lease manager has the flexibility to change them
+            case DHCP_SOLICIT: {
+                Dhcp6Exception.InvalidMsgException.checkSolicit(incomingMsg);
+                reply = advertise(requestContext, incomingMsg);
 
-            // Add serverUnicastOption if configured
-            if(reply != null && unicastAllowed()) {
-                reply.getOptions().add(serverUnicastOption.get());
+                // Add serverUnicastOption if configured
+                if (reply != null && unicastAllowed()) {
+                    reply.getOptions().add(serverUnicastOption.get());
+                }
+                break;
             }
-            break;
-        }
-        case DHCP_REQUEST: {
-            // TODO is this check correct ? if we dont allow unicasts, we check if we received from link local addr
-            // https://tools.ietf.org/html/rfc3315#section-18.2.1 first paragraph
-            if (!unicastAllowed() && !isLinkLocal(requestContext)) {
-                reply = rejectUnicast(requestContext, incomingMsg);
-            } else {
-                Dhcp6Exception.InvalidMsgException.checkRequest(incomingMsg, getServerId().getDuid());
-                reply = reply(requestContext, incomingMsg);
+            case DHCP_REQUEST: {
+                // TODO is this check correct ? if we dont allow unicasts, we check if we received from link local addr
+                // https://tools.ietf.org/html/rfc3315#section-18.2.1 first paragraph
+                if (!unicastAllowed() && !isLinkLocal(requestContext)) {
+                    reply = rejectUnicast(requestContext, incomingMsg);
+                } else {
+                    Dhcp6Exception.InvalidMsgException.checkRequest(incomingMsg, getServerId().getDuid());
+                    reply = reply(requestContext, incomingMsg);
+                }
+                break;
             }
-            break;
-        }
-        case DHCP_RENEW: {
-            // TODO is this check correct ? if we dont allow unicasts, we check if we received from link local addr
-            if (!unicastAllowed() && !isLinkLocal(requestContext)) {
-                reply = rejectUnicast(requestContext, incomingMsg);
-            } else {
-                Dhcp6Exception.InvalidMsgException.checkRenew(incomingMsg, getServerId().getDuid());
-                reply = renew(requestContext, incomingMsg);
+            case DHCP_RENEW: {
+                // TODO is this check correct ? if we dont allow unicasts, we check if we received from link local addr
+                if (!unicastAllowed() && !isLinkLocal(requestContext)) {
+                    reply = rejectUnicast(requestContext, incomingMsg);
+                } else {
+                    Dhcp6Exception.InvalidMsgException.checkRenew(incomingMsg, getServerId().getDuid());
+                    reply = renew(requestContext, incomingMsg);
+                }
+                break;
             }
-            break;
-        }
-        case DHCP_REBIND: {
-            Dhcp6Exception.InvalidMsgException.checkRebind(incomingMsg);
-            reply = rebind(requestContext, incomingMsg);
-            break;
-        }
-        case DHCP_RELEASE: {
-            // TODO is this check correct ? if we dont allow unicasts, we check if we received from link local addr
-            if (!unicastAllowed() && !isLinkLocal(requestContext)) {
-                reply = rejectUnicast(requestContext, incomingMsg);
-            } else {
-                Dhcp6Exception.InvalidMsgException.checkRelease(incomingMsg, getServerId().getDuid());
-                reply = release(requestContext, incomingMsg);
+            case DHCP_REBIND: {
+                Dhcp6Exception.InvalidMsgException.checkRebind(incomingMsg);
+                reply = rebind(requestContext, incomingMsg);
+                break;
             }
-            break;
-        }
-        case DHCP_CONFIRM: {
-            Dhcp6Exception.InvalidMsgException.checkConfirm(incomingMsg);
-            reply = confirm(requestContext, incomingMsg);
-            if(reply == null) {
-                LOG.warn("Unable to confirm request: {}", incomingMsg);
+            case DHCP_RELEASE: {
+                // TODO is this check correct ? if we dont allow unicasts, we check if we received from link local addr
+                if (!unicastAllowed() && !isLinkLocal(requestContext)) {
+                    reply = rejectUnicast(requestContext, incomingMsg);
+                } else {
+                    Dhcp6Exception.InvalidMsgException.checkRelease(incomingMsg, getServerId().getDuid());
+                    reply = release(requestContext, incomingMsg);
+                }
+                break;
             }
-            break;
-        }
-        case DHCP_DECLINE: {
-            // TODO is this check correct ? if we dont allow unicasts, we check if we received from link local addr
-            if (!unicastAllowed() && !isLinkLocal(requestContext)) {
-                reply = rejectUnicast(requestContext, incomingMsg);
-            } else {
-                Dhcp6Exception.InvalidMsgException.checkDecline(incomingMsg, getServerId().getDuid());
-                reply = decline(requestContext, incomingMsg);
+            case DHCP_CONFIRM: {
+                Dhcp6Exception.InvalidMsgException.checkConfirm(incomingMsg);
+                reply = confirm(requestContext, incomingMsg);
+                if (reply == null) {
+                    LOG.warn("Unable to confirm request: {}", incomingMsg);
+                }
+                break;
             }
-            break;
-        }
-        case DHCP_INFORMATION_REQUEST: {
-            Dhcp6Exception.InvalidMsgException.checkInformationRequest(incomingMsg, getServerId().getDuid());
-            reply = requestInformation(requestContext, incomingMsg);
-            break;
-        }
-        case DHCP_RELAY_FORW: {
-            Dhcp6Exception.InvalidMsgException.checkRelayForward(incomingMsg);
-            RelayMessageOption innerMsg = incomingMsg.getOptions().get(RelayMessageOption.class);
-            requestContext = new Dhcp6RequestContext(((Dhcp6RelayMessage) incomingMsg).getLinkAddress(), requestContext.getClientAddress(), incomingMsg.getOptions());
-            // Recursively call this method to get a reply to inner DHCP message. Just add replay msg options to request context
-            final Optional<Dhcp6Message> nestedReply = getReplyFor(requestContext.withRelayedOptions(incomingMsg.getOptions()), innerMsg.getRelayedMessage());
+            case DHCP_DECLINE: {
+                // TODO is this check correct ? if we dont allow unicasts, we check if we received from link local addr
+                if (!unicastAllowed() && !isLinkLocal(requestContext)) {
+                    reply = rejectUnicast(requestContext, incomingMsg);
+                } else {
+                    Dhcp6Exception.InvalidMsgException.checkDecline(incomingMsg, getServerId().getDuid());
+                    reply = decline(requestContext, incomingMsg);
+                }
+                break;
+            }
+            case DHCP_INFORMATION_REQUEST: {
+                Dhcp6Exception.InvalidMsgException.checkInformationRequest(incomingMsg, getServerId().getDuid());
+                reply = requestInformation(requestContext, incomingMsg);
+                break;
+            }
+            case DHCP_RELAY_FORW: {
+                Dhcp6Exception.InvalidMsgException.checkRelayForward(incomingMsg);
+                RelayMessageOption innerMsg = incomingMsg.getOptions().get(RelayMessageOption.class);
+                requestContext = new Dhcp6RequestContext(((Dhcp6RelayMessage) incomingMsg).getLinkAddress(), requestContext.getClientAddress(), incomingMsg.getOptions());
+                // Recursively call this method to get a reply to inner DHCP message. Just add replay msg options to request context
+                final Optional<Dhcp6Message> nestedReply = getReplyFor(requestContext.withRelayedOptions(incomingMsg.getOptions()), innerMsg.getRelayedMessage());
 
-            if(nestedReply.isPresent()) {
-                reply = wrapAsRelayReply((Dhcp6RelayMessage) incomingMsg, nestedReply);
-            } else {
-                reply = nestedReply.orNull();
+                if (nestedReply.isPresent()) {
+                    reply = wrapAsRelayReply((Dhcp6RelayMessage) incomingMsg, nestedReply);
+                } else {
+                    reply = nestedReply.orNull();
+                }
+                break;
             }
-            break;
-        }
 
-        // https://tools.ietf.org/html/rfc3315#section-15.10
-        case DHCP_REPLY: {}
-        // https://tools.ietf.org/html/rfc3315#section-15.11
-        case DHCP_RECONFIGURE: {}
-        // https://tools.ietf.org/html/rfc3315#section-15.14
-        case DHCP_RELAY_REPL: {}
-        // https://tools.ietf.org/html/rfc3315#section-15.3
-        case DHCP_ADVERTISE: {
-            // fall-through intentional, following messages are unexpected to be received on server side
-            throw new Dhcp6Exception.InvalidMsgException(incomingMsg.getMessageType());
-        }
-        default: {
-            reply = handle(requestContext, incomingMsg);
-        }
+            // https://tools.ietf.org/html/rfc3315#section-15.10
+            case DHCP_REPLY: {
+            }
+            // https://tools.ietf.org/html/rfc3315#section-15.11
+            case DHCP_RECONFIGURE: {
+            }
+            // https://tools.ietf.org/html/rfc3315#section-15.14
+            case DHCP_RELAY_REPL: {
+            }
+            // https://tools.ietf.org/html/rfc3315#section-15.3
+            case DHCP_ADVERTISE: {
+                // fall-through intentional, following messages are unexpected to be received on server side
+                throw new Dhcp6Exception.InvalidMsgException(incomingMsg.getMessageType());
+            }
+            default: {
+                reply = handle(requestContext, incomingMsg);
+            }
         }
 
         // Strip options to provide only requested
         final OptionRequestOption optionRequestOption = incomingMsg.getOptions().get(OptionRequestOption.class);
-        if(reply != null && optionRequestOption != null) {
+        if (reply != null && optionRequestOption != null) {
             stripOptions(reply, optionRequestOption);
         }
 
@@ -181,7 +183,6 @@ public abstract class AbstractDhcp6Service implements Dhcp6Service {
         return reply;
     }
 
-
     private static boolean isLinkLocal(final @Nonnull Dhcp6RequestContext requestContext) {
         return requestContext.getClientAddress().isLinkLocalAddress();
     }
@@ -192,7 +193,8 @@ public abstract class AbstractDhcp6Service implements Dhcp6Service {
         final Dhcp6Options filtered = new Dhcp6Options();
 
         filtered.addAll(Iterables.filter(reply.getOptions(), new Predicate<Dhcp6Option>() {
-            @Override public boolean apply(final Dhcp6Option input) {
+            @Override
+            public boolean apply(Dhcp6Option input) {
                 // keep only requested options + the standard options RFC3315
                 return input.getTag() <= 20 || requestedOptions.contains(input.getTag());
             }
@@ -206,7 +208,7 @@ public abstract class AbstractDhcp6Service implements Dhcp6Service {
     }
 
     private Dhcp6RelayMessage wrapAsRelayReply(final @Nonnull Dhcp6RelayMessage incomingMsg,
-        final Optional<Dhcp6Message> nestedReply) {
+            final Optional<Dhcp6Message> nestedReply) {
         final Dhcp6RelayMessage dhcp6RelayReply = new Dhcp6RelayMessage();
         dhcp6RelayReply.setMessageType(Dhcp6MessageType.DHCP_RELAY_REPL);
         dhcp6RelayReply.setHopCount(incomingMsg.getHopCount());
@@ -216,9 +218,9 @@ public abstract class AbstractDhcp6Service implements Dhcp6Service {
         options.add(RelayMessageOption.create(nestedReply.get()));
 
         // https://tools.ietf.org/html/rfc3315#section-22.18 - Copy interfaceId option if present in request
-        if(incomingMsg.getOptions().contains(InterfaceIdOption.class)) {
-            options.add(incomingMsg.getOptions().get(InterfaceIdOption.class));
-        }
+        InterfaceIdOption interfaceIdOption = incomingMsg.getOptions().get(InterfaceIdOption.class);
+        if (interfaceIdOption != null)
+            options.add(interfaceIdOption);
 
         dhcp6RelayReply.setOptions(options);
         return dhcp6RelayReply;
@@ -231,7 +233,7 @@ public abstract class AbstractDhcp6Service implements Dhcp6Service {
         final ClientIdOption option = incomingMsg.getOptions().get(ClientIdOption.class);
 
         LOG.warn("Rejecting message: {} from UNICAST: {} by client: {}", incomingMsg, requestContext.getClientAddress(),
-            option.getDuid());
+                (option == null) ? null : option.getDuid());
 
         Dhcp6Message reply = new Dhcp6Message();
         reply.setTransactionId(incomingMsg.getTransactionId());
@@ -247,31 +249,31 @@ public abstract class AbstractDhcp6Service implements Dhcp6Service {
     }
 
     protected abstract Dhcp6Message release(Dhcp6RequestContext requestContext, Dhcp6Message incomingMsg)
-        throws Dhcp6Exception;
+            throws Dhcp6Exception;
 
     protected abstract Dhcp6Message decline(Dhcp6RequestContext requestContext, Dhcp6Message incomingMsg)
-        throws Dhcp6Exception;
+            throws Dhcp6Exception;
 
     protected abstract Dhcp6Message reply(Dhcp6RequestContext requestContext, Dhcp6Message incomingMsg)
-        throws Dhcp6Exception;
+            throws Dhcp6Exception;
 
     protected abstract Dhcp6Message renew(Dhcp6RequestContext requestContext, Dhcp6Message incomingMsg)
-        throws Dhcp6Exception;
+            throws Dhcp6Exception;
 
     protected abstract Dhcp6Message rebind(Dhcp6RequestContext requestContext, Dhcp6Message incomingMsg)
-        throws Dhcp6Exception;
+            throws Dhcp6Exception;
 
     protected abstract Dhcp6Message requestInformation(Dhcp6RequestContext requestContext, Dhcp6Message incomingMsg)
-        throws Dhcp6Exception;
+            throws Dhcp6Exception;
 
     protected abstract Dhcp6Message advertise(Dhcp6RequestContext requestContext, Dhcp6Message incomingMsg)
-        throws Dhcp6Exception;
+            throws Dhcp6Exception;
 
     protected abstract Dhcp6Message confirm(Dhcp6RequestContext requestContext, Dhcp6Message incomingMsg)
-        throws Dhcp6Exception;
+            throws Dhcp6Exception;
 
     protected abstract Dhcp6Message handle(Dhcp6RequestContext requestContext, Dhcp6Message incomingMsg)
-        throws Dhcp6Exception;
+            throws Dhcp6Exception;
 
     protected abstract ServerIdOption getServerId();
 }

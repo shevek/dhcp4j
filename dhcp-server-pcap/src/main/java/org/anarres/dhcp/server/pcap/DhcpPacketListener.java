@@ -5,6 +5,7 @@
  */
 package org.anarres.dhcp.server.pcap;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -38,11 +39,13 @@ public class DhcpPacketListener implements PacketListener {
     private final DhcpService service;
     private final InterfaceAddress[] interfaceAddresses;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public DhcpPacketListener(@Nonnull DhcpService service, @Nonnull InterfaceAddress[] interfaceAddresses) {
         this.service = service;
         this.interfaceAddresses = interfaceAddresses;
     }
 
+    @Override
     public void gotPacket(Packet rawPacket) {
         try {
             LOG.info("Read raw " + rawPacket);

@@ -19,8 +19,8 @@ public class VendorSpecificInformationOption extends SuboptionOption {
     /**
      * Default decoder treats all suboptions as unknown
      */
-    public static Dhcp6MessageDecoder DEFAULT_DECODER = new Dhcp6MessageDecoder(new Dhcp6OptionsRegistry());
-    public static Map<Integer, Dhcp6MessageDecoder> DECODERS = new HashMap<>();
+    public static final Dhcp6MessageDecoder DEFAULT_DECODER = new Dhcp6MessageDecoder(new Dhcp6OptionsRegistry());
+    public static final Map<Integer, Dhcp6MessageDecoder> DECODERS = new HashMap<>();
 
     /**
      *
@@ -49,11 +49,13 @@ public class VendorSpecificInformationOption extends SuboptionOption {
         return HEADER_SIZE;
     }
 
-    @Override public short getTag() {
+    @Override
+    public short getTag() {
         return TAG;
     }
 
-    @Override protected Dhcp6MessageDecoder getDecoder() {
+    @Override
+    protected Dhcp6MessageDecoder getDecoder() {
         final Dhcp6MessageDecoder specificDecoder = DECODERS.get(getEnterpriseNumber());
         return specificDecoder == null ? DEFAULT_DECODER : specificDecoder;
     }
@@ -80,7 +82,7 @@ public class VendorSpecificInformationOption extends SuboptionOption {
         int length = HEADER_SIZE;
 
         ByteBuffer encodedOptions = null;
-        if(!options.isEmpty()) {
+        if (!options.isEmpty()) {
             encodedOptions = Dhcp6MessageEncoder.getInstance().encode(options);
             length += encodedOptions.limit();
         }

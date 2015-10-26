@@ -8,6 +8,7 @@ import com.google.common.collect.Iterables;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.anarres.dhcp.v6.Dhcp6Exception;
@@ -417,8 +418,12 @@ public abstract class AbstractDhcp6LeaseManager implements Dhcp6LeaseManager {
         return ip;
     }
 
+    @CheckForNull
     private DuidOption.Duid getClientId(final Dhcp6Message incomingMsg) {
-        return incomingMsg.getOptions().get(ClientIdOption.class).getDuid();
+        ClientIdOption option = incomingMsg.getOptions().get(ClientIdOption.class);
+        if (option == null)
+            return null;
+        return option.getDuid();
     }
 
     protected abstract InetAddress newIp(Dhcp6RequestContext requestContext, DuidOption.Duid clientId,

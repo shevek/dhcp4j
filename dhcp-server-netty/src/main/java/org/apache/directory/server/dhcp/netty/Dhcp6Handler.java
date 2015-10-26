@@ -48,7 +48,7 @@ public class Dhcp6Handler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Incomming DHCP : {}, from: {}", ByteBufUtil.hexDump(msg.content()), msg.sender());
         }
 
@@ -61,9 +61,9 @@ public class Dhcp6Handler extends SimpleChannelInboundHandler<DatagramPacket> {
         }
 
         final Optional<Dhcp6Message> reply = dhcpService
-            .getReplyFor(new Dhcp6RequestContext(msg.sender().getAddress()), incommingMsg);
+                .getReplyFor(new Dhcp6RequestContext(msg.sender().getAddress()), incommingMsg);
 
-        if(reply.isPresent()) {
+        if (reply.isPresent()) {
             LOG.debug("Responding with message: {}", reply.get());
 
             // TODO what size to allocate the buffer to ?

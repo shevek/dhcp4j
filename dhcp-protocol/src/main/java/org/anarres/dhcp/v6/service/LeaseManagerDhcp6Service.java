@@ -130,9 +130,9 @@ public class LeaseManagerDhcp6Service extends AbstractDhcp6Service {
         throws Dhcp6Exception {
         Dhcp6Message reply = createGenericReply(incomingMsg, Dhcp6MessageType.DHCP_REPLY);
 
-        if (incomingMsg.getOptions().contains(ClientIdOption.class)) {
-            reply.getOptions().add(incomingMsg.getOptions().get(ClientIdOption.class));
-        }
+        ClientIdOption clientIdOption = incomingMsg.getOptions().get(ClientIdOption.class);
+        if (clientIdOption != null)
+            reply.getOptions().add(clientIdOption);
 
         return leaseManager.requestInformation(requestContext, incomingMsg, reply);
     }
